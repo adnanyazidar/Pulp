@@ -3,17 +3,17 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>PomoFocus | Stay in Flow</title>
+<title>PomoFocus - Task Management</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config = {
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     "colors": {
-                        "primary": "var(--primary-color, #ffb4aa)",
-                        "primary-container": "var(--primary-container-color, #ff5446)",
                         "secondary-container": "#1ea296",
                         "on-tertiary-fixed": "#001c38",
                         "background": "#121416",
@@ -24,8 +24,10 @@
                         "on-primary-fixed": "#410001",
                         "primary-fixed": "#ffdad5",
                         "on-background": "#e2e2e5",
+                        "primary-container": "#ff5446",
                         "on-tertiary": "#00315b",
                         "surface-container-lowest": "#0c0e10",
+                        "primary": "#ffb4aa",
                         "on-primary-container": "#5c0002",
                         "surface-bright": "#38393c",
                         "surface-container-high": "#282a2c",
@@ -70,219 +72,231 @@
                         "headline": ["Manrope"],
                         "body": ["Inter"],
                         "label": ["Inter"]
-                    },
-                    "animation": {
-                        "pulse-slow": "pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                        "wave": "wave 2s ease-in-out infinite",
-                    },
-                    "keyframes": {
-                        "pulse-slow": {
-                            "0%, 100%": { "opacity": 0.1 },
-                            "50%": { "opacity": 0.25 },
-                        },
-                        "wave": {
-                            "0%, 100%": { "transform": "scale(1)" },
-                            "50%": { "transform": "scale(1.2)" },
-                        }
                     }
                 },
-            }
-        }</script><style>
-    :root {
-        --primary-color: #ffb4aa;
-        --primary-container-color: #ff5446;
-    }
-    .mode-break {
-        --primary-color: #4FD1C5;
-        --primary-container-color: #38B2AC;
-    }
-    /* Ensure smooth transitions for color variables */
-    body {
-        transition: --primary-color 0.5s ease, --primary-container-color 0.5s ease;
-    }
-    .transition-theme {
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .primary-glow {
-        background: linear-gradient(90deg, var(--primary-container-color) 0%, var(--primary-color) 100%);
-        box-shadow: 0 0 12px rgba(79, 209, 197, 0.1);
-    }
-    .mode-focus .primary-glow { box-shadow: 0 0 12px rgba(255, 180, 170, 0.2); }
-</style>
-<style>
-        .tabular-nums { font-variant-numeric: tabular-nums; }
-        .glass { background: rgba(51, 53, 55, 0.4); backdrop-filter: blur(20px); }
-        .primary-glow { background: linear-gradient(90deg, #ff5446 0%, #ffb4aa 100%); box-shadow: 0 0 12px rgba(255, 180, 170, 0.2); }
-        .timer-glow { filter: drop-shadow(0 0 28px rgba(255, 180, 170, 0.1)); }
-        @keyframes timer-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
+            },
         }
-        .animate-timer-pulse { animation: timer-pulse 1s ease-in-out infinite; }
+    </script>
+<style>
+        body {
+            background-color: #121416;
+            color: #e2e2e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(51, 53, 55, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-white mode-focus">
+<body class="flex min-h-screen">
 <!-- SideNavBar -->
-<nav class="hidden md:flex h-screen w-64 fixed left-0 bg-[#121416] dark:bg-slate-950 border-r border-white/5 flex-col py-8 z-50">
-<div class="px-8 mb-12">
-<h1 class="text-xl font-black text-[#ffb4aa] font-headline tracking-tighter">PomoFocus</h1>
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant/60 mt-1">Stay in flow</p>
+<aside class="h-screen w-64 fixed left-0 border-r border-white/5 bg-[#121416] dark:bg-slate-950 flex flex-col h-full py-8 z-50 hidden md:flex">
+<div class="px-6 mb-12">
+<h1 class="text-xl font-black text-[#ffb4aa] font-headline">PomoFocus</h1>
+<p class="font-['Inter'] uppercase tracking-widest text-[10px] text-slate-500 text-on-surface-variant/60">Stay in flow</p>
 </div>
-<div class="flex-1 space-y-1">
-<a class="flex items-center gap-4 bg-[#ff5446]/10 text-[#ffb4aa] border-r-4 border-[#ffb4aa] px-6 py-4 transition-all duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="timer">timer</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Timer</span>
+<nav class="flex-1">
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Timer</span>
+</a>
+<a class="flex items-center gap-4 bg-gradient-to-r from-primary/10 to-transparent text-primary border-r-2 border-primary px-6 py-4 transition-all hover:translate-x-1 duration-200 group" href="#">
+<span class="material-symbols-outlined" data-icon="format_list_bulleted">format_list_bulleted</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Tasks</span>
 </a>
 <a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="format_list_bulleted">format_list_bulleted</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Tasks</span>
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Analytics</span>
 </a>
 <a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="insights">insights</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Analytics</span>
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Settings</span>
 </a>
-<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="settings">settings</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Settings</span>
-</a>
-</div>
 </nav>
-<!-- TopNavBar (Mobile Only) -->
-<header class="md:hidden sticky top-0 w-full bg-[#121416] px-6 py-4 flex justify-between items-center z-50">
-<h1 class="text-2xl font-bold tracking-tighter text-[#ffb4aa] font-headline">PomoFocus</h1>
+<div class="px-6 mt-auto">
+<button class="w-full bg-primary-container text-on-primary-container font-headline font-bold py-3 rounded-xl hover:bg-primary-fixed-dim transition-colors">
+                Start Focus
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 bg-background min-h-screen">
+<!-- TopNavBar (Universal Header) -->
+<header class="w-full top-0 sticky z-40 bg-[#121416] dark:bg-slate-950 flex justify-between items-center px-6 py-4 max-w-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold tracking-tighter text-[#ffb4aa] dark:text-red-300 font-headline">Tasks</span>
+</div>
+<div class="flex items-center gap-6">
 <div class="flex gap-4">
-<span class="material-symbols-outlined text-[#ffb4aa] transition-theme" data-icon="bar_chart">bar_chart</span>
-<span class="material-symbols-outlined text-[#ffb4aa] transition-theme" data-icon="account_circle">account_circle</span>
+<span class="material-symbols-outlined text-slate-400 hover:text-white transition-colors cursor-pointer" data-icon="bar_chart">bar_chart</span>
+<span class="material-symbols-outlined text-slate-400 hover:text-white transition-colors cursor-pointer" data-icon="settings">settings</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a creative director in dark studio lighting with subtle rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOIjmtE6bkilipHF3OE4fnAFUhL2mLcGDS4dPCbr2lbeUUzQkUBCG8T7PjQVvYSVVJDmCm5LZhggsTt5HdABKfVoAtsdJ9mLj0mYvrSWk-jhshrBPg6JeAjY0Y7ptl7DY9Zw3M7Z70nQ1CKxrhOhFT2IgNTGbt8UDglTu2qN1IWC-FkKlmxFDjZBN8yjXbWwV1dwH346oPAF2ry3NoADVZW19jKRyxIz5Ctr_FOsm6PnA4Ii4yjH-y84WtMR15C0IqkltZm_6DCSxs"/>
+</div>
 </div>
 </header>
-<!-- Main Content Canvas -->
-<main class="md:ml-64 min-h-screen flex flex-col items-center justify-center p-6 lg:p-12 transition-colors duration-1000">
-<!-- Background Atmospheric Texture -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-<div class="absolute -top-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[120px] animate-pulse-slow"></div>
-<div class="absolute -bottom-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-tertiary/10 blur-[120px] animate-pulse-slow"></div>
+<div class="max-w-4xl mx-auto px-6 py-8">
+<!-- Create Task Section -->
+<section class="mb-12">
+<div class="glass-panel p-6 rounded-xl border border-white/10 shadow-2xl">
+<div class="flex items-center gap-4">
+<div class="flex-1">
+<input class="w-full bg-transparent border-none focus:ring-0 text-xl font-headline placeholder:text-on-surface-variant/40 text-on-surface" placeholder="What are you working on?" type="text"/>
 </div>
-<!-- Mode Selector -->
-<div class="flex gap-4 mb-8">
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-primary bg-primary/10 transition-all duration-300 shadow-[0_0_15px_rgba(255,180,170,0.1)] transition-theme" onclick="document.body.classList.remove('mode-break'); document.body.classList.add('mode-focus');">
-<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#ffb4aa] transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-primary font-bold transition-theme">Focus Mode</span>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-label-sm text-on-surface-variant hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="folder">folder</span>
+<span class="text-[10px] uppercase tracking-widest font-bold">Project</span>
 </button>
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-outline-variant/20 hover:bg-white/5 transition-all duration-300 group transition-theme" onclick="document.body.classList.remove('mode-focus'); document.body.classList.add('mode-break');">
-<span class="w-2 h-2 rounded-full bg-secondary opacity-40 group-hover:opacity-100 transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant transition-theme">Short Break</span>
-</button>
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-outline-variant/20 hover:bg-white/5 transition-all duration-300 group transition-theme" onclick="document.body.classList.remove('mode-focus'); document.body.classList.add('mode-break');">
-<span class="w-2 h-2 rounded-full bg-tertiary opacity-40 group-hover:opacity-100 transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant transition-theme">Long Break</span>
-</button>
-</div>
-<!-- Mode Indicator Label -->
-<div class="mb-2">
-<span class="font-headline font-black text-primary/40 tracking-[0.4em] uppercase text-sm md:text-base transition-theme">Focus Mode</span>
-</div>
-<!-- Main Timer Block -->
-<div class="relative w-full max-w-2xl text-center">
-<!-- Chrono Clarity Display -->
-<div class="mb-12 timer-glow relative inline-block">
-<!-- Subtle background disk glow - reduced opacity -->
-<div class="absolute inset-0 bg-primary/[0.035] rounded-full blur-3xl -z-10"></div>
-<span class="font-headline font-extrabold text-[8rem] md:text-[14rem] leading-none tabular-nums tracking-tighter text-on-surface block transition-theme">
-                25:00
-            </span>
-</div>
-<!-- Timer Progress -->
-<div class="w-full h-1.5 bg-surface-container-highest mb-16 overflow-hidden rounded-full max-w-md mx-auto">
-<div class="h-full w-[100%] primary-glow transition-theme"></div>
-</div>
-<!-- Controls -->
-<div class="flex items-center justify-center gap-8 mb-24">
-<button class="p-6 glass rounded-full text-on-surface-variant hover:text-white transition-all active:scale-90 border border-white/5 transition-theme">
-<span class="material-symbols-outlined text-3xl transition-theme" data-icon="refresh">refresh</span>
-</button>
-<button class="px-16 py-8 primary-glow rounded-full text-on-primary-container font-headline font-extrabold text-3xl tracking-tight shadow-[0_12px_30px_rgba(255,84,70,0.2)] active:scale-95 transition-all duration-300 transition-theme">
-                START
-            </button>
-<button class="p-6 glass rounded-full text-on-surface-variant hover:text-white transition-all active:scale-90 border border-white/5 transition-theme">
-<span class="material-symbols-outlined text-3xl transition-theme" data-icon="pause">pause</span>
+<button class="bg-primary-container text-on-primary-container p-2 rounded-lg hover:scale-95 active:scale-90 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
 </button>
 </div>
 </div>
-<!-- Dashboard Bento Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-<!-- Active Task Card -->
-<div class="bg-primary/5 border border-primary/20 p-8 rounded-2xl flex flex-col justify-between min-h-[200px] relative overflow-hidden group hover:bg-primary/[0.08] transition-all duration-300">
-<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-<span class="material-symbols-outlined text-8xl transition-theme" data-icon="edit_note">edit_note</span>
 </div>
+</section>
+<!-- Projects & Task Groups -->
+<div class="space-y-12">
+<!-- Work Project -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-1 h-6 bg-primary rounded-full"></div>
+<h2 class="text-xs uppercase tracking-[0.2em] font-black text-on-surface-variant font-headline font-extrabold">Work</h2>
+<span class="text-[10px] text-outline px-2 py-0.5 rounded border border-outline/20">3 TASKS</span>
+</div>
+<div class="space-y-4">
+<!-- Task Card 1 -->
+<div class="group relative flex items-center justify-between p-6 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-transparent hover:border-white/5">
+<div class="flex items-center gap-6">
+<button class="w-6 h-6 rounded-full border-2 border-primary/40 flex items-center justify-center hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-xs text-transparent group-hover:text-primary" data-icon="check">check</span>
+</button><span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute -left-2" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
 <div>
-<div class="flex items-center gap-2 mb-4">
-<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse transition-theme"></span>
-<p class="font-label uppercase tracking-widest text-[10px] text-primary font-bold transition-theme">Active Task</p>
-</div>
-<h3 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">Drafting PRD</h3>
-<p class="text-on-surface-variant/60 text-sm">Main focus for this session</p>
-</div>
-<div class="flex items-center gap-2 text-primary pt-4 border-t border-primary/10 transition-theme">
-<span class="material-symbols-outlined text-base transition-theme" data-icon="verified">verified</span>
-<span class="font-label text-[10px] uppercase tracking-widest font-bold transition-theme">Session In Progress</span>
+<h3 class="font-headline font-bold text-on-surface">Design System Documentation</h3>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">High Priority • 45m</p>
 </div>
 </div>
-<!-- Ambient Noise Card -->
-<div class="bg-surface-container-low p-8 rounded-2xl flex flex-col justify-between min-h-[200px] border border-white/5 hover:bg-surface-container transition-all duration-300 group">
-<div class="flex justify-between items-start">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant">Environment</p>
-<div class="flex items-center gap-3 bg-surface-container-high px-4 py-2 rounded-full border border-white/5">
-<span class="material-symbols-outlined text-primary text-xl animate-wave origin-center transition-theme" data-icon="cloudy_snowing">cloudy_snowing</span>
-<span class="font-label text-[10px] uppercase tracking-widest text-on-surface font-bold transition-theme">Rainfall</span>
+<div class="flex flex-col items-end gap-2">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(255,180,170,0.5)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(255,180,170,0.5)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+</div>
+<span class="text-[9px] uppercase tracking-tighter text-outline">ESTIMATED: 4 POMOS</span>
 </div>
 </div>
-<div class="space-y-6">
-<div class="relative w-full h-1.5 bg-surface-container-highest rounded-full">
-<div class="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full transition-theme"></div>
-<div class="absolute left-2/3 -top-1.5 w-4.5 h-4.5 bg-on-surface rounded-full border-4 border-surface-container-low shadow-lg cursor-pointer"></div>
+<!-- Task Card 2 -->
+<div class="group relative flex items-center justify-between p-6 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-transparent hover:border-white/5">
+<div class="flex items-center gap-6">
+<button class="w-6 h-6 rounded-full border-2 border-primary/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-xs text-transparent" data-icon="check">check</span>
+</button><span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute -left-2" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Weekly Sync with Engineering</h3>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Scheduled • 14:00</p>
 </div>
-<div class="flex justify-between text-[10px] font-label uppercase tracking-widest text-on-surface-variant/40">
-<span class="transition-theme">Silent</span>
-<span class="transition-theme">Full Immersion</span>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+</div>
+<span class="text-[9px] uppercase tracking-tighter text-outline">ESTIMATED: 2 POMOS</span>
 </div>
 </div>
 </div>
+</section>
+<!-- Study Project -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-1 h-6 bg-secondary rounded-full"></div>
+<h2 class="text-xs uppercase tracking-[0.2em] font-black text-on-surface-variant font-headline font-extrabold">Study</h2>
+<span class="text-[10px] text-outline px-2 py-0.5 rounded border border-outline/20">1 TASK</span>
 </div>
-<!-- Stats Inset Footer -->
-<div class="mt-16 w-full max-w-4xl bg-surface-container-lowest p-8 rounded-2xl border border-white/5 flex flex-wrap justify-around items-center gap-8">
-<div class="text-center group hover:scale-[1.02] transition-all duration-300 cursor-default">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant mb-1">Current Session</p>
-<p class="font-headline font-bold text-2xl group-hover:text-primary transition-colors">#1</p>
+<div class="space-y-4">
+<div class="group relative flex items-center justify-between p-6 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all border border-transparent hover:border-white/5">
+<div class="flex items-center gap-6">
+<button class="w-6 h-6 rounded-full border-2 border-secondary/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-xs text-transparent" data-icon="check">check</span>
+</button><span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute -left-2" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Neural Networks Deep Dive</h3>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant mt-1">Research • Chapter 4</p>
 </div>
-<div class="h-8 w-px bg-white/[0.03] hidden md:block"></div>
-<div class="text-center group hover:scale-[1.02] transition-all duration-300 cursor-default">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant mb-1">Today's Total</p>
-<p class="font-headline font-bold text-2xl group-hover:text-primary transition-colors">4h 20m</p>
 </div>
-<div class="h-8 w-px bg-white/[0.03] hidden md:block"></div>
-<div class="text-center">
-<button class="flex items-center gap-2 group opacity-40 hover:opacity-100 hover:scale-[1.02] transition-all duration-300 transition-theme">
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant group-hover:text-primary transition-theme">Full Reports</span>
-<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary transition-theme" data-icon="arrow_forward">arrow_forward</span>
-</button>
+<div class="flex flex-col items-end gap-2">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(102,217,204,0.5)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(102,217,204,0.5)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(102,217,204,0.5)]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+</div>
+<span class="text-[9px] uppercase tracking-tighter text-outline">ESTIMATED: 6 POMOS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Personal Project -->
+<section>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-1 h-6 bg-tertiary rounded-full"></div>
+<h2 class="text-xs uppercase tracking-[0.2em] font-black text-on-surface-variant font-headline font-extrabold">Personal</h2>
+<span class="text-[10px] text-outline px-2 py-0.5 rounded border border-outline/20">DONE</span>
+</div>
+<div class="space-y-4 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0">
+<div class="group relative flex items-center justify-between p-6 rounded-xl bg-surface-container-lowest border border-white/5">
+<div class="flex items-center gap-6">
+<button class="w-6 h-6 rounded-full bg-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-xs text-on-tertiary font-bold" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+</button><span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute -left-2" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<div>
+<h3 class="font-headline font-bold text-on-surface line-through">Morning Yoga &amp; Breathwork</h3>
+<p class="text-[10px] uppercase tracking-widest text-tertiary mt-1">COMPLETED • 08:30</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+</div>
+<span class="text-[9px] uppercase tracking-tighter text-tertiary">2/2 COMPLETED</span>
+</div>
+</div>
+</div>
+</section>
 </div>
 </div>
 </main>
-<!-- Bottom Nav for Mobile -->
-<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low px-6 py-4 flex justify-around items-center z-50 border-t border-white/5">
-<button class="flex flex-col items-center gap-1 text-[#ffb4aa] transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="timer">timer</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Focus</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="format_list_bulleted">format_list_bulleted</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Tasks</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="settings">settings</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Prefs</span>
-</button>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-white/5 px-6 py-4 flex justify-around items-center z-50">
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+<span class="text-[8px] uppercase tracking-widest">Timer</span>
+</a>
+<a class="text-[#ffb4aa] flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="format_list_bulleted" style="font-variation-settings: 'FILL' 1;">format_list_bulleted</span>
+<span class="text-[8px] uppercase tracking-widest">Tasks</span>
+</a>
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-[8px] uppercase tracking-widest">Stats</span>
+</a>
+<a class="text-slate-400 flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[8px] uppercase tracking-widest">Config</span>
+</a>
 </nav>
+<!-- Contextual FAB - Only for Home/Task context -->
+<button class="fixed bottom-24 md:bottom-12 right-6 md:right-12 w-16 h-16 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
 </body></html>
