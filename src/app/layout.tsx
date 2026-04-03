@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
+import { TabTitleManager } from "@/components/layout/tab-title-manager";
+import { SoundManager } from "@/components/layout/sound-manager";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -44,8 +46,18 @@ export default function RootLayout({
           as="fetch"
           crossOrigin="anonymous"
         />
+        <link
+          rel="preload"
+          href="/sounds/click-soft.mp3"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <TabTitleManager />
+        <SoundManager />
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useTaskStore } from "./task-store";
 
 export type TimerMode = "focus" | "shortBreak" | "longBreak";
 
@@ -69,6 +70,12 @@ export const useTimerStore = create<TimerState>()(
           if (mode === "focus") {
             const newCount = sessionCount + 1;
             const nextMode = newCount % 4 === 0 ? "longBreak" : "shortBreak";
+            // Increment actual pomodoros for the active task
+            const { activeTaskId, incrementActPomos } = useTaskStore.getState();
+            if (activeTaskId) {
+              incrementActPomos(activeTaskId);
+            }
+
             set({
               timeRemaining: DURATIONS[nextMode],
                isRunning: false,
