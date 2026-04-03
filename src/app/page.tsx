@@ -2,10 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTimerStore, formatTime, getModeLabel } from "@/store/timer-store";
-import { SideNavbar } from "@/components/layout/side-navbar";
-import { TopNavbar } from "@/components/layout/top-navbar";
 import { BottomNavbar } from "@/components/layout/bottom-navbar";
-import { BackgroundAtmosphere } from "@/components/layout/background-atmosphere";
 import { ModeSelector } from "@/components/timer/mode-selector";
 import { TimerDisplay } from "@/components/timer/timer-display";
 import { TimerProgress } from "@/components/timer/timer-progress";
@@ -83,7 +80,6 @@ export default function Home() {
   }, [ambientVolume, isAmbientPlaying, ambientSoundId]);
 
   // Click Sound Trigger
-  // We can listen to specific state changes that correlate with tactile feedback
   const prevState = useRef({ isRunning, mode });
   useEffect(() => {
     const isRunningChanged = prevState.current.isRunning !== isRunning;
@@ -103,9 +99,7 @@ export default function Home() {
     prevState.current.mode = mode;
   }, [isRunning, mode, clickSoundId]);
 
-  // Alarm Trigger (when timer hits 0)
-  // We use a ref to ensure it only plays when the counter INCREASES
-  // and doesn't play on initial page load/mount
+  // Alarm Trigger
   const lastAlarmRef = useRef(alarmCounter);
   useEffect(() => {
     if (alarmCounter > lastAlarmRef.current) {
@@ -116,27 +110,15 @@ export default function Home() {
     lastAlarmRef.current = alarmCounter;
   }, [alarmCounter]);
 
-  const modeClass =
-    mode === "shortBreak"
-      ? "short-break"
-      : mode === "longBreak"
-      ? "long-break"
-      : "focus";
-
   return (
-    <div className={`min-h-screen transition-colors duration-1000 mode-${modeClass}`}>
+    <div className="p-6 lg:p-12 pb-32">
       {/* Audio elements */}
       <audio ref={ambientAudioRef} loop />
       <audio ref={alarmAudioRef} src="/sounds/alarm.mp3" />
       <audio ref={clickAudioRef} preload="auto" />
 
-      {/* Navigation & Atmosphere */}
-      <SideNavbar />
-      <TopNavbar />
-      <BackgroundAtmosphere />
-
       {/* Main Content */}
-      <main className="md:ml-64 min-h-screen flex flex-col items-center justify-center p-6 lg:p-12">
+      <div className="flex flex-col items-center justify-center pt-8">
         {/* Mode Selector */}
         <ModeSelector />
 
@@ -148,7 +130,7 @@ export default function Home() {
         </div>
 
         {/* Timer Block */}
-        <div className="relative w-full max-w-2xl text-center">
+        <div className="relative w-full max-w-2xl text-center mb-12">
           <TimerDisplay />
           <TimerProgress />
           <TimerControls />
@@ -162,7 +144,7 @@ export default function Home() {
 
         {/* Footer Stats */}
         <StatsFooter />
-      </main>
+      </div>
 
       <BottomNavbar />
     </div>

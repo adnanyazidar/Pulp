@@ -3,6 +3,7 @@ import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { TabTitleManager } from "@/components/layout/tab-title-manager";
 import { SoundManager } from "@/components/layout/sound-manager";
+import { LayoutShell } from "@/components/layout/layout-shell";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -53,10 +54,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="antialiased bg-pf-surface overflow-hidden">
         <TabTitleManager />
         <SoundManager />
-        {children}
+        
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
