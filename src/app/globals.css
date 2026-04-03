@@ -91,6 +91,10 @@
     50% { transform: scale(1.02); opacity: 0.9; }
     100% { transform: scale(1); opacity: 1; }
   }
+  @keyframes grow-up {
+    0% { transform: scaleY(0); transform-origin: bottom; }
+    100% { transform: scaleY(1); transform-origin: bottom; }
+  }
 }
 
 /* ─── Dark Mode Only (app is always dark) ─── */
