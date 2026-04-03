@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
+import { SideNavbar } from "@/components/layout/side-navbar";
+import { TopNavbar } from "@/components/layout/top-navbar";
+import { BackgroundAtmosphere } from "@/components/layout/background-atmosphere";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,7 +48,16 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased bg-pf-surface overflow-x-hidden">
+        <SideNavbar />
+        <div className="flex flex-col md:pl-64 min-h-screen">
+          <TopNavbar />
+          <BackgroundAtmosphere />
+          <main className="flex-1 w-full bg-[#121416]">
+            {children}
+          </main>
+        </div>
+      </body>
     </html>
   );
 }

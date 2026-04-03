@@ -3,286 +3,285 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>PomoFocus | Stay in Flow</title>
+<title>PomoFocus - Settings &amp; Customization</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "primary": "var(--primary-color, #ffb4aa)",
-                        "primary-container": "var(--primary-container-color, #ff5446)",
-                        "secondary-container": "#1ea296",
-                        "on-tertiary-fixed": "#001c38",
-                        "background": "#121416",
-                        "inverse-surface": "#e2e2e5",
-                        "inverse-on-surface": "#2f3133",
-                        "outline-variant": "#5c403c",
-                        "on-surface-variant": "#e5bdb8",
-                        "on-primary-fixed": "#410001",
-                        "primary-fixed": "#ffdad5",
-                        "on-background": "#e2e2e5",
-                        "on-tertiary": "#00315b",
-                        "surface-container-lowest": "#0c0e10",
-                        "on-primary-container": "#5c0002",
-                        "surface-bright": "#38393c",
-                        "surface-container-high": "#282a2c",
-                        "tertiary": "#a2c9ff",
-                        "on-tertiary-fixed-variant": "#004881",
-                        "inverse-primary": "#bb1615",
-                        "secondary-fixed-dim": "#66d9cc",
-                        "surface-container": "#1e2022",
-                        "tertiary-fixed-dim": "#a2c9ff",
-                        "surface-variant": "#333537",
-                        "on-secondary-fixed": "#00201d",
-                        "surface-tint": "#ffb4aa",
-                        "tertiary-container": "#3394f1",
-                        "surface-container-low": "#1a1c1e",
-                        "surface": "#121416",
-                        "primary-fixed-dim": "#ffb4aa",
-                        "error-container": "#93000a",
-                        "secondary": "#66d9cc",
-                        "on-secondary-fixed-variant": "#005049",
-                        "outline": "#ac8884",
-                        "on-tertiary-container": "#002b50",
-                        "on-primary": "#690003",
-                        "on-surface": "#e2e2e5",
-                        "on-primary-fixed-variant": "#930006",
-                        "tertiary-fixed": "#d3e4ff",
-                        "on-secondary": "#003732",
-                        "on-secondary-container": "#00302b",
-                        "secondary-fixed": "#84f5e8",
-                        "on-error": "#690005",
-                        "on-error-container": "#ffdad6",
-                        "surface-dim": "#121416",
-                        "error": "#ffb4ab",
-                        "surface-container-highest": "#333537"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "fontFamily": {
-                        "headline": ["Manrope"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    },
-                    "animation": {
-                        "pulse-slow": "pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                        "wave": "wave 2s ease-in-out infinite",
-                    },
-                    "keyframes": {
-                        "pulse-slow": {
-                            "0%, 100%": { "opacity": 0.1 },
-                            "50%": { "opacity": 0.25 },
-                        },
-                        "wave": {
-                            "0%, 100%": { "transform": "scale(1)" },
-                            "50%": { "transform": "scale(1.2)" },
-                        }
-                    }
-                },
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#1ea296",
+                    "on-tertiary-fixed": "#001c38",
+                    "background": "#121416",
+                    "inverse-surface": "#e2e2e5",
+                    "inverse-on-surface": "#2f3133",
+                    "outline-variant": "#5c403c",
+                    "on-surface-variant": "#e5bdb8",
+                    "on-primary-fixed": "#410001",
+                    "primary-fixed": "#ffdad5",
+                    "on-background": "#e2e2e5",
+                    "primary-container": "#ff5446",
+                    "on-tertiary": "#00315b",
+                    "surface-container-lowest": "#0c0e10",
+                    "primary": "#ffb4aa",
+                    "on-primary-container": "#5c0002",
+                    "surface-bright": "#38393c",
+                    "surface-container-high": "#282a2c",
+                    "tertiary": "#a2c9ff",
+                    "on-tertiary-fixed-variant": "#004881",
+                    "inverse-primary": "#bb1615",
+                    "secondary-fixed-dim": "#66d9cc",
+                    "surface-container": "#1e2022",
+                    "tertiary-fixed-dim": "#a2c9ff",
+                    "surface-variant": "#333537",
+                    "on-secondary-fixed": "#00201d",
+                    "surface-tint": "#ffb4aa",
+                    "tertiary-container": "#3394f1",
+                    "surface-container-low": "#1a1c1e",
+                    "surface": "#121416",
+                    "primary-fixed-dim": "#ffb4aa",
+                    "error-container": "#93000a",
+                    "secondary": "#66d9cc",
+                    "on-secondary-fixed-variant": "#005049",
+                    "outline": "#ac8884",
+                    "on-tertiary-container": "#002b50",
+                    "on-primary": "#690003",
+                    "on-surface": "#e2e2e5",
+                    "on-primary-fixed-variant": "#930006",
+                    "tertiary-fixed": "#d3e4ff",
+                    "on-secondary": "#003732",
+                    "on-secondary-container": "#00302b",
+                    "secondary-fixed": "#84f5e8",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "surface-dim": "#121416",
+                    "error": "#ffb4ab",
+                    "surface-container-highest": "#333537"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
             }
-        }</script><style>
-    :root {
-        --primary-color: #ffb4aa;
-        --primary-container-color: #ff5446;
-    }
-    .mode-break {
-        --primary-color: #4FD1C5;
-        --primary-container-color: #38B2AC;
-    }
-    /* Ensure smooth transitions for color variables */
-    body {
-        transition: --primary-color 0.5s ease, --primary-container-color 0.5s ease;
-    }
-    .transition-theme {
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .primary-glow {
-        background: linear-gradient(90deg, var(--primary-container-color) 0%, var(--primary-color) 100%);
-        box-shadow: 0 0 12px rgba(79, 209, 197, 0.1);
-    }
-    .mode-focus .primary-glow { box-shadow: 0 0 12px rgba(255, 180, 170, 0.2); }
-</style>
-<style>
-        .tabular-nums { font-variant-numeric: tabular-nums; }
-        .glass { background: rgba(51, 53, 55, 0.4); backdrop-filter: blur(20px); }
-        .primary-glow { background: linear-gradient(90deg, #ff5446 0%, #ffb4aa 100%); box-shadow: 0 0 12px rgba(255, 180, 170, 0.2); }
-        .timer-glow { filter: drop-shadow(0 0 28px rgba(255, 180, 170, 0.1)); }
-        @keyframes timer-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
+          },
         }
-        .animate-timer-pulse { animation: timer-pulse 1s ease-in-out infinite; }
+      }
+    </script>
+<style>
+        body {
+            background-color: #121416;
+            color: #e2e2e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(51, 53, 55, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-white mode-focus">
-<!-- SideNavBar -->
-<nav class="hidden md:flex h-screen w-64 fixed left-0 bg-[#121416] dark:bg-slate-950 border-r border-white/5 flex-col py-8 z-50">
-<div class="px-8 mb-12">
-<h1 class="text-xl font-black text-[#ffb4aa] font-headline tracking-tighter">PomoFocus</h1>
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant/60 mt-1">Stay in flow</p>
+<body class="flex min-h-screen overflow-x-hidden">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="hidden md:flex h-screen w-64 fixed left-0 border-r border-white/5 bg-[#121416] dark:bg-slate-950 flex flex-col h-full py-8 shadow-[40px_0_40px_rgba(0,0,0,0.2)] z-50">
+<div class="px-6 mb-12">
+<h1 class="text-xl font-black text-[#ffb4aa] font-['Inter'] uppercase tracking-widest text-[10px]">PomoFocus</h1>
+<p class="text-slate-500 font-['Inter'] uppercase tracking-widest text-[10px] mt-1">Stay in flow</p>
 </div>
-<div class="flex-1 space-y-1">
-<a class="flex items-center gap-4 bg-[#ff5446]/10 text-[#ffb4aa] border-r-4 border-[#ffb4aa] px-6 py-4 transition-all duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="timer">timer</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Timer</span>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Timer</span>
 </a>
 <a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="format_list_bulleted">format_list_bulleted</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Tasks</span>
+<span class="material-symbols-outlined" data-icon="format_list_bulleted">format_list_bulleted</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Tasks</span>
 </a>
 <a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="insights">insights</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Analytics</span>
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Analytics</span>
 </a>
-<a class="flex items-center gap-4 text-slate-500 px-6 py-4 hover:bg-white/5 hover:text-slate-200 transition-all hover:translate-x-1 duration-200" href="#">
-<span class="material-symbols-outlined transition-theme" data-icon="settings">settings</span>
-<span class="font-label uppercase tracking-widest text-[10px] transition-theme">Settings</span>
+<a class="flex items-center gap-4 bg-[#ff5446]/10 text-[#ffb4aa] border-r-4 border-[#ffb4aa] px-6 py-4 transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Settings</span>
 </a>
-</div>
 </nav>
-<!-- TopNavBar (Mobile Only) -->
-<header class="md:hidden sticky top-0 w-full bg-[#121416] px-6 py-4 flex justify-between items-center z-50">
-<h1 class="text-2xl font-bold tracking-tighter text-[#ffb4aa] font-headline">PomoFocus</h1>
-<div class="flex gap-4">
-<span class="material-symbols-outlined text-[#ffb4aa] transition-theme" data-icon="bar_chart">bar_chart</span>
-<span class="material-symbols-outlined text-[#ffb4aa] transition-theme" data-icon="account_circle">account_circle</span>
+<div class="px-6 mt-auto">
+<button class="w-full py-4 rounded-xl bg-primary-container text-on-primary-container font-bold text-xs uppercase tracking-tighter hover:bg-primary-fixed transition-colors">
+                Start Focus
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 min-h-screen pb-24">
+<!-- TopAppBar (Authority: JSON) -->
+<header class="w-full top-0 sticky bg-[#121416] dark:bg-slate-950 flex justify-between items-center px-6 py-4 max-w-full z-40">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold tracking-tighter text-[#ffb4aa] dark:text-red-300 font-['Manrope']">PomoFocus</span>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-400 font-medium hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+</button>
+<button class="text-[#ffb4aa] border-b-2 border-[#ffb4aa] pb-1 hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="text-slate-400 font-medium hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
 </div>
 </header>
-<!-- Main Content Canvas -->
-<main class="md:ml-64 min-h-screen flex flex-col items-center justify-center p-6 lg:p-12 transition-colors duration-1000">
-<!-- Background Atmospheric Texture -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-<div class="absolute -top-[10%] -right-[10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[120px] animate-pulse-slow"></div>
-<div class="absolute -bottom-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-tertiary/10 blur-[120px] animate-pulse-slow"></div>
+<!-- Settings Container -->
+<div class="max-w-4xl mx-auto px-6 py-12">
+<div class="mb-12">
+<h2 class="text-4xl font-headline font-extrabold tracking-tight text-on-background mb-2">Settings</h2>
+<p class="text-on-surface-variant font-body">Tailor your focus environment to match your workflow.</p>
 </div>
-<!-- Mode Selector -->
-<div class="flex gap-4 mb-8">
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-primary bg-primary/10 transition-all duration-300 shadow-[0_0_15px_rgba(255,180,170,0.1)] transition-theme" onclick="document.body.classList.remove('mode-break'); document.body.classList.add('mode-focus');">
-<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#ffb4aa] transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-primary font-bold transition-theme">Focus Mode</span>
-</button>
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-outline-variant/20 hover:bg-white/5 transition-all duration-300 group transition-theme" onclick="document.body.classList.remove('mode-focus'); document.body.classList.add('mode-break');">
-<span class="w-2 h-2 rounded-full bg-secondary opacity-40 group-hover:opacity-100 transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant transition-theme">Short Break</span>
-</button>
-<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-outline-variant/20 hover:bg-white/5 transition-all duration-300 group transition-theme" onclick="document.body.classList.remove('mode-focus'); document.body.classList.add('mode-break');">
-<span class="w-2 h-2 rounded-full bg-tertiary opacity-40 group-hover:opacity-100 transition-theme"></span>
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant transition-theme">Long Break</span>
-</button>
+<!-- Bento Grid Settings Layout -->
+<div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+<!-- Section: Timer Durations -->
+<section class="md:col-span-4 bg-surface-container-low rounded-xl p-8 border-none flex flex-col gap-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="schedule">schedule</span>
+<h3 class="text-label-sm font-label uppercase tracking-widest text-xs text-on-surface-variant">Timer Durations</h3>
 </div>
-<!-- Mode Indicator Label -->
-<div class="mb-2">
-<span class="font-headline font-black text-primary/40 tracking-[0.4em] uppercase text-sm md:text-base transition-theme">Focus Mode</span>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Focus</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 text-2xl font-headline font-bold text-primary focus:ring-2 focus:ring-primary-container outline-none transition-all" type="number" value="25"/>
 </div>
-<!-- Main Timer Block -->
-<div class="relative w-full max-w-2xl text-center">
-<!-- Chrono Clarity Display -->
-<div class="mb-12 timer-glow relative inline-block">
-<!-- Subtle background disk glow - reduced opacity -->
-<div class="absolute inset-0 bg-primary/[0.035] rounded-full blur-3xl -z-10"></div>
-<span class="font-headline font-extrabold text-[8rem] md:text-[14rem] leading-none tabular-nums tracking-tighter text-on-surface block transition-theme">
-                25:00
-            </span>
+<div class="space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Short Break</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 text-2xl font-headline font-bold text-secondary focus:ring-2 focus:ring-secondary-container outline-none transition-all" type="number" value="5"/>
 </div>
-<!-- Timer Progress -->
-<div class="w-full h-1.5 bg-surface-container-highest mb-16 overflow-hidden rounded-full max-w-md mx-auto">
-<div class="h-full w-[100%] primary-glow transition-theme"></div>
-</div>
-<!-- Controls -->
-<div class="flex items-center justify-center gap-8 mb-24">
-<button class="p-6 glass rounded-full text-on-surface-variant hover:text-white transition-all active:scale-90 border border-white/5 transition-theme">
-<span class="material-symbols-outlined text-3xl transition-theme" data-icon="refresh">refresh</span>
-</button>
-<button class="px-16 py-8 primary-glow rounded-full text-on-primary-container font-headline font-extrabold text-3xl tracking-tight shadow-[0_12px_30px_rgba(255,84,70,0.2)] active:scale-95 transition-all duration-300 transition-theme">
-                START
-            </button>
-<button class="p-6 glass rounded-full text-on-surface-variant hover:text-white transition-all active:scale-90 border border-white/5 transition-theme">
-<span class="material-symbols-outlined text-3xl transition-theme" data-icon="pause">pause</span>
-</button>
+<div class="space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 ml-1">Long Break</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 text-2xl font-headline font-bold text-tertiary focus:ring-2 focus:ring-tertiary-container outline-none transition-all" type="number" value="15"/>
 </div>
 </div>
-<!-- Dashboard Bento Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-<!-- Active Task Card -->
-<div class="bg-primary/5 border border-primary/20 p-8 rounded-2xl flex flex-col justify-between min-h-[200px] relative overflow-hidden group hover:bg-primary/[0.08] transition-all duration-300">
-<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-<span class="material-symbols-outlined text-8xl transition-theme" data-icon="edit_note">edit_note</span>
+</section>
+<!-- Section: Notification Sound -->
+<section class="md:col-span-2 bg-surface-container-low rounded-xl p-8 border-none">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-tertiary" data-icon="volume_up">volume_up</span>
+<h3 class="text-label-sm font-label uppercase tracking-widest text-xs text-on-surface-variant">Sound</h3>
 </div>
-<div>
-<div class="flex items-center gap-2 mb-4">
-<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse transition-theme"></span>
-<p class="font-label uppercase tracking-widest text-[10px] text-primary font-bold transition-theme">Active Task</p>
+<div class="space-y-4">
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-highest cursor-pointer border-r-2 border-transparent hover:border-tertiary transition-all">
+<span class="text-sm font-medium">Digital</span>
+<input checked="" class="text-tertiary focus:ring-tertiary bg-surface-variant border-none" name="sound" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface cursor-pointer border-r-2 border-transparent hover:border-tertiary transition-all">
+<span class="text-sm font-medium">Bell</span>
+<input class="text-tertiary focus:ring-tertiary bg-surface-variant border-none" name="sound" type="radio"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface cursor-pointer border-r-2 border-transparent hover:border-tertiary transition-all">
+<span class="text-sm font-medium">Bird</span>
+<input class="text-tertiary focus:ring-tertiary bg-surface-variant border-none" name="sound" type="radio"/>
+</label>
 </div>
-<h3 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">Drafting PRD</h3>
-<p class="text-on-surface-variant/60 text-sm">Main focus for this session</p>
+</section>
+<!-- Section: Theme & Personalization -->
+<section class="md:col-span-6 glass-panel rounded-xl p-8 border-none">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
+<div class="space-y-6 flex-1">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="palette">palette</span>
+<h3 class="text-label-sm font-label uppercase tracking-widest text-xs text-on-surface-variant">Personalization</h3>
 </div>
-<div class="flex items-center gap-2 text-primary pt-4 border-t border-primary/10 transition-theme">
-<span class="material-symbols-outlined text-base transition-theme" data-icon="verified">verified</span>
-<span class="font-label text-[10px] uppercase tracking-widest font-bold transition-theme">Session In Progress</span>
+<div class="flex items-center gap-12">
+<div class="space-y-4">
+<span class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Appearance</span>
+<div class="flex items-center bg-surface-container-lowest p-1 rounded-full w-fit">
+<button class="px-6 py-2 rounded-full bg-surface-variant text-primary text-xs font-bold transition-all">Dark</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant text-xs font-bold hover:text-white transition-all">Light</button>
 </div>
 </div>
-<!-- Ambient Noise Card -->
-<div class="bg-surface-container-low p-8 rounded-2xl flex flex-col justify-between min-h-[200px] border border-white/5 hover:bg-surface-container transition-all duration-300 group">
-<div class="flex justify-between items-start">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant">Environment</p>
-<div class="flex items-center gap-3 bg-surface-container-high px-4 py-2 rounded-full border border-white/5">
-<span class="material-symbols-outlined text-primary text-xl animate-wave origin-center transition-theme" data-icon="cloudy_snowing">cloudy_snowing</span>
-<span class="font-label text-[10px] uppercase tracking-widest text-on-surface font-bold transition-theme">Rainfall</span>
-</div>
-</div>
-<div class="space-y-6">
-<div class="relative w-full h-1.5 bg-surface-container-highest rounded-full">
-<div class="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full transition-theme"></div>
-<div class="absolute left-2/3 -top-1.5 w-4.5 h-4.5 bg-on-surface rounded-full border-4 border-surface-container-low shadow-lg cursor-pointer"></div>
-</div>
-<div class="flex justify-between text-[10px] font-label uppercase tracking-widest text-on-surface-variant/40">
-<span class="transition-theme">Silent</span>
-<span class="transition-theme">Full Immersion</span>
+<div class="space-y-4">
+<span class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Accent Color</span>
+<div class="flex gap-3">
+<button class="w-8 h-8 rounded-full bg-[#ffb4aa] ring-2 ring-offset-4 ring-offset-background ring-primary transition-transform hover:scale-110"></button>
+<button class="w-8 h-8 rounded-full bg-[#66d9cc] transition-transform hover:scale-110"></button>
+<button class="w-8 h-8 rounded-full bg-[#a2c9ff] transition-transform hover:scale-110"></button>
+<button class="w-8 h-8 rounded-full bg-[#f48fb1] transition-transform hover:scale-110"></button>
 </div>
 </div>
 </div>
 </div>
-<!-- Stats Inset Footer -->
-<div class="mt-16 w-full max-w-4xl bg-surface-container-lowest p-8 rounded-2xl border border-white/5 flex flex-wrap justify-around items-center gap-8">
-<div class="text-center group hover:scale-[1.02] transition-all duration-300 cursor-default">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant mb-1">Current Session</p>
-<p class="font-headline font-bold text-2xl group-hover:text-primary transition-colors">#1</p>
+<div class="md:w-64">
+<div class="h-40 rounded-xl overflow-hidden relative group">
+<img alt="Abstract flowing gradient" class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="smooth gradient flowing from deep sunset red to soft peach with subtle grain texture and cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkEieoInOK4dSHRWE509vIyLRglVtPQIgsVMfdo-g5g1bjG_XT6bQNDRLdKyDHc_GQBgF-Wgwt68VhiIQHRRq2gH6YoefjPpfSNfQrc82GZcRvHNlUzGcvc1_QZiY4kip00p2UJZazGzA_geMu6NnkDHSjSYJjo8TznhgVXaudQIaiNoLxs0yalWNwnZxvpD7Vz_l0-pm9yNmnCIdomHv-JUJi-zWYxVAuoheucw-ryCeKE1Qs4yAw0vzDLwYOlKZxElzCDnoLYKxy"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<p class="text-[10px] font-bold uppercase tracking-widest text-white">Preview</p>
+<p class="text-xs text-primary">Focused Red Theme</p>
 </div>
-<div class="h-8 w-px bg-white/[0.03] hidden md:block"></div>
-<div class="text-center group hover:scale-[1.02] transition-all duration-300 cursor-default">
-<p class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant mb-1">Today's Total</p>
-<p class="font-headline font-bold text-2xl group-hover:text-primary transition-colors">4h 20m</p>
 </div>
-<div class="h-8 w-px bg-white/[0.03] hidden md:block"></div>
-<div class="text-center">
-<button class="flex items-center gap-2 group opacity-40 hover:opacity-100 hover:scale-[1.02] transition-all duration-300 transition-theme">
-<span class="font-label uppercase tracking-widest text-[10px] text-on-surface-variant group-hover:text-primary transition-theme">Full Reports</span>
-<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary transition-theme" data-icon="arrow_forward">arrow_forward</span>
-</button>
+</div>
+</div>
+</section>
+<!-- Section: Advanced -->
+<section class="md:col-span-3 bg-surface-container-low rounded-xl p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-outline" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="text-label-sm font-label uppercase tracking-widest text-xs text-on-surface-variant">Auto-Flow</h3>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm">Auto-start breaks</span>
+<div class="w-10 h-5 bg-primary-container rounded-full relative flex items-center px-1">
+<div class="w-3 h-3 bg-on-primary-container rounded-full ml-auto"></div>
+</div>
+</div>
+</section>
+<section class="md:col-span-3 bg-surface-container-low rounded-xl p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-outline" data-icon="history">history</span>
+<h3 class="text-label-sm font-label uppercase tracking-widest text-xs text-on-surface-variant">Data Management</h3>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 rounded bg-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright transition-all">Export JSON</button>
+<button class="px-4 py-2 rounded bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-all">Clear All</button>
+</div>
+</section>
+</div>
+<!-- Footer Actions -->
+<div class="mt-12 flex items-center justify-between border-t border-outline-variant/20 pt-12">
+<button class="text-on-surface-variant font-label uppercase tracking-widest text-[10px] hover:text-white transition-all">Reset to Defaults</button>
+<button class="px-10 py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-headline font-bold text-sm shadow-[0_10px_40px_-10px_rgba(255,84,70,0.4)] hover:brightness-110 active:scale-95 transition-all">
+                    Save Changes
+                </button>
 </div>
 </div>
 </main>
-<!-- Bottom Nav for Mobile -->
-<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-low px-6 py-4 flex justify-around items-center z-50 border-t border-white/5">
-<button class="flex flex-col items-center gap-1 text-[#ffb4aa] transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="timer">timer</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Focus</span>
+<!-- BottomNavBar (Authority: JSON - Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-[#121416] dark:bg-slate-950 flex justify-around items-center py-4 px-6 z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="timer">timer</span>
+<span class="text-[8px] uppercase tracking-widest">Timer</span>
 </button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="format_list_bulleted">format_list_bulleted</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Tasks</span>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="format_list_bulleted">format_list_bulleted</span>
+<span class="text-[8px] uppercase tracking-widest">Tasks</span>
 </button>
-<button class="flex flex-col items-center gap-1 text-on-surface-variant transition-theme">
-<span class="material-symbols-outlined transition-theme" data-icon="settings">settings</span>
-<span class="text-[10px] font-label uppercase tracking-widest transition-theme">Prefs</span>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-[8px] uppercase tracking-widest">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#ffb4aa]">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[8px] uppercase tracking-widest">Settings</span>
 </button>
 </nav>
 </body></html>
