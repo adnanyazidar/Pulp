@@ -11,13 +11,23 @@ interface StatsState {
   lastFocusDate: string | null;
   weeklySessionsCount: number; // For the current week
 
+  // Gamification
+  joinDate: string;
+  unlockedBadges: string[];
+  xp: number;
+  level: number;
+
   // Actions
   recordSession: (durationMinutes: number, projectId: string | null) => void;
   generateMockData: () => void;
   downloadCSV: () => void;
+  addXP: (amount: number) => void;
+  checkAchievements: () => void;
 }
 
 const getTodayKey = () => new Date().toISOString().split("T")[0];
+
+const XP_PER_LEVEL = 1000;
 
 export const useStatsStore = create<StatsState>()(
   persist(
@@ -28,6 +38,48 @@ export const useStatsStore = create<StatsState>()(
       currentStreak: 0,
       lastFocusDate: null,
       weeklySessionsCount: 0,
+
+      // Default Gamification
+      joinDate: new Date().toISOString(),
+      unlockedBadges: [],
+      xp: 0,
+      level: 1,
+
+      addXP: (amount) => {
+        const currentXp = get().xp;
+        const currentLevel = get().level;
+        const newTotalXp = currentXp + amount;
+        
+        // Level up logic (simple: 1000 XP per level)
+        if (newTotalXp >= XP_PER_LEVEL) {
+          set({ 
+            xp: newTotalXp - XP_PER_LEVEL, 
+            level: currentLevel + 1 
+          });
+        } else {
+          set({ xp: newTotalXp });
+        }
+        
+        get().checkAchievements();
+      },
+
+      checkAchievements: () => {
+        const { currentStreak, level, unlockedBadges } = get();
+        const newBadges = [...unlockedBadges];
+
+        const unlock = (id: string) => {
+          if (!newBadges.includes(id)) newBadges.push(id);
+        };
+
+        // Milestone rules
+        if (level >= 5) unlock("early_bird");
+        if (level >= 10) unlock("focus_master");
+        if (currentStreak >= 7) unlock("week_warrior");
+
+        if (newBadges.length !== unlockedBadges.length) {
+          set({ unlockedBadges: newBadges });
+        }
+      },
 
       recordSession: (durationMinutes, projectId) => {
         const today = getTodayKey();
@@ -64,6 +116,9 @@ export const useStatsStore = create<StatsState>()(
           lastFocusDate: today,
           weeklySessionsCount: weeklySessionsCount + 1,
         });
+
+        // Gamification Reward: 50 XP per 25 min session roughly
+        get().addXP(durationMinutes * 2); 
       },
 
       generateMockData: () => {
@@ -79,16 +134,19 @@ export const useStatsStore = create<StatsState>()(
           const d = new Date();
           d.setDate(d.getDate() - i);
           const key = d.toISOString().split("T")[0];
-          // Random minutes between 40 and 200
           history[key] = Math.floor(Math.random() * 160) + 40;
         }
 
         set({
           dailyHistory: history,
           projectStats: pStats,
-          currentStreak: 12,
+          currentStreak: 14,
           totalTasksCompleted: 48,
           weeklySessionsCount: 24,
+          level: 14,
+          xp: 850,
+          unlockedBadges: ["early_bird", "focus_master"],
+          joinDate: "2024-04-12T00:00:00.000Z",
         });
       },
 

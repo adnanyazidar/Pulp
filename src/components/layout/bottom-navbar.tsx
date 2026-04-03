@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Timer, ListTodo, Settings } from "lucide-react";
+import { Timer, ListTodo, BarChart3 } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Focus", icon: Timer },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
-  { href: "/settings", label: "Prefs", icon: Settings },
+  { href: "/analytics", label: "Stats", icon: BarChart3 },
 ];
 
 export function BottomNavbar() {
