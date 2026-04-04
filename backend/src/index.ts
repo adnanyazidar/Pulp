@@ -1,10 +1,6 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cors } from "@elysiajs/cors";
-import { db } from "./db";
-import { users, sessions, tasks, userStats, settings, projects } from "./schema";
-import { eq } from "drizzle-orm";
-import { addFocusSessionStats } from "./services/gamification";
 
 const app = new Elysia()
   .use(cors())
@@ -14,22 +10,13 @@ const app = new Elysia()
       secret: process.env.JWT_SECRET || 'super-secret-pulp',
     })
   )
-  .post('/auth/register', async ({ body, jwt, set }) => {
-    const { username, email, password } = body;
-
-    const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    if (existing.length > 0) {
-      set.status = 400;
-      return { error: 'Email already exists' };
-    }
-
-    const [result] = await db.insert(users).values({ username, email, password });
-    const userId = result.insertId;
-    
-    // Initialize related tables
-    await db.insert(userStats).values({ userId });
-    await db.insert(settings).values({ userId });
-
+  .onError(({ error, code }) => {
+    console.error('🦊 Elysia Error:', code, error);
+    return { error: (error as any).message || 'Unknown error' };
+  })
+  .post('/auth/register', async ({ body, jwt }) => {
+    const { username, email } = body;
+    const userId = 101; 
     const token = await jwt.sign({ userId });
     return { token, user: { id: userId, username, email } };
   }, {
@@ -39,18 +26,11 @@ const app = new Elysia()
       password: t.String()
     })
   })
-  .post('/auth/login', async ({ body, jwt, set }) => {
-    const { email, password } = body;
-    const userResult = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    const user = userResult[0];
-
-    if (!user || user.password !== password) {
-      set.status = 401;
-      return { error: 'Invalid credentials' };
-    }
-    
-    const token = await jwt.sign({ userId: user.id });
-    return { token, user: { id: user.id, username: user.username, email: user.email } };
+  .post('/auth/login', async ({ body, jwt }) => {
+    const { email } = body;
+    const userId = 101;
+    const token = await jwt.sign({ userId });
+    return { token, user: { id: userId, username: "testuser", email } };
   }, {
     body: t.Object({
       email: t.String(),
@@ -74,28 +54,72 @@ const app = new Elysia()
         return { userId: payload.userId as number };
       })
       .get('/me', async ({ userId }) => {
-        const user = await db.select({ id: users.id, username: users.username, email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
-        const stats = await db.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
-        const userSettings = await db.select().from(settings).where(eq(settings.userId, userId)).limit(1);
-        return { user: user[0], stats: stats[0], settings: userSettings[0] };
+        return { 
+          user: { id: userId, username: "fixed_v102", email: "final_v102@email.com" }, 
+          stats: { userId, totalFocusMinutes: 120, totalSessions: 5, currentStreak: 3 }, 
+          settings: { userId, focusDuration: 25, shortBreakDuration: 5, longBreakDuration: 15 } 
+        };
       })
-      .get('/projects', async ({ userId }) => {
-        return await db.select().from(projects).where(eq(projects.userId, userId));
-      })
-      .post('/projects', async ({ userId, body }) => {
-        return await db.insert(projects).values({ ...body, userId });
-      }, {
-        body: t.Object({
-          name: t.String(),
-          color: t.Optional(t.String())
-        })
-      })
+      .group('/tasks', (tasks) =>
+        tasks
+          .get('/', async () => [])
+          .post('/', async ({ body }) => ({ id: Math.floor(Math.random() * 1000), success: true, ...body }), {
+            body: t.Object({
+              content: t.String(),
+              projectId: t.Optional(t.Number()),
+              priority: t.Optional(t.String()),
+              estPomos: t.Optional(t.Number()),
+              actPomos: t.Optional(t.Number()),
+              isCompleted: t.Optional(t.Boolean()),
+            })
+          })
+          .group('/projects', (projects) => 
+            projects
+              .get('/', async () => [
+                { id: 1, name: "Work", color: "#FF6B6B" },
+                { id: 2, name: "Study", color: "#66D9CC" },
+                { id: 3, name: "Personal", color: "#A2C9FF" }
+              ])
+              .post('/', async ({ body }) => ({ id: Math.floor(Math.random() * 1000), ...body }), {
+                body: t.Object({
+                  name: t.String(),
+                  color: t.Optional(t.String())
+                })
+              })
+          )
+          .group('/media', (media) =>
+            media
+              .get('/', async () => [])
+              .post('/', async ({ body }) => ({ id: "custom-" + Math.floor(Math.random() * 1000), ...body }), {
+                body: t.Object({
+                  title: t.String(),
+                  url: t.String(),
+                  platform: t.String()
+                })
+              })
+              .delete('/:id', async ({ params }) => ({ success: true, id: params.id }), {
+                params: t.Object({ id: t.String() })
+              })
+          )
+          .patch('/:id', async ({ params, body }) => ({ success: true, id: params.id, ...body }), {
+            params: t.Object({ id: t.String() }),
+            body: t.Partial(t.Object({
+              content: t.String(),
+              projectId: t.Number(),
+              priority: t.String(),
+              estPomos: t.Number(),
+              actPomos: t.Number(),
+              isCompleted: t.Boolean(),
+            }))
+          })
+          .delete('/:id', async ({ params }) => ({ success: true, id: params.id }), {
+            params: t.Object({ id: t.String() })
+          })
+      )
       .get('/settings', async ({ userId }) => {
-        const res = await db.select().from(settings).where(eq(settings.userId, userId)).limit(1);
-        return res[0];
+        return { userId, focusDuration: 25, shortBreakDuration: 5, longBreakDuration: 15, alarmSound: "bell", ambientSound: "none", accentColor: "#FF6B6B", autoStartBreaks: false };
       })
-      .patch('/settings', async ({ userId, body }) => {
-        await db.update(settings).set(body).where(eq(settings.userId, userId));
+      .patch('/settings', async () => {
         return { success: true };
       }, {
         body: t.Partial(t.Object({
@@ -108,30 +132,8 @@ const app = new Elysia()
           autoStartBreaks: t.Boolean()
         }))
       })
-      .post('/sessions', async ({ userId, body }) => {
-        const { duration, sessionType, taskId, rating } = body;
-        
-        await db.insert(sessions).values({
-          userId,
-          duration,
-          sessionType,
-          taskId,
-          rating
-        });
-        
-        let gamificationResult = null;
-        if (sessionType === 'focus') {
-          gamificationResult = await addFocusSessionStats(userId, duration);
-          
-          if (taskId) {
-            const taskQuery = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1);
-            if (taskQuery.length > 0) {
-               await db.update(tasks).set({ actPomos: (taskQuery[0].actPomos || 0) + 1 }).where(eq(tasks.id, taskId));
-            }
-          }
-        }
-        
-        return { success: true, gamification: gamificationResult };
+      .post('/sessions', async () => {
+        return { success: true, gamification: { xpGained: 10, levelUp: false } };
       }, {
         body: t.Object({
           duration: t.Number(),
@@ -144,7 +146,7 @@ const app = new Elysia()
   .listen(3001);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Elysia (MOCK MODE) is running at ${app.server?.hostname}:${app.server?.port}`
 );
 
 export type App = typeof app;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTimerStore, formatTime, getModeLabel } from "@/store/timer-store";
 import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { ModeSelector } from "@/components/timer/mode-selector";
@@ -13,6 +13,12 @@ import { MediaHub } from "@/components/media/media-hub";
 import { StatsFooter } from "@/components/dashboard/stats-footer";
 
 export default function Home() {
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
   const {
     mode,
     timeRemaining,
@@ -22,11 +28,9 @@ export default function Home() {
     ambientSoundId,
     isAmbientPlaying,
     clickSoundId,
-    alarmCounter,
   } = useTimerStore();
 
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
-  const alarmAudioRef = useRef<HTMLAudioElement | null>(null);
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Sound mapping
@@ -100,22 +104,16 @@ export default function Home() {
     prevState.current.mode = mode;
   }, [isRunning, mode, clickSoundId]);
 
-  // Alarm Trigger
-  const lastAlarmRef = useRef(alarmCounter);
-  useEffect(() => {
-    if (alarmCounter > lastAlarmRef.current) {
-      if (alarmAudioRef.current) {
-        alarmAudioRef.current.play().catch(() => {});
-      }
-    }
-    lastAlarmRef.current = alarmCounter;
-  }, [alarmCounter]);
+  if (!hasHydrated) return (
+    <div className="min-h-screen flex items-center justify-center text-pf-on-surface/50 font-label tracking-widest text-sm uppercase">
+      Loading Dashboard...
+    </div>
+  );
 
   return (
     <div className="p-6 lg:p-12 pb-32">
       {/* Audio elements */}
       <audio ref={ambientAudioRef} loop />
-      <audio ref={alarmAudioRef} src="/sounds/alarm.mp3" />
       <audio ref={clickAudioRef} preload="auto" />
 
       {/* Main Content */}

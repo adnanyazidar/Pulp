@@ -4,6 +4,8 @@ import "./globals.css";
 import { TabTitleManager } from "@/components/layout/tab-title-manager";
 import { SoundManager } from "@/components/layout/sound-manager";
 import { LayoutShell } from "@/components/layout/layout-shell";
+import { CloudSyncManager } from "@/components/auth/cloud-sync-manager";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,30 +35,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${manrope.variable} dark`}
+      suppressHydrationWarning
     >
-      <head>
-        <link
-          rel="preload"
-          href="/sounds/alarm.mp3"
-          as="fetch"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/sounds/rain.mp3"
-          as="fetch"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/sounds/click-soft.mp3"
-          as="fetch"
-          crossOrigin="anonymous"
-        />
-      </head>
       <body className="antialiased bg-pf-surface overflow-hidden">
         <TabTitleManager />
         <SoundManager />
+        <CloudSyncManager />
+        <Toaster theme="dark" position="bottom-right" />
         
         <LayoutShell>{children}</LayoutShell>
       </body>

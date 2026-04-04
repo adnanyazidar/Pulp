@@ -16,7 +16,7 @@ export function TabTitleManager() {
 
     const activeTask = tasks.find((t) => t.id === activeTaskId);
     const timeStr = formatTime(timeRemaining);
-    const taskPart = activeTask ? ` ${activeTask.title}` : "";
+    const taskPart = activeTask ? ` ${activeTask.content}` : "";
 
     document.title = `(${timeStr})${taskPart} | PomoFocus`;
   }, [timeRemaining, isRunning, activeTaskId, tasks]);

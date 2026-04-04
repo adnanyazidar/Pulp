@@ -5,20 +5,19 @@ import { useTimerStore } from "@/store/timer-store";
 import { useSound } from "@/lib/hooks/use-sound";
 
 export function SoundManager() {
-  const { alarmCounter } = useTimerStore();
-  const { playSound } = useSound();
-  const isFirstRender = useRef(true);
+  const { alarmCounter, isRunning, mode } = useTimerStore();
+  const { playSound, stopSound } = useSound();
+  const lastAlarmRef = useRef(alarmCounter);
 
+  // Play alarm when session naturally ends
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    if (alarmCounter > 0) {
+    if (alarmCounter > lastAlarmRef.current) {
       playSound("alarm");
     }
+    lastAlarmRef.current = alarmCounter;
   }, [alarmCounter, playSound]);
+
+  // Note: Alarm stopping logic removed per user request to let it play all the way through.
 
   return null;
 }

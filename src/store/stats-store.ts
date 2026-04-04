@@ -1,36 +1,35 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { useTimerStore } from "./timer-store";
 import { useTaskStore } from "./task-store";
+import { useAuthStore } from "./auth-store";
 
 interface StatsState {
   dailyHistory: Record<string, number>; // date string -> total minutes
-  projectStats: Record<string, number>; // projectId -> total minutes
+  projectStats: Record<number, number>; // projectId -> total minutes
   totalTasksCompleted: number;
   currentStreak: number;
   lastFocusDate: string | null;
-  weeklySessionsCount: number; // For the current week
+  weeklySessionsCount: number;
 
   // Gamification
   joinDate: string;
   unlockedBadges: string[];
   xp: number;
   level: number;
+  isLoading: boolean;
 
   // Actions
-  recordSession: (durationMinutes: number, projectId: string | null) => void;
-  generateMockData: () => void;
-  downloadCSV: () => void;
+  fetchStats: () => Promise<void>;
+  recordSession: (durationMinutes: number, projectId: number | null) => void;
+  syncSessionToBackend: (params: { duration: number; sessionType: string; taskId?: number; rating?: number }) => Promise<void>;
   addXP: (amount: number) => void;
   checkAchievements: () => void;
-  
-  // Sync Actions
-  syncLocalToCloud: () => Promise<void>;
+  downloadCSV: () => void;
 }
 
 const getTodayKey = () => new Date().toISOString().split("T")[0];
 
-const XP_PER_LEVEL = 1000;
+import { persist } from "zustand/middleware";
 
 export const useStatsStore = create<StatsState>()(
   persist(
@@ -41,75 +40,76 @@ export const useStatsStore = create<StatsState>()(
       currentStreak: 0,
       lastFocusDate: null,
       weeklySessionsCount: 0,
-
-      // Default Gamification
       joinDate: new Date().toISOString(),
       unlockedBadges: [],
       xp: 0,
       level: 1,
+      isLoading: false,
+
+      fetchStats: async () => {
+        set({ isLoading: true });
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const { data, error } = await getAuthedApi().api.me.get();
+          if (error) throw new Error("Failed to fetch stats");
+          if (data && (data as any).stats) {
+            const stats = (data as any).stats;
+            set({
+              xp: stats.xp ?? 0,
+              level: stats.level ?? 1,
+              currentStreak: stats.currentStreak ?? 0,
+            });
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          set({ isLoading: false });
+        }
+      },
 
       addXP: (amount) => {
-        const currentXp = get().xp;
-        const currentLevel = get().level;
-        const newTotalXp = currentXp + amount;
-        
-        // Level up logic (simple: 1000 XP per level)
-        if (newTotalXp >= XP_PER_LEVEL) {
-          set({ 
-            xp: newTotalXp - XP_PER_LEVEL, 
-            level: currentLevel + 1 
-          });
-        } else {
-          set({ xp: newTotalXp });
-        }
-        
+        set((state) => {
+          const newTotalXp = state.xp + amount;
+          const XP_PER_LEVEL = 1000;
+          if (newTotalXp >= XP_PER_LEVEL) {
+            return { xp: newTotalXp - XP_PER_LEVEL, level: state.level + 1 };
+          }
+          return { xp: newTotalXp };
+        });
         get().checkAchievements();
       },
 
       checkAchievements: () => {
         const { currentStreak, level, unlockedBadges } = get();
         const newBadges = [...unlockedBadges];
+        const unlock = (id: string) => { if (!newBadges.includes(id)) newBadges.push(id); };
 
-        const unlock = (id: string) => {
-          if (!newBadges.includes(id)) newBadges.push(id);
-        };
-
-        // Milestone rules
         if (level >= 5) unlock("early_bird");
         if (level >= 10) unlock("focus_master");
         if (currentStreak >= 7) unlock("week_warrior");
 
-        if (newBadges.length !== unlockedBadges.length) {
-          set({ unlockedBadges: newBadges });
-        }
+        if (newBadges.length !== unlockedBadges.length) set({ unlockedBadges: newBadges });
       },
 
       recordSession: (durationMinutes, projectId) => {
         const today = getTodayKey();
         const { dailyHistory, projectStats, currentStreak, lastFocusDate, weeklySessionsCount } = get();
 
-        // Update daily history
-        const newDailyHistory = { ...dailyHistory };
-        newDailyHistory[today] = (newDailyHistory[today] || 0) + durationMinutes;
-
-        // Update project stats
+        const newDailyHistory = { ...dailyHistory, [today]: (dailyHistory[today] || 0) + durationMinutes };
         const newProjectStats = { ...projectStats };
-        if (projectId) {
-          newProjectStats[projectId] = (newProjectStats[projectId] || 0) + durationMinutes;
-        }
+        if (projectId) newProjectStats[projectId] = (projectStats[projectId] || 0) + durationMinutes;
 
-        // Update streak
         let newStreak = currentStreak;
         if (lastFocusDate !== today) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
           const yesterdayKey = yesterday.toISOString().split("T")[0];
-
-          if (lastFocusDate === yesterdayKey) {
-            newStreak += 1;
-          } else if (!lastFocusDate || lastFocusDate !== today) {
-            newStreak = 1;
-          }
+          newStreak = (lastFocusDate === yesterdayKey) ? newStreak + 1 : 1;
         }
 
         set({
@@ -119,63 +119,41 @@ export const useStatsStore = create<StatsState>()(
           lastFocusDate: today,
           weeklySessionsCount: weeklySessionsCount + 1,
         });
-
-        // Gamification Reward: 50 XP per 25 min session roughly
-        get().addXP(durationMinutes * 2); 
       },
 
-      syncLocalToCloud: async () => {
-         console.log("Syncing local stats to cloud...");
-      },
+      syncSessionToBackend: async (params) => {
+        const { isAuthenticated, setSyncStatus } = useAuthStore.getState();
+        if (!isAuthenticated) return;
 
-      generateMockData: () => {
-        const history: Record<string, number> = {};
-        const pStats: Record<string, number> = {
-          work: 1240,
-          study: 860,
-          personal: 420,
-        };
-
-        // Last 30 days
-        for (let i = 0; i < 30; i++) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const key = d.toISOString().split("T")[0];
-          history[key] = Math.floor(Math.random() * 160) + 40;
+        setSyncStatus("syncing");
+        try {
+          const { getAuthedApi } = await import("@/lib/api");
+          const { data, error } = await getAuthedApi().api.sessions.post(params);
+          if (error) throw new Error("Failed to sync session");
+          
+          if (data && (data as any).gamification) {
+            const { xp, level, currentStreak } = (data as any).gamification;
+            set({ xp, level, currentStreak });
+          }
+          setSyncStatus("synced");
+        } catch (err) {
+          console.error(err);
+          setSyncStatus("error");
         }
-
-        set({
-          dailyHistory: history,
-          projectStats: pStats,
-          currentStreak: 14,
-          totalTasksCompleted: 48,
-          weeklySessionsCount: 24,
-          level: 14,
-          xp: 850,
-          unlockedBadges: ["early_bird", "focus_master"],
-          joinDate: "2024-04-12T00:00:00.000Z",
-        });
       },
 
       downloadCSV: () => {
         const { dailyHistory } = get();
         const dates = Object.keys(dailyHistory).sort();
-        
-        const csvContent = "data:text/csv;charset=utf-8," 
-          + "Date,Minutes\n"
-          + dates.map(date => `${date},${dailyHistory[date]}`).join("\n");
-        
-        const encodedUri = encodeURI(csvContent);
+        const csvContent = "data:text/csv;charset=utf-8,Date,Minutes\n" + dates.map(date => `${date},${dailyHistory[date]}`).join("\n");
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "pomofocus_report.csv");
-        document.body.appendChild(link);
+        link.href = encodeURI(csvContent);
+        link.download = "pomofocus_report.csv";
         link.click();
-        document.body.removeChild(link);
       },
     }),
     {
-      name: "pomofocus-stats",
+      name: "pulp-stats"
     }
   )
 );
@@ -186,42 +164,23 @@ if (typeof window !== "undefined") {
 
   useTimerStore.subscribe(async (state) => {
     if (state.alarmCounter > previousAlarmCounter) {
-      // Session finished naturally
       if (state.mode === "focus") {
         const { activeTaskId, tasks } = useTaskStore.getState();
         const activeTask = tasks.find(t => t.id === activeTaskId);
-        const projectId = activeTask?.projectId || null;
+        const projectId = activeTask?.projectId ?? null;
         
-        // Timer duration (typically 25m = 1500s)
-        const durationSeconds = 25 * 60; 
-        
-        // Update Local Stats
+        // 1. Update Local Stats
         useStatsStore.getState().recordSession(25, projectId);
 
-        // SYNC TO BACKEND IF AUTHENTICATED
-        const { isAuthenticated, token, setSyncStatus } = (await import("./auth-store")).useAuthStore.getState();
-        const { api } = await import("@/lib/api");
-
-        if (isAuthenticated && token) {
-           setSyncStatus("syncing");
-           try {
-             // In a real app, taskId would be a numeric database ID. 
-             // Since we use UUIDs locally, we'll need a mapping or just pass null for now if not numeric.
-             const numericTaskId = typeof activeTaskId === 'string' && !isNaN(parseInt(activeTaskId)) ? parseInt(activeTaskId) : undefined;
-             
-             await (api.api.sessions as any).post({
-                duration: durationSeconds,
-                sessionType: "focus",
-                taskId: numericTaskId
-             }, {
-                headers: { "Authorization": `Bearer ${token}` }
-             });
-             setSyncStatus("synced");
-           } catch (error) {
-             console.error("Failed to sync session:", error);
-             setSyncStatus("error");
-           }
-        }
+        // 2. Sync to Backend
+        await useStatsStore.getState().syncSessionToBackend({
+          duration: 25 * 60,
+          sessionType: "focus",
+          taskId: (activeTaskId as number) ?? undefined
+        });
+        
+        // 3. Refresh tasks to update actPomos
+        if (activeTaskId) await useTaskStore.getState().fetchTasks();
       }
       previousAlarmCounter = state.alarmCounter;
     }

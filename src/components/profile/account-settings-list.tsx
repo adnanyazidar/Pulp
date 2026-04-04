@@ -1,8 +1,11 @@
 "use client";
 
-import { UserCircle, Trash2 } from "lucide-react";
+import { UserCircle, Trash2, LogOut } from "lucide-react";
+import { useAuthStore } from "@/store/auth-store";
 
 export function AccountSettingsList() {
+  const { logout } = useAuthStore();
+
   return (
     <div className="lg:col-span-2 space-y-8">
       <h4 className="font-headline text-2xl font-bold text-pf-on-surface flex items-center gap-3">
@@ -53,8 +56,16 @@ export function AccountSettingsList() {
 
       </div>
 
-      <div className="pt-4 px-2">
-        <button className="flex items-center gap-2 text-red-500/60 hover:text-red-500 text-[11px] font-bold uppercase tracking-widest transition-all duration-300">
+      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-6 px-2">
+        <button 
+          onClick={() => logout()}
+          className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-red-500/10 text-red-500 text-[11px] font-bold uppercase tracking-widest hover:bg-red-500/20 transition-all group"
+        >
+          <LogOut size={18} className="transition-transform group-hover:translate-x-0.5" />
+          Sign Out
+        </button>
+
+        <button className="flex items-center gap-2 text-pf-on-surface-variant/40 hover:text-red-500/60 text-[11px] font-bold uppercase tracking-widest transition-all duration-300">
           <Trash2 size={18} />
           Deactivate Account
         </button>
