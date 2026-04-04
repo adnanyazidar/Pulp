@@ -23,6 +23,9 @@ interface StatsState {
   downloadCSV: () => void;
   addXP: (amount: number) => void;
   checkAchievements: () => void;
+  
+  // Sync Actions
+  syncLocalToCloud: () => Promise<void>;
 }
 
 const getTodayKey = () => new Date().toISOString().split("T")[0];
@@ -121,6 +124,10 @@ export const useStatsStore = create<StatsState>()(
         get().addXP(durationMinutes * 2); 
       },
 
+      syncLocalToCloud: async () => {
+         console.log("Syncing local stats to cloud...");
+      },
+
       generateMockData: () => {
         const history: Record<string, number> = {};
         const pStats: Record<string, number> = {
@@ -177,7 +184,7 @@ export const useStatsStore = create<StatsState>()(
 if (typeof window !== "undefined") {
   let previousAlarmCounter = useTimerStore.getState().alarmCounter;
 
-  useTimerStore.subscribe((state) => {
+  useTimerStore.subscribe(async (state) => {
     if (state.alarmCounter > previousAlarmCounter) {
       // Session finished naturally
       if (state.mode === "focus") {
@@ -185,8 +192,36 @@ if (typeof window !== "undefined") {
         const activeTask = tasks.find(t => t.id === activeTaskId);
         const projectId = activeTask?.projectId || null;
         
-        // Timer duration is 25m in PRD
+        // Timer duration (typically 25m = 1500s)
+        const durationSeconds = 25 * 60; 
+        
+        // Update Local Stats
         useStatsStore.getState().recordSession(25, projectId);
+
+        // SYNC TO BACKEND IF AUTHENTICATED
+        const { isAuthenticated, token, setSyncStatus } = (await import("./auth-store")).useAuthStore.getState();
+        const { api } = await import("@/lib/api");
+
+        if (isAuthenticated && token) {
+           setSyncStatus("syncing");
+           try {
+             // In a real app, taskId would be a numeric database ID. 
+             // Since we use UUIDs locally, we'll need a mapping or just pass null for now if not numeric.
+             const numericTaskId = typeof activeTaskId === 'string' && !isNaN(parseInt(activeTaskId)) ? parseInt(activeTaskId) : undefined;
+             
+             await (api.api.sessions as any).post({
+                duration: durationSeconds,
+                sessionType: "focus",
+                taskId: numericTaskId
+             }, {
+                headers: { "Authorization": `Bearer ${token}` }
+             });
+             setSyncStatus("synced");
+           } catch (error) {
+             console.error("Failed to sync session:", error);
+             setSyncStatus("error");
+           }
+        }
       }
       previousAlarmCounter = state.alarmCounter;
     }
