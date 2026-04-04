@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1775265465225,
+      "tag": "0000_harsh_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775266234940,
+      "tag": "0001_red_rattler",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775266457225,
+      "tag": "0002_wild_argent",
+      "breakpoints": true
+    }
+  ]
+}

@@ -34,6 +34,9 @@ interface TaskState {
   
   // Project Actions (for future extensibility)
   addProject: (project: Omit<Project, "id">) => void;
+
+  // Sync Actions
+  syncLocalToCloud: () => Promise<void>;
 }
 
 const DEFAULT_PROJECTS: Project[] = [
@@ -44,24 +47,21 @@ const DEFAULT_PROJECTS: Project[] = [
 
 export const useTaskStore = create<TaskState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       tasks: [],
       projects: DEFAULT_PROJECTS,
       activeTaskId: null,
 
-      addTask: (taskData) =>
-        set((state) => ({
-          tasks: [
-            ...state.tasks,
-            {
-              ...taskData,
-              id: crypto.randomUUID(),
-              actPomos: 0,
-              isCompleted: false,
-              createdAt: Date.now(),
-            },
-          ],
-        })),
+      addTask: (taskData) => {
+        const newTask: Task = {
+          ...taskData,
+          id: crypto.randomUUID(),
+          actPomos: 0,
+          isCompleted: false,
+          createdAt: Date.now(),
+        };
+        set((state) => ({ tasks: [...state.tasks, newTask] }));
+      },
 
       updateTask: (id, updates) =>
         set((state) => ({
@@ -97,6 +97,12 @@ export const useTaskStore = create<TaskState>()(
             { ...projectData, id: crypto.randomUUID() },
           ],
         })),
+
+      syncLocalToCloud: async () => {
+        // Implementation for syncing local tasks to the cloud on first login
+        // Mock implementation for now, will be bridged with API calls in next steps
+        console.log("Syncing local tasks to cloud...");
+      }
     }),
     {
       name: "pomofocus-tasks",
