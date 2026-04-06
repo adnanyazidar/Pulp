@@ -32,7 +32,13 @@ export const useAuthStore = create<AuthState>()(
       syncStatus: "synced",
       isAuthModalOpen: false,
 
-      setAuth: (user, token) => set({ user, token, isAuthenticated: true, syncStatus: "synced" }),
+      setAuth: (user, token) => {
+        set({ user, token, isAuthenticated: true, syncStatus: "synced" });
+        // Trigger Smart Merge when logging in or registering
+        import('@/store/task-store').then(m => {
+          m.useTaskStore.getState().syncLocalToCloud();
+        });
+      },
       
       logout: () => {
         // 1. Hapus Token & User Data

@@ -42,3 +42,10 @@ next-env.d.ts
 
 # temp files
 /tmp/
+
+# backend
+/backend/node_modules
+
+# output artifacts
+*.err
+*.out

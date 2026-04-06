@@ -287,7 +287,6 @@ export const useTaskStore = create<TaskState>()(
             return;
           }
 
-          console.log(`Starting migration: ${localProjects.length} projects, ${localTasks.length} tasks.`);
 
           // 1. Migrate Projects and build ID swap map
           const projectIdMap: Record<number, number> = {};
@@ -322,10 +321,15 @@ export const useTaskStore = create<TaskState>()(
             // The post returns the new task ID we could use to patch progress, but for 'Smart Merge' of guests, basic is fine.
           }
 
-          // 4. Fetch clean official state (this overwrites the negative IDs in Zustand)
-          await currentState.fetchTasks();
+          // 4. Wipe local guest data, then fetch clean official state
+          localStorage.removeItem("pulp-tasks");
+          localStorage.removeItem("pulp-stats");
+          localStorage.removeItem("pulp-settings");
+          localStorage.removeItem("pulp-timer");
           
-          console.log("Migration complete!");
+          await currentState.fetchTasks();
+          await currentState.fetchProjects(); // One final sync to ensure mapped IDs are saved locally
+          
         } catch (err) {
           console.error("Migration failed:", err);
         }

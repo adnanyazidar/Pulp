@@ -16,8 +16,6 @@ export function CloudSyncManager() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log("Initializing Cloud Sync for user:", user.username);
-      
       // Initial Hydration
       const initializeCloudData = async () => {
         await Promise.all([

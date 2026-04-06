@@ -5,6 +5,6 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'mysql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'mysql://root:@127.0.0.1:3306/pulp_db',
+    url: process.env.DATABASE_URL || 'mysql://root:@127.0.0.1:3306/pulp_ultra',
   },
 });

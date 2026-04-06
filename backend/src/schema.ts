@@ -5,7 +5,7 @@ export const users = mysqlTable('users', {
   id: int('id').autoincrement().primaryKey(),
   username: varchar('username', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  password: text('password').notNull(),
+  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
   avatarUrl: text('avatar_url'), // Untuk tampilan di Top Navbar & Profile
   createdAt: timestamp('created_at').defaultNow(),
 });
