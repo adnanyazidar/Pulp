@@ -6,7 +6,7 @@ export const getEmbedUrl = (url: string) => {
     // Extract video ID safely
     const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
     if (videoIdMatch && videoIdMatch[1]) {
-      return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=1`;
+      return `https://www.youtube.com/embed/${videoIdMatch[1]}?autoplay=0&mute=0`;
     }
   }
   

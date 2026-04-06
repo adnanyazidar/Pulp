@@ -3,7 +3,7 @@ import { jwt } from "@elysiajs/jwt";
 import { cors } from "@elysiajs/cors";
 import { db } from "./db";
 import { users, settings, userStats, projects, tasks, sessions, userPlaylists } from "./schema";
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and } from 'drizzle-orm';
 
 const app = new Elysia()
   .use(cors())
@@ -211,8 +211,12 @@ const app = new Elysia()
                 })
               })
               .delete('/:id', async ({ params, userId }) => {
-                // To do: ensure it belongs to userId
-                await db.delete(userPlaylists).where(eq(userPlaylists.id, parseInt(params.id)));
+                await db.delete(userPlaylists).where(
+                  and(
+                    eq(userPlaylists.id, parseInt(params.id)),
+                    eq(userPlaylists.userId, userId)
+                  )
+                );
                 return { success: true, id: params.id };
               }, {
                 params: t.Object({ id: t.String() })
@@ -221,7 +225,12 @@ const app = new Elysia()
           .patch('/:id', async ({ params, body, userId }) => {
             await db.update(tasks)
               .set(body as any)
-              .where(eq(tasks.id, parseInt(params.id)));
+              .where(
+                and(
+                  eq(tasks.id, parseInt(params.id)),
+                  eq(tasks.userId, userId)
+                )
+              );
             return { success: true, id: params.id, ...body };
           }, {
             params: t.Object({ id: t.String() }),
@@ -235,8 +244,12 @@ const app = new Elysia()
             }))
           })
           .delete('/:id', async ({ params, userId }) => {
-             // To do: ensure it belongs to userId
-             await db.delete(tasks).where(eq(tasks.id, parseInt(params.id)));
+             await db.delete(tasks).where(
+               and(
+                 eq(tasks.id, parseInt(params.id)),
+                 eq(tasks.userId, userId)
+               )
+             );
              return { success: true, id: params.id };
           }, {
             params: t.Object({ id: t.String() })
@@ -308,9 +321,5 @@ const app = new Elysia()
       })
   )
   .listen(3001);
-
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
 
 export type App = typeof app;

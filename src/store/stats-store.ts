@@ -72,8 +72,8 @@ export const useStatsStore = create<StatsState>()(
         }
       },
 
-      addXP: (amount) => {
-        set((state) => {
+      addXP: (amount: number) => {
+        set((state: StatsState) => {
           const newTotalXp = state.xp + amount;
           const XP_PER_LEVEL = 1000;
           if (newTotalXp >= XP_PER_LEVEL) {
@@ -96,7 +96,7 @@ export const useStatsStore = create<StatsState>()(
         if (newBadges.length !== unlockedBadges.length) set({ unlockedBadges: newBadges });
       },
 
-      recordSession: (durationMinutes, projectId) => {
+      recordSession: (durationMinutes: number, projectId: number | null) => {
         const today = getTodayKey();
         const { dailyHistory, projectStats, currentStreak, lastFocusDate, weeklySessionsCount } = get();
 
@@ -145,7 +145,7 @@ export const useStatsStore = create<StatsState>()(
       downloadCSV: () => {
         const { dailyHistory } = get();
         const dates = Object.keys(dailyHistory).sort();
-        const csvContent = "data:text/csv;charset=utf-8,Date,Minutes\n" + dates.map(date => `${date},${dailyHistory[date]}`).join("\n");
+        const csvContent = "data:text/csv;charset=utf-8,Date,Minutes\n" + dates.map((date: string) => `${date},${dailyHistory[date]}`).join("\n");
         const link = document.createElement("a");
         link.href = encodeURI(csvContent);
         link.download = "pomofocus_report.csv";
@@ -162,7 +162,7 @@ export const useStatsStore = create<StatsState>()(
 if (typeof window !== "undefined") {
   let previousAlarmCounter = useTimerStore.getState().alarmCounter;
 
-  useTimerStore.subscribe(async (state) => {
+  useTimerStore.subscribe(async (state: any) => {
     if (state.alarmCounter > previousAlarmCounter) {
       if (state.mode === "focus") {
         const { activeTaskId, tasks } = useTaskStore.getState();

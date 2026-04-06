@@ -150,7 +150,7 @@ export const useTaskStore = create<TaskState>()(
               isCompleted: false,
               createdAt: new Date().toISOString(),
             };
-            set((state) => ({ tasks: [newTask, ...state.tasks] }));
+            set((state: TaskState) => ({ tasks: [newTask, ...state.tasks] }));
             return;
           }
 
@@ -171,7 +171,7 @@ export const useTaskStore = create<TaskState>()(
 
       updateTask: async (id, updates) => {
         const previousTasks = get().tasks;
-        set((state) => ({
+        set((state: TaskState) => ({
           tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
         }));
 
@@ -195,7 +195,7 @@ export const useTaskStore = create<TaskState>()(
 
       deleteTask: async (id) => {
         const previousTasks = get().tasks;
-        set((state) => ({
+        set((state: TaskState) => ({
           tasks: state.tasks.filter((t) => t.id !== id),
           activeTaskId: state.activeTaskId === id ? null : state.activeTaskId,
         }));
@@ -218,16 +218,16 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      toggleComplete: async (id) => {
+      toggleComplete: async (id: number) => {
         const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
         await get().updateTask(id, { isCompleted: !task.isCompleted });
       },
 
-      setActiveTask: (id) => set({ activeTaskId: id }),
+      setActiveTask: (id: number | null) => set({ activeTaskId: id }),
 
-      incrementActPomos: (id) =>
-        set((state) => ({
+      incrementActPomos: (id: number) =>
+        set((state: TaskState) => ({
           tasks: state.tasks.map((t) =>
             t.id === id ? { ...t, actPomos: t.actPomos + 1 } : t
           ),
@@ -242,7 +242,7 @@ export const useTaskStore = create<TaskState>()(
               name: projectData.name,
               color: projectData.color || "#FFFFFF",
             };
-            set((state) => ({ projects: [...state.projects, newProject] }));
+            set((state: TaskState) => ({ projects: [...state.projects, newProject] }));
             return;
           }
           const token = JSON.parse(raw)?.state?.token;
@@ -252,7 +252,7 @@ export const useTaskStore = create<TaskState>()(
               name: projectData.name,
               color: projectData.color || "#FFFFFF",
             };
-            set((state) => ({ projects: [...state.projects, newProject] }));
+            set((state: TaskState) => ({ projects: [...state.projects, newProject] }));
             return;
           }
 

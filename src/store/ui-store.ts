@@ -16,8 +16,8 @@ export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
       isSidebarOpen: true, // Default to expanded on desktop
-      toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-      setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+      toggleSidebar: () => set((state: UIState) => ({ isSidebarOpen: !state.isSidebarOpen })),
+      setSidebarOpen: (isOpen: boolean) => set({ isSidebarOpen: isOpen }),
     }),
     {
       name: "pomofocus-ui",

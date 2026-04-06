@@ -1,13 +1,13 @@
 "use client";
 
 import { useMediaStore } from "@/store/media-store";
-import { Play, Plus, BookAudio, Library } from "lucide-react";
+import { Play, Plus, BookAudio, Library, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { detectPlatform } from "@/lib/media-utils";
 
 export function MediaHub() {
-  const { playlists, playMedia, savePlaylist } = useMediaStore();
+  const { playlists, playMedia, savePlaylist, removePlaylist } = useMediaStore();
   const [inputUrl, setInputUrl] = useState("");
   const [showSaved, setShowSaved] = useState(false);
 
@@ -16,6 +16,18 @@ export function MediaHub() {
     if (!inputUrl) return;
     playMedia(inputUrl);
     setInputUrl("");
+  };
+
+  const handleSaveCustom = () => {
+    if (!inputUrl) return;
+    const platform = detectPlatform(inputUrl);
+    // Descriptive title based on platform
+    const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
+    const title = `My ${platformName} Track`;
+    
+    savePlaylist(title, inputUrl, platform);
+    setInputUrl("");
+    setShowSaved(true); // Switch to saved tab to show feedback
   };
 
   const currentList = showSaved 
@@ -68,8 +80,17 @@ export function MediaHub() {
         <button 
           type="submit"
           className="bg-pf-primary hover:bg-[#ff5446] text-[#5c0002] px-6 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(255,107,107,0.3)] hover:shadow-[0_0_25px_rgba(255,107,107,0.5)] active:scale-95"
+          title="Play Now"
         >
           <Play size={18} className="fill-[#5c0002]" />
+        </button>
+        <button 
+          type="button"
+          onClick={handleSaveCustom}
+          className="bg-pf-surface-bright/20 hover:bg-pf-surface-bright/30 text-pf-on-surface px-6 rounded-xl font-bold transition-all border border-white/10 active:scale-95"
+          title="Save to Library"
+        >
+          <Plus size={18} />
         </button>
       </form>
 
@@ -104,14 +125,22 @@ export function MediaHub() {
               </div>
             </div>
             
-            {/* Quick Save button for presets if not already saved (mock behavior) */}
-            {!showSaved && (
+            {/* Quick Save button for presets */}
+            {!showSaved ? (
               <button 
                 onClick={(e) => { e.stopPropagation(); savePlaylist(item.title, item.url, item.platform); }}
                 className="opacity-0 group-hover/item:opacity-100 p-2 text-white/40 hover:text-pf-primary hover:bg-white/5 rounded-lg transition-all"
                 title="Save to Library"
               >
                 <Plus size={16} />
+              </button>
+            ) : (
+              <button 
+                onClick={(e) => { e.stopPropagation(); removePlaylist(item.id); }}
+                className="opacity-0 group-hover/item:opacity-100 p-2 text-white/40 hover:text-pf-error hover:bg-white/5 rounded-lg transition-all"
+                title="Remove from Library"
+              >
+                <Trash2 size={16} />
               </button>
             )}
           </motion.div>

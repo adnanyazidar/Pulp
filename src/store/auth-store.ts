@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>()(
       syncStatus: "synced",
       isAuthModalOpen: false,
 
-      setAuth: (user, token) => {
+      setAuth: (user: User, token: string) => {
         set({ user, token, isAuthenticated: true, syncStatus: "synced" });
         // Trigger Smart Merge when logging in or registering
         import('@/store/task-store').then(m => {
@@ -54,9 +54,9 @@ export const useAuthStore = create<AuthState>()(
         window.location.href = '/';
       },
       
-      setSyncStatus: (status) => set({ syncStatus: status }),
+      setSyncStatus: (status: AuthState["syncStatus"]) => set({ syncStatus: status }),
 
-      setAuthModalOpen: (isOpen) => set({ isAuthModalOpen: isOpen }),
+      setAuthModalOpen: (isOpen: boolean) => set({ isAuthModalOpen: isOpen }),
     }),
     {
       name: "pulp-auth",

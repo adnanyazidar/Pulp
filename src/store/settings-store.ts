@@ -97,7 +97,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       updateTimerDuration: async (mode, minutes) => {
         const prev = get().timerDurations;
-        set((state) => ({
+        set((state: SettingsState) => ({
           timerDurations: { ...state.timerDurations, [mode]: minutes },
         }));
 
@@ -115,12 +115,12 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
 
-      updateSoundSetting: (key, value) =>
-        set((state) => ({
+      updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: any) =>
+        set((state: SettingsState) => ({
           soundSettings: { ...state.soundSettings, [key]: value },
         })),
 
-      updateThemeAccent: async (color) => {
+      updateThemeAccent: async (color: AccentColor) => {
         const prev = get().themeSettings.accentColor;
         set({ themeSettings: { accentColor: color } });
         if (typeof document !== "undefined") {
@@ -140,9 +140,9 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
 
-      updateUISetting: async (key, value) => {
+      updateUISetting: async (key: keyof SettingsState["uiSettings"], value: boolean) => {
         const prev = get().uiSettings;
-        set((state) => ({
+        set((state: SettingsState) => ({
           uiSettings: { ...state.uiSettings, [key]: value },
         }));
 

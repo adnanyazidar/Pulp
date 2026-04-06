@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useTaskStore } from "./task-store";
+import { useSettingsStore } from "./settings-store";
 
 export type TimerMode = "focus" | "shortBreak" | "longBreak";
 
@@ -29,17 +30,17 @@ interface TimerState {
   toggleAmbient: () => void;
 }
 
-const DURATIONS: Record<TimerMode, number> = {
-  focus: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60,
+// Helper: get duration in seconds from settings store
+export const getModeDuration = (mode: TimerMode): number => {
+  const durations = useSettingsStore.getState().timerDurations;
+  return (durations[mode] || 25) * 60;
 };
 
 export const useTimerStore = create<TimerState>()(
   persist(
     (set, get) => ({
       mode: "focus",
-      timeRemaining: DURATIONS.focus,
+      timeRemaining: getModeDuration("focus"),
       isRunning: false,
       sessionCount: 1,
       totalFocusToday: 0,
@@ -55,7 +56,7 @@ export const useTimerStore = create<TimerState>()(
 
       reset: () => {
         const { mode } = get();
-        set({ timeRemaining: DURATIONS[mode], isRunning: false });
+        set({ timeRemaining: getModeDuration(mode), isRunning: false });
       },
 
       tick: () => {
@@ -77,17 +78,17 @@ export const useTimerStore = create<TimerState>()(
             }
 
             set({
-              timeRemaining: DURATIONS[nextMode],
+              timeRemaining: getModeDuration(nextMode),
                isRunning: false,
               mode: nextMode,
               sessionCount: newCount,
-              totalFocusToday: totalFocusToday + DURATIONS.focus,
+              totalFocusToday: totalFocusToday + getModeDuration("focus"),
               alarmCounter: get().alarmCounter + 1,
             });
           } else {
             // Break complete → back to focus
             set({
-              timeRemaining: DURATIONS.focus,
+              timeRemaining: getModeDuration("focus"),
               isRunning: false,
               mode: "focus",
               alarmCounter: get().alarmCounter + 1,
@@ -102,7 +103,7 @@ export const useTimerStore = create<TimerState>()(
       switchMode: (mode: TimerMode) => {
         set({
           mode,
-          timeRemaining: DURATIONS[mode],
+          timeRemaining: getModeDuration(mode),
           isRunning: false,
         });
       },
@@ -114,14 +115,14 @@ export const useTimerStore = create<TimerState>()(
           const nextMode = newCount % 4 === 0 ? "longBreak" : "shortBreak";
           set({
             mode: nextMode,
-            timeRemaining: DURATIONS[nextMode],
+            timeRemaining: getModeDuration(nextMode),
             isRunning: false,
             sessionCount: newCount,
           });
         } else {
           set({
             mode: "focus",
-            timeRemaining: DURATIONS.focus,
+            timeRemaining: getModeDuration("focus"),
             isRunning: false,
           });
         }
@@ -140,6 +141,7 @@ export const useTimerStore = create<TimerState>()(
       name: "pomofocus-timer",
       partialize: (state) => ({
         mode: state.mode,
+        timeRemaining: state.timeRemaining,
         sessionCount: state.sessionCount,
         totalFocusToday: state.totalFocusToday,
         ambientVolume: state.ambientVolume,
@@ -149,6 +151,18 @@ export const useTimerStore = create<TimerState>()(
     }
   )
 );
+
+// Subscribe to settings store to update timeRemaining when durations change
+useSettingsStore.subscribe((state) => {
+  const { mode, isRunning, timeRemaining } = useTimerStore.getState();
+  // Only update if timer is not running
+  if (!isRunning) {
+    const newDuration = (state.timerDurations[mode] || 25) * 60;
+    if (timeRemaining !== newDuration) {
+      useTimerStore.setState({ timeRemaining: newDuration });
+    }
+  }
+});
 
 // Utility: format seconds to MM:SS
 export function formatTime(seconds: number): string {
@@ -167,9 +181,4 @@ export function getModeLabel(mode: TimerMode): string {
     case "longBreak":
       return "Long Break";
   }
-}
-
-// Utility: get total duration for mode
-export function getModeDuration(mode: TimerMode): number {
-  return DURATIONS[mode];
 }
