@@ -31,17 +31,23 @@ export function TaskList() {
     );
   }
 
+  // Merge orphaned tasks (no projectId) into the first project
+  const firstProject = projects[0];
+
   return (
     <div className="space-y-12 pb-24">
-      {projects.map((project) => {
-        const projectTasks = tasks.filter((t) => t.projectId === project.id);
+      {projects.map((project, idx) => {
+        // For the first project, also include orphaned tasks
+        const projectTasks = idx === 0
+          ? tasks.filter((t) => t.projectId === project.id || !t.projectId)
+          : tasks.filter((t) => t.projectId === project.id);
         const activeTasks = projectTasks.filter((t) => !t.isCompleted);
         const completedTasks = projectTasks.filter((t) => t.isCompleted);
 
         if (projectTasks.length === 0) return null;
 
         return (
-          <section key={project.id}>
+          <section key={`proj-${project.id}`}>
             <div className="flex items-center gap-3 mb-6">
               <div
                 className="w-1 h-6 rounded-full"
@@ -56,12 +62,9 @@ export function TaskList() {
             </div>
 
             <div className="space-y-4">
-              {/* Active Tasks First */}
               {activeTasks.map((task) => (
                 <TaskCard key={task.id} task={task} project={project} />
               ))}
-
-              {/* Completed Tasks */}
               {completedTasks.length > 0 && (
                 <div className="space-y-4 opacity-50 grayscale transition-all hover:opacity-100 hover:grayscale-0">
                   {completedTasks.map((task) => (

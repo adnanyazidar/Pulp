@@ -29,6 +29,7 @@ interface SettingsState {
   updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: any) => void;
   updateThemeAccent: (color: AccentColor) => void;
   updateUISetting: (key: keyof SettingsState["uiSettings"], value: boolean) => void;
+  fetchSettings: () => Promise<void>;
   exportData: () => void;
   resetData: () => void;
 }
@@ -63,27 +64,102 @@ export const useSettingsStore = create<SettingsState>()(
         showTabTimer: true,
       },
 
-      updateTimerDuration: (mode, minutes) =>
+      fetchSettings: async () => {
+        try {
+          const { getAuthedApi } = await import("@/lib/api");
+          const { data, error } = await getAuthedApi().api.settings.get();
+          if (error) throw new Error("Failed to fetch settings");
+          if (data) {
+            const d = data as any;
+            set({
+              timerDurations: {
+                focus: d.focusDuration ?? 25,
+                shortBreak: d.shortBreakDuration ?? 5,
+                longBreak: d.longBreakDuration ?? 15,
+              },
+              themeSettings: {
+                accentColor: d.accentColor ?? "coral",
+              },
+              uiSettings: {
+                autoStartBreaks: !!d.autoStartBreaks,
+                showTabTimer: get().uiSettings.showTabTimer,
+              }
+            });
+            if (typeof document !== "undefined" && (data as any).accentColor) {
+              const color = (data as any).accentColor as AccentColor;
+              document.documentElement.style.setProperty("--pf-primary", ACCENT_COLORS[color] || ACCENT_COLORS.coral);
+            }
+          }
+        } catch (err: any) {
+          console.error("Settings sync error:", err);
+        }
+      },
+
+      updateTimerDuration: async (mode, minutes) => {
+        const prev = get().timerDurations;
         set((state) => ({
           timerDurations: { ...state.timerDurations, [mode]: minutes },
-        })),
+        }));
+
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const fieldMap = { focus: 'focusDuration', shortBreak: 'shortBreakDuration', longBreak: 'longBreakDuration' };
+          await getAuthedApi().api.settings.patch({ [fieldMap[mode]]: minutes });
+        } catch (err) {
+          set({ timerDurations: prev });
+        }
+      },
 
       updateSoundSetting: (key, value) =>
         set((state) => ({
           soundSettings: { ...state.soundSettings, [key]: value },
         })),
 
-      updateThemeAccent: (color) => {
+      updateThemeAccent: async (color) => {
+        const prev = get().themeSettings.accentColor;
         set({ themeSettings: { accentColor: color } });
         if (typeof document !== "undefined") {
           document.documentElement.style.setProperty("--pf-primary", ACCENT_COLORS[color]);
         }
+
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          await getAuthedApi().api.settings.patch({ accentColor: color });
+        } catch (err) {
+          set({ themeSettings: { accentColor: prev } });
+        }
       },
 
-      updateUISetting: (key, value) =>
+      updateUISetting: async (key, value) => {
+        const prev = get().uiSettings;
         set((state) => ({
           uiSettings: { ...state.uiSettings, [key]: value },
-        })),
+        }));
+
+        if (key === 'autoStartBreaks') {
+          try {
+            const raw = localStorage.getItem("pulp-auth");
+            if (!raw) return;
+            const token = JSON.parse(raw)?.state?.token;
+            if (!token) return;
+
+            const { getAuthedApi } = await import("@/lib/api");
+            await getAuthedApi().api.settings.patch({ autoStartBreaks: value });
+          } catch (err) {
+            set({ uiSettings: prev });
+          }
+        }
+      },
 
       exportData: () => {
         const data = {
@@ -110,7 +186,6 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: "pomofocus-settings",
       onRehydrateStorage: () => (state) => {
-        // Sync theme on load
         if (state && typeof document !== "undefined") {
           document.documentElement.style.setProperty(
             "--pf-primary",

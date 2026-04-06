@@ -68,7 +68,7 @@ export function TaskCard({ task, project }: TaskCardProps) {
               task.isCompleted && "line-through text-pf-on-surface-variant"
             )}
           >
-            {task.title}
+            {task.content}
           </h3>
           <p className="text-[10px] uppercase tracking-widest text-pf-on-surface-variant mt-1">
             {task.priority} Priority • {task.estPomos * 25}m

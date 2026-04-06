@@ -2,29 +2,44 @@
 
 import { useTaskStore, Project } from "@/store/task-store";
 import { Plus, Folder, Hash } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function CreateTask() {
   const { addTask, projects } = useTaskStore();
-  const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState(projects[0]?.id || "work");
+  const [content, setContent] = useState("");
+  const [projectId, setProjectId] = useState<number | undefined>(undefined);
   const [estPomos, setEstPomos] = useState(1);
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
 
+  // Sync default project selection when projects load
+  useEffect(() => {
+    if (projects.length > 0 && !projectId) {
+      setProjectId(projects[0].id);
+    }
+  }, [projects, projectId]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!content.trim()) return;
 
-    addTask({
-      title,
+    const promise = addTask({
+      content,
       projectId,
       estPomos,
       priority,
     });
 
-    setTitle("");
-    setEstPomos(1);
+    toast.promise(promise, {
+      loading: "Creating task...",
+      success: () => {
+        setContent("");
+        setEstPomos(1);
+        return "Task created!";
+      },
+      error: "Failed to create task",
+    });
   };
 
   return (
@@ -36,8 +51,8 @@ export function CreateTask() {
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-xl font-headline placeholder:text-pf-on-surface-variant/40 text-pf-on-surface"
               placeholder="What are you working on?"
               type="text"
@@ -45,7 +60,7 @@ export function CreateTask() {
           </div>
           <button
             type="submit"
-            disabled={!title.trim()}
+            disabled={!content.trim()}
             className="bg-pf-primary-container text-pf-on-primary-container p-2 rounded-lg hover:scale-95 active:scale-90 transition-all disabled:opacity-50 disabled:grayscale"
           >
             <Plus size={24} />
@@ -57,8 +72,8 @@ export function CreateTask() {
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-pf-surface-container-highest text-pf-on-surface-variant">
             <Folder size={14} className="opacity-60" />
             <select
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
+              value={projectId || ""}
+              onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value, 10) : undefined)}
               className="bg-transparent border-none focus:ring-0 text-[10px] uppercase tracking-widest font-bold cursor-pointer"
             >
               {projects.map((p) => (

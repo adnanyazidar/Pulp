@@ -1,85 +1,228 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface Project {
-  id: string;
+  id: number;
   name: string;
-  color: string; // Hex color for the indicator line
+  color: string;
 }
 
 export interface Task {
-  id: string;
-  title: string;
-  projectId: string;
-  estPomos: number; // Estimated pomodoros
-  actPomos: number; // Actual pomodoros completed
+  id: number;
+  content: string;
+  projectId: number | null;
+  estPomos: number;
+  actPomos: number;
   priority: "low" | "medium" | "high";
   isCompleted: boolean;
-  note?: string;
-  createdAt: number;
+  createdAt: string | Date;
+  projectName?: string;
+  projectColor?: string;
 }
 
 interface TaskState {
   tasks: Task[];
   projects: Project[];
-  activeTaskId: string | null;
+  activeTaskId: number | null;
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
-  addTask: (task: Omit<Task, "id" | "actPomos" | "isCompleted" | "createdAt">) => void;
-  updateTask: (id: string, updates: Partial<Task>) => void;
-  deleteTask: (id: string) => void;
-  toggleComplete: (id: string) => void;
-  setActiveTask: (id: string | null) => void;
-  incrementActPomos: (id: string) => void;
+  fetchTasks: () => Promise<void>;
+  fetchProjects: () => Promise<void>;
+  addTask: (task: { content: string; projectId?: number; priority: "low" | "medium" | "high"; estPomos: number }) => Promise<void>;
+  updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
+  deleteTask: (id: number) => Promise<void>;
+  toggleComplete: (id: number) => Promise<void>;
+  setActiveTask: (id: number | null) => void;
+  incrementActPomos: (id: number) => void;
   
-  // Project Actions (for future extensibility)
-  addProject: (project: Omit<Project, "id">) => void;
-
-  // Sync Actions
+  addProject: (project: { name: string; color?: string }) => Promise<void>;
   syncLocalToCloud: () => Promise<void>;
 }
 
-const DEFAULT_PROJECTS: Project[] = [
-  { id: "work", name: "Work", color: "#ffb4aa" }, // Coral
-  { id: "study", name: "Study", color: "#66d9cc" }, // Tosca
-  { id: "personal", name: "Personal", color: "#a2c9ff" }, // Blue
-];
+import { persist } from "zustand/middleware";
 
 export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
       tasks: [],
-      projects: DEFAULT_PROJECTS,
+      projects: [
+        { id: -1, name: "Work", color: "#FF6B6B" },
+        { id: -2, name: "Study", color: "#66D9CC" },
+        { id: -3, name: "Personal", color: "#A2C9FF" },
+      ],
       activeTaskId: null,
+      isLoading: false,
+      error: null,
 
-      addTask: (taskData) => {
-        const newTask: Task = {
-          ...taskData,
-          id: crypto.randomUUID(),
-          actPomos: 0,
-          isCompleted: false,
-          createdAt: Date.now(),
-        };
-        set((state) => ({ tasks: [...state.tasks, newTask] }));
+      fetchTasks: async () => {
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          set({ isLoading: true });
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          const { data, error } = await authedApi.api.tasks.get();
+          if (error) throw new Error("Failed to fetch tasks");
+          const taskList = (data as any[]) || [];
+
+          // Auto-migrate orphaned tasks to the first project
+          const { projects } = get();
+          if (projects.length > 0) {
+            const firstProjectId = projects[0].id;
+            const orphans = taskList.filter((t: any) => !t.projectId);
+            for (const orphan of orphans) {
+              orphan.projectId = firstProjectId;
+              try {
+                await (authedApi.api.tasks as any)[orphan.id.toString()].patch({ projectId: firstProjectId } as any);
+              } catch {}
+            }
+          }
+
+          set({ tasks: taskList });
+        } catch (err: any) {
+          // Don't set error on 401s during initial load
+          if (err.message !== "Unauthorized") {
+            set({ error: err.message });
+          }
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
-      updateTask: (id, updates) =>
+      fetchProjects: async () => {
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          const { data, error } = await authedApi.api.tasks.projects.get();
+          if (error) throw new Error("Failed to fetch projects");
+          const projectList = (data as any[]) || [];
+          
+          // Self-healing: create default projects if user has none
+          if (projectList.length === 0) {
+            const defaultProjects = [
+              { name: "Work", color: "#FF6B6B" },
+              { name: "Study", color: "#66D9CC" },
+              { name: "Personal", color: "#A2C9FF" },
+            ];
+            for (const p of defaultProjects) {
+              await authedApi.api.tasks.projects.post(p);
+            }
+            // Re-fetch after creation
+            const { data: refreshed } = await authedApi.api.tasks.projects.get();
+            if (refreshed) set({ projects: refreshed as any[] });
+          } else {
+            set({ projects: projectList });
+          }
+        } catch (err: any) {
+          console.error(err);
+        }
+      },
+
+      addTask: async (taskData) => {
+        try {
+          const { getAuthedApi } = await import("@/lib/api");
+          const token = (() => {
+            try {
+              const raw = localStorage.getItem("pulp-auth");
+              if (!raw) return null;
+              return JSON.parse(raw)?.state?.token ?? null;
+            } catch { return null; }
+          })();
+
+          if (!token) {
+            // Guest Mode: Add task locally only
+            const newTask: Task = {
+              id: Math.floor(Math.random() * -1000000) - 1, // Ensure negative ID for local
+              content: taskData.content,
+              projectId: taskData.projectId || -1, // default to local Work
+              estPomos: taskData.estPomos,
+              actPomos: 0,
+              priority: taskData.priority,
+              isCompleted: false,
+              createdAt: new Date().toISOString(),
+            };
+            set((state) => ({ tasks: [newTask, ...state.tasks] }));
+            return;
+          }
+
+          const authedApi = getAuthedApi();
+          const { data, error } = await authedApi.api.tasks.post({
+            ...taskData,
+            projectId: taskData.projectId && taskData.projectId > 0 ? taskData.projectId : undefined
+          });
+          if (error) throw new Error("Failed to create task");
+          if (data && (data as any).success) {
+            await get().fetchTasks();
+          }
+        } catch (err: any) {
+          set({ error: err.message });
+          throw err;
+        }
+      },
+
+      updateTask: async (id, updates) => {
+        const previousTasks = get().tasks;
         set((state) => ({
           tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
-        })),
+        }));
 
-      deleteTask: (id) =>
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+          // Do not sync negatively ID'ed tasks to cloud on update
+          if (id < 0) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          const { error } = await (authedApi.api.tasks as any)[id.toString()].patch(updates as any);
+          if (error) throw new Error("Failed to update task");
+        } catch (err: any) {
+          set({ tasks: previousTasks, error: err.message });
+          throw err;
+        }
+      },
+
+      deleteTask: async (id) => {
+        const previousTasks = get().tasks;
         set((state) => ({
           tasks: state.tasks.filter((t) => t.id !== id),
           activeTaskId: state.activeTaskId === id ? null : state.activeTaskId,
-        })),
+        }));
 
-      toggleComplete: (id) =>
-        set((state) => ({
-          tasks: state.tasks.map((t) =>
-            t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
-          ),
-        })),
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+          // Local only delete
+          if (id < 0) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          const { error } = await (authedApi.api.tasks as any)[id.toString()].delete();
+          if (error) throw new Error("Failed to delete task");
+        } catch (err: any) {
+          set({ tasks: previousTasks, error: err.message });
+          throw err;
+        }
+      },
+
+      toggleComplete: async (id) => {
+        const task = get().tasks.find((t) => t.id === id);
+        if (!task) return;
+        await get().updateTask(id, { isCompleted: !task.isCompleted });
+      },
 
       setActiveTask: (id) => set({ activeTaskId: id }),
 
@@ -90,22 +233,110 @@ export const useTaskStore = create<TaskState>()(
           ),
         })),
 
-      addProject: (projectData) =>
-        set((state) => ({
-          projects: [
-            ...state.projects,
-            { ...projectData, id: crypto.randomUUID() },
-          ],
-        })),
+      addProject: async (projectData) => {
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) {
+            const newProject: Project = {
+              id: Math.floor(Math.random() * -1000) - 100, // Negative ID
+              name: projectData.name,
+              color: projectData.color || "#FFFFFF",
+            };
+            set((state) => ({ projects: [...state.projects, newProject] }));
+            return;
+          }
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) {
+            const newProject: Project = {
+              id: Math.floor(Math.random() * -1000) - 100,
+              name: projectData.name,
+              color: projectData.color || "#FFFFFF",
+            };
+            set((state) => ({ projects: [...state.projects, newProject] }));
+            return;
+          }
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          const { error } = await authedApi.api.tasks.projects.post(projectData);
+          if (error) throw new Error("Failed to create project");
+          await get().fetchProjects();
+        } catch (err: any) {
+          set({ error: err.message });
+        }
+      },
 
       syncLocalToCloud: async () => {
-        // Implementation for syncing local tasks to the cloud on first login
-        // Mock implementation for now, will be bridged with API calls in next steps
-        console.log("Syncing local tasks to cloud...");
+        try {
+          const raw = localStorage.getItem("pulp-auth");
+          if (!raw) return;
+          const token = JSON.parse(raw)?.state?.token;
+          if (!token) return;
+
+          const { getAuthedApi } = await import("@/lib/api");
+          const authedApi = getAuthedApi();
+          
+          const currentState = get();
+          const localProjects = currentState.projects.filter(p => p.id < 0);
+          const localTasks = currentState.tasks.filter(t => t.id < 0);
+
+          if (localProjects.length === 0 && localTasks.length === 0) {
+            // Nothing to migrate, just fetch cloud
+            await currentState.fetchProjects();
+            await currentState.fetchTasks();
+            return;
+          }
+
+
+          // 1. Migrate Projects and build ID swap map
+          const projectIdMap: Record<number, number> = {};
+          
+          for (const lp of localProjects) {
+            const { data, error } = await authedApi.api.tasks.projects.post({ name: lp.name, color: lp.color });
+            if (!error && data && (data as any).id) {
+              projectIdMap[lp.id] = (data as any).id;
+            }
+          }
+
+          // 2. Fetch fresh projects to get the default cloud projects just in case
+          await currentState.fetchProjects();
+          const freshProjects = get().projects;
+          const firstCloudProjectId = freshProjects.find(p => p.id > 0)?.id;
+
+          // 3. Migrate Tasks
+          for (const lt of localTasks) {
+            // Swap Project ID or fallback to first available cloud project
+            let newProjectId = lt.projectId ? projectIdMap[lt.projectId] : undefined;
+            if (!newProjectId && lt.projectId && lt.projectId > 0) newProjectId = lt.projectId; // was already a cloud ID
+            if (!newProjectId && firstCloudProjectId) newProjectId = firstCloudProjectId; // fallback
+
+            await authedApi.api.tasks.post({
+              content: lt.content,
+              projectId: newProjectId,
+              priority: lt.priority,
+              estPomos: lt.estPomos
+            });
+            // Note: actPomos and isCompleted are not in the POST schema currently (based on earlier implementation),
+            // but this is fine for basic guest tasks. If they had progress, we can update it immediately:
+            // The post returns the new task ID we could use to patch progress, but for 'Smart Merge' of guests, basic is fine.
+          }
+
+          // 4. Wipe local guest data, then fetch clean official state
+          localStorage.removeItem("pulp-tasks");
+          localStorage.removeItem("pulp-stats");
+          localStorage.removeItem("pulp-settings");
+          localStorage.removeItem("pulp-timer");
+          
+          await currentState.fetchTasks();
+          await currentState.fetchProjects(); // One final sync to ensure mapped IDs are saved locally
+          
+        } catch (err) {
+          console.error("Migration failed:", err);
+        }
       }
     }),
     {
-      name: "pomofocus-tasks",
+      name: "pulp-tasks"
     }
   )
 );
