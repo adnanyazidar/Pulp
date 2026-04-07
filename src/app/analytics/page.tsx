@@ -5,6 +5,7 @@ import { StatsSummary } from "@/components/analytics/stats-summary";
 import { WeeklyChart } from "@/components/analytics/weekly-chart";
 import { ProjectAllocation } from "@/components/analytics/project-allocation";
 import { ActivityHeatmap } from "@/components/analytics/activity-heatmap";
+import { BadgeGrid } from "@/components/analytics/badge-grid";
 import { useStatsStore } from "@/store/stats-store";
 import { useAuthStore } from "@/store/auth-store";
 import { BottomNavbar } from "@/components/layout/bottom-navbar";
@@ -12,7 +13,7 @@ import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function AnalyticsPage() {
-  const { dailyHistory } = useStatsStore();
+  const { unlockedBadges } = useStatsStore();
   const { isAuthenticated, setAuthModalOpen } = useAuthStore();
   const [hasHydrated, setHasHydrated] = useState(false);
 
@@ -52,6 +53,21 @@ export default function AnalyticsPage() {
             </div>
 
             <ActivityHeatmap />
+
+            {/* Badges Section */}
+            <section className="space-y-8 pt-8 border-t border-white/5">
+              <header className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-headline font-black text-pf-on-surface tracking-tighter">
+                    Elite Collection
+                  </h2>
+                  <p className="text-[10px] font-label font-bold uppercase tracking-widest text-pf-primary">
+                    {unlockedBadges.length} / 20 Achievements
+                  </p>
+                </div>
+              </header>
+              <BadgeGrid unlockedIds={unlockedBadges} />
+            </section>
           </div>
 
           {/* Guest Overlay CTA */}

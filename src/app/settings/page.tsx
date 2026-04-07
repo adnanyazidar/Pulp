@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { SettingSection } from "@/components/settings/setting-section";
 import { TimerConfig } from "@/components/settings/timer-config";
@@ -8,20 +8,49 @@ import { SoundscapeConfig } from "@/components/settings/soundscape-config";
 import { ThemeConfig } from "@/components/settings/theme-config";
 import { ShortcutCheatsheet } from "@/components/settings/shortcut-cheatsheet";
 import { DataManagement } from "@/components/settings/data-management";
+import { useSettingsStore } from "@/store/settings-store";
 import { Check, Loader2, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
+  const store = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
 
-  const handleSave = () => {
+  // Draft state to hold unsaved changes
+  const [draft, setDraft] = useState({
+    timerDurations: { ...store.timerDurations },
+    soundSettings: { ...store.soundSettings },
+    themeSettings: { ...store.themeSettings },
+    uiSettings: { ...store.uiSettings },
+  });
+
+  // Keep draft in sync if store rehydrates or fetches from server
+  useEffect(() => {
+    setDraft({
+      timerDurations: { ...store.timerDurations },
+      soundSettings: { ...store.soundSettings },
+      themeSettings: { ...store.themeSettings },
+      uiSettings: { ...store.uiSettings },
+    });
+  }, [store.timerDurations, store.soundSettings, store.themeSettings, store.uiSettings]);
+
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setShowSaved(true);
-      setTimeout(() => setShowSaved(false), 2000);
-    }, 800);
+    
+    // Commit only the changed parts to the store and backend
+    await store.updateSettings(draft);
+    
+    setIsSaving(false);
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const updateDraft = (key: keyof typeof draft, value: any) => {
+    setDraft(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   return (
@@ -66,21 +95,30 @@ export default function SettingsPage() {
             title="Timer Performance" 
             description="Adjust focus intervals and break durations based on your cognitive rhythm."
           >
-            <TimerConfig />
+            <TimerConfig 
+              durations={draft.timerDurations} 
+              onUpdate={(val) => updateDraft('timerDurations', val)} 
+            />
           </SettingSection>
 
           <SettingSection 
             title="Atmospheric Engine" 
             description="Optimize your deep work soundscape with curated ambient scenes and high-fidelity notifications."
           >
-            <SoundscapeConfig />
+            <SoundscapeConfig 
+              settings={draft.soundSettings}
+              onUpdate={(val) => updateDraft('soundSettings', val)}
+            />
           </SettingSection>
 
           <SettingSection 
             title="Chromesthesia Customization" 
             description="Select your signature accent color. Changes are applied dynamically across the entire interface."
           >
-            <ThemeConfig />
+            <ThemeConfig 
+              settings={draft.themeSettings}
+              onUpdate={(val) => updateDraft('themeSettings', val)}
+            />
           </SettingSection>
 
           <SettingSection 
@@ -94,7 +132,10 @@ export default function SettingsPage() {
             title="System Governance" 
             description="Manage your local data persistence and security settings."
           >
-            <DataManagement />
+            <DataManagement 
+              uiSettings={draft.uiSettings}
+              onUpdate={(val) => updateDraft('uiSettings', val)}
+            />
           </SettingSection>
         </div>
 

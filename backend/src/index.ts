@@ -2,8 +2,9 @@ import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { cors } from "@elysiajs/cors";
 import { db } from "./db";
-import { users, settings, userStats, projects, tasks, sessions, userPlaylists } from "./schema";
-import { eq, sql, and } from 'drizzle-orm';
+import { users, settings, userStats, projects, tasks, sessions, userPlaylists, userBadges } from "./schema";
+import { eq, sql, and, desc } from 'drizzle-orm';
+import { checkAndUnlockBadges } from "./badges";
 
 const app = new Elysia()
   .use(cors())
@@ -159,11 +160,17 @@ const app = new Elysia()
         const stats = statsRecords[0];
         const sett = settingsRecords[0];
 
+        const badgesRecords = await db.select().from(userBadges).where(eq(userBadges.userId, userId));
+
         return { 
           user: user ? { id: user.id, username: user.username, email: user.email } : null,
           stats: stats ? stats : null,
           settings: sett ? sett : null,
+          badges: badgesRecords || [],
         };
+      })
+      .get('/badges', async ({ userId }) => {
+        return await db.select().from(userBadges).where(eq(userBadges.userId, userId));
       })
       .group('/tasks', (tasksRoute) =>
         tasksRoute
@@ -256,7 +263,9 @@ const app = new Elysia()
                   url: body.url,
                   platform: body.platform as any,
                 });
-                return { id: insertResult.insertId, ...body };
+                const newlyUnlocked = await checkAndUnlockBadges(userId, 'media_updated');
+
+                return { id: insertResult.insertId, newlyUnlocked, ...body };
               }, {
                 body: t.Object({
                   title: t.String(),
@@ -285,7 +294,10 @@ const app = new Elysia()
                   eq(tasks.userId, userId)
                 )
               );
-            return { success: true, id: params.id, ...body };
+            
+            const newlyUnlocked = await checkAndUnlockBadges(userId, 'task_completed', body);
+            
+            return { success: true, id: params.id, newlyUnlocked, ...body };
           }, {
             params: t.Object({ id: t.String() }),
             body: t.Partial(t.Object({
@@ -315,7 +327,8 @@ const app = new Elysia()
       })
       .patch('/settings', async ({ body, userId }) => {
         await db.update(settings).set(body).where(eq(settings.userId, userId));
-        return { success: true };
+        const newlyUnlocked = await checkAndUnlockBadges(userId, 'settings_updated', body);
+        return { success: true, newlyUnlocked };
       }, {
         body: t.Partial(t.Object({
           focusDuration: t.Number(),
@@ -338,6 +351,8 @@ const app = new Elysia()
             duration,
             sessionType,
             rating,
+            wasPaused: body.wasPaused || false,
+            ambientSound: body.ambientSound || 'none',
           });
 
           // 2. If it's a focus session, update task and stats
@@ -385,6 +400,14 @@ const app = new Elysia()
                 })
                 .where(eq(userStats.userId, userId));
 
+              // Trigger badge check after potential stats update
+              const sessionBadges = await checkAndUnlockBadges(userId, 'session_complete', {
+                ...body,
+                timestamp: new Date()
+              });
+              
+              const consistencyBadges = await checkAndUnlockBadges(userId, 'stats_updated');
+
               return {
                 success: true,
                 gamification: {
@@ -392,19 +415,22 @@ const app = new Elysia()
                   level: newLevel,
                   currentStreak: newStreak,
                   xpGained
-                }
+                },
+                newlyUnlocked: [...sessionBadges, ...consistencyBadges]
               };
             }
           }
 
-          return { success: true };
+          return { success: true, newlyUnlocked: [] };
         });
       }, {
         body: t.Object({
           duration: t.Number(),
           sessionType: t.String(),
           taskId: t.Optional(t.Number()),
-          rating: t.Optional(t.Number())
+          rating: t.Optional(t.Number()),
+          wasPaused: t.Optional(t.Boolean()),
+          ambientSound: t.Optional(t.String()),
         })
       })
       .get('/analytics/summary', async ({ userId }) => {
@@ -441,6 +467,17 @@ const app = new Elysia()
           xp: stats?.xp || 0,
           history
         };
+      })
+      .post('/feedback', async ({ body, userId }) => {
+        // In a real app, save to feedback table. 
+        // For now, just trigger the badge.
+        const newlyUnlocked = await checkAndUnlockBadges(userId, 'feedback_submitted', body);
+        return { success: true, newlyUnlocked };
+      }, {
+        body: t.Object({
+          message: t.String(),
+          category: t.Optional(t.String())
+        })
       })
   )
   .listen(3001);

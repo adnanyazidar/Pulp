@@ -17,6 +17,7 @@ interface TimerState {
   clickSoundId: "soft" | "tactile" | "none";
   alarmCounter: number; // Incremented when session naturally ends
   lastSessionFinishedAt: number | null; // Timestamp for sync triggers
+  hasPaused: boolean; // Tracking for "Zen Master" badge
 
   // Actions
   start: () => void;
@@ -51,14 +52,15 @@ export const useTimerStore = create<TimerState>()(
       clickSoundId: "soft",
       alarmCounter: 0,
       lastSessionFinishedAt: null,
+      hasPaused: false,
 
       start: () => set({ isRunning: true }),
 
-      pause: () => set({ isRunning: false }),
+      pause: () => set({ isRunning: false, hasPaused: true }),
 
       reset: () => {
         const { mode } = get();
-        set({ timeRemaining: getModeDuration(mode), isRunning: false });
+        set({ timeRemaining: getModeDuration(mode), isRunning: false, hasPaused: false });
       },
 
       tick: () => {
@@ -109,6 +111,7 @@ export const useTimerStore = create<TimerState>()(
           mode,
           timeRemaining: getModeDuration(mode),
           isRunning: false,
+          hasPaused: false,
         });
       },
 
@@ -122,12 +125,14 @@ export const useTimerStore = create<TimerState>()(
             timeRemaining: getModeDuration(nextMode),
             isRunning: false,
             sessionCount: newCount,
+            hasPaused: false,
           });
         } else {
           set({
             mode: "focus",
             timeRemaining: getModeDuration("focus"),
             isRunning: false,
+            hasPaused: false,
           });
         }
       },

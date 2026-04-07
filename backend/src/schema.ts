@@ -63,7 +63,9 @@ export const sessions = mysqlTable('sessions', {
   taskId: int('task_id').references(() => tasks.id), // Link ke Task yang dikerjakan
   duration: int('duration').notNull(), 
   sessionType: varchar('session_type', { length: 50 }).notNull(), 
-  rating: int('rating'), // Untuk metrik "Flow State" di Analytics
+  rating: int('rating'), 
+  wasPaused: boolean('was_paused').default(false),
+  ambientSound: varchar('ambient_sound', { length: 50 }).default('none'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -75,3 +77,13 @@ export const userPlaylists = mysqlTable('user_playlists', {
   url: text('url').notNull(),
   title: varchar('title', { length: 150 }).notNull(),
 });
+
+// 8. USER BADGES
+export const userBadges = mysqlTable('user_badges', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull().references(() => users.id),
+  badgeId: varchar('badge_id', { length: 50 }).notNull(), // Kedepannya bisa diconnect ke table badges statis
+  unlockedAt: timestamp('unlocked_at').defaultNow(),
+}, (t) => ({
+  userBadgeUnique: uniqueIndex('user_badge_unique').on(t.userId, t.badgeId)
+}));

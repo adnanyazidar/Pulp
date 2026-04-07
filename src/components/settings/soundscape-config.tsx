@@ -1,12 +1,16 @@
 "use client";
 
-import { useSettingsStore } from "@/store/settings-store";
+import { useSettingsStore, SettingsState } from "@/store/settings-store";
 import { Music, Bell, Bird, CloudRain, Coffee, Wind, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
-export function SoundscapeConfig() {
-  const { soundSettings, updateSoundSetting } = useSettingsStore();
+interface SoundscapeConfigProps {
+  settings: SettingsState["soundSettings"];
+  onUpdate: (val: SettingsState["soundSettings"]) => void;
+}
+
+export function SoundscapeConfig({ settings, onUpdate }: SoundscapeConfigProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const ambientSounds = [
@@ -25,13 +29,20 @@ export function SoundscapeConfig() {
   const playPreview = (path: string) => {
     if (audioRef.current) {
       audioRef.current.src = path;
-      audioRef.current.volume = soundSettings.alarmVolume / 100 / 2; // Preview at half volume
+      audioRef.current.volume = settings.alarmVolume / 100 / 2; // Preview at half volume
       audioRef.current.play();
       setTimeout(() => {
         audioRef.current?.pause();
         if (audioRef.current) audioRef.current.currentTime = 0;
       }, 1500);
     }
+  };
+
+  const handleUpdate = (key: keyof SettingsState["soundSettings"], value: any) => {
+    onUpdate({
+      ...settings,
+      [key]: value
+    });
   };
 
   return (
@@ -49,12 +60,12 @@ export function SoundscapeConfig() {
               <button
                 key={sound.id}
                 onClick={() => {
-                  updateSoundSetting("alarmSound", sound.id);
-                  playPreview("/sounds/alarm.mp3"); // Using available alarm for all previews in Phase 1
+                  handleUpdate("alarmSound", sound.id);
+                  playPreview("/sounds/alarm.mp3");
                 }}
                 className={cn(
                   "p-3 rounded-xl border flex flex-col items-center gap-2 transition-all",
-                  soundSettings.alarmSound === sound.id
+                  settings.alarmSound === sound.id
                     ? "bg-pf-primary/10 border-pf-primary/30 text-pf-primary"
                     : "bg-pf-surface-container-low border-white/5 text-pf-on-surface-variant/40 hover:border-white/10"
                 )}
@@ -77,8 +88,8 @@ export function SoundscapeConfig() {
               type="range"
               min="0"
               max="100"
-              value={soundSettings.alarmVolume}
-              onChange={(e) => updateSoundSetting("alarmVolume", parseInt(e.target.value))}
+              value={settings.alarmVolume}
+              onChange={(e) => handleUpdate("alarmVolume", parseInt(e.target.value))}
               className="w-full h-1 bg-pf-surface-dim rounded-full appearance-none cursor-pointer accent-pf-primary"
             />
           </div>
@@ -96,13 +107,13 @@ export function SoundscapeConfig() {
               <button
                 key={sound.id}
                 onClick={() => {
-                  updateSoundSetting("ambientSound", sound.id);
+                  handleUpdate("ambientSound", sound.id);
                   const path = sound.id === "rain" ? "/sounds/rain.mp3" : "/sounds/study.mp3";
                   playPreview(path);
                 }}
                 className={cn(
                   "p-3 rounded-xl border flex flex-col items-center gap-2 transition-all",
-                  soundSettings.ambientSound === sound.id
+                  settings.ambientSound === sound.id
                     ? "bg-pf-primary/10 border-pf-primary/30 text-pf-primary"
                     : "bg-pf-surface-container-low border-white/5 text-pf-on-surface-variant/40 hover:border-white/10"
                 )}
@@ -125,8 +136,8 @@ export function SoundscapeConfig() {
               type="range"
               min="0"
               max="100"
-              value={soundSettings.ambientVolume}
-              onChange={(e) => updateSoundSetting("ambientVolume", parseInt(e.target.value))}
+              value={settings.ambientVolume}
+              onChange={(e) => handleUpdate("ambientVolume", parseInt(e.target.value))}
               className="w-full h-1 bg-pf-surface-dim rounded-full appearance-none cursor-pointer accent-pf-primary"
             />
           </div>

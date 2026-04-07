@@ -19,6 +19,8 @@ const manrope = Manrope({
   weight: ["400", "700", "800"],
 });
 
+import { CelebrationModal } from "@/components/ui/celebration-modal";
+
 export const metadata: Metadata = {
   title: "PomoFocus | Stay in Flow",
   description:
@@ -42,6 +44,7 @@ export default function RootLayout({
         <SoundManager />
         <CloudSyncManager />
         <Toaster theme="dark" position="bottom-right" />
+        <CelebrationModal />
         
         <LayoutShell>{children}</LayoutShell>
       </body>

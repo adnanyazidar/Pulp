@@ -32,6 +32,7 @@ interface TaskState {
   addTask: (task: { content: string; projectId?: number; priority: "low" | "medium" | "high"; estPomos: number }) => Promise<void>;
   updateTask: (id: number, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
+  restoreTask: (task: Task) => Promise<void>;
   toggleComplete: (id: number) => Promise<void>;
   setActiveTask: (id: number | null) => void;
   incrementActPomos: (id: number) => void;
@@ -196,8 +197,18 @@ export const useTaskStore = create<TaskState>()(
 
           const { getAuthedApi } = await import("@/lib/api");
           const authedApi = getAuthedApi();
-          const { error } = await (authedApi.api.tasks as any)[id.toString()].patch(updates as any);
+          const { data, error } = await (authedApi.api.tasks as any)[id.toString()].patch(updates as any);
           if (error) throw new Error("Failed to update task");
+
+          // Capture newly unlocked badges (e.g., Clean Sweep, The Organizer)
+          const d = data as any;
+          if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
+            const { useStatsStore } = await import("./stats-store");
+            useStatsStore.setState((state) => ({
+              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)],
+              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)])]
+            }));
+          }
         } catch (err: any) {
           set({ tasks: previousTasks, error: err.message });
           throw err;
@@ -226,6 +237,37 @@ export const useTaskStore = create<TaskState>()(
         } catch (err: any) {
           set({ tasks: previousTasks, error: err.message });
           throw err;
+        }
+      },
+
+      restoreTask: async (task: Task) => {
+        try {
+          const { getAuthedApi } = await import("@/lib/api");
+          const token = (() => {
+            try {
+              const raw = localStorage.getItem("pulp-auth");
+              if (!raw) return null;
+              return JSON.parse(raw)?.state?.token ?? null;
+            } catch { return null; }
+          })();
+
+          if (!token) {
+            set((state: TaskState) => ({ tasks: [task, ...state.tasks] }));
+            return;
+          }
+
+          const authedApi = getAuthedApi();
+          // We use addTask logic but with original data
+          const { data, error } = await authedApi.api.tasks.post({
+            content: task.content,
+            projectId: task.projectId && task.projectId > 0 ? task.projectId : undefined,
+            priority: task.priority,
+            estPomos: task.estPomos,
+          });
+          if (error) throw new Error("Failed to restore task");
+          await get().fetchTasks();
+        } catch (err: any) {
+          console.error(err);
         }
       },
 

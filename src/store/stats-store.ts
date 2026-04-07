@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useTimerStore } from "./timer-store";
+import { useSettingsStore } from "./settings-store";
 import { useTaskStore } from "./task-store";
 import { useAuthStore } from "./auth-store";
 
@@ -12,20 +13,22 @@ interface StatsState {
   weeklySessionsCount: number;
   analyticsHistory: { date: string; minutes: number }[];
 
+  isUpdating: boolean;
+  newlyUnlockedBadges: string[]; // For celebration trigger
+
   // Gamification
   joinDate: string;
   unlockedBadges: string[];
   xp: number;
   level: number;
   isLoading: boolean;
-  isUpdating: boolean; // For "flicker" effect/skeleton
 
   // Actions
   fetchStats: () => Promise<void>;
   recordSession: (durationMinutes: number, projectId: number | null) => void;
-  syncSessionToBackend: (params: { duration: number; sessionType: string; taskId?: number; rating?: number }) => Promise<void>;
+  syncSessionToBackend: (params: { duration: number; sessionType: string; taskId?: number; rating?: number; wasPaused?: boolean; ambientSound?: string }) => Promise<void>;
   addXP: (amount: number) => void;
-  checkAchievements: () => void;
+  clearNewBadges: () => void;
   downloadCSV: () => void;
 }
 
@@ -49,6 +52,7 @@ export const useStatsStore = create<StatsState>()(
       level: 1,
       isLoading: false,
       isUpdating: false,
+      newlyUnlockedBadges: [],
 
       fetchStats: async () => {
         set({ isUpdating: true });
@@ -70,6 +74,7 @@ export const useStatsStore = create<StatsState>()(
               level: d.level ?? 1,
               currentStreak: d.currentStreak ?? 0,
               analyticsHistory: d.history ?? [],
+              unlockedBadges: (d.badges || []).map((b: any) => b.badgeId),
               // Update dailyHistory for components still using it
               dailyHistory: (d.history || []).reduce((acc: any, curr: any) => ({
                 ...acc, [curr.date]: curr.minutes
@@ -83,29 +88,9 @@ export const useStatsStore = create<StatsState>()(
         }
       },
 
-      addXP: (amount: number) => {
-        set((state: StatsState) => {
-          const newTotalXp = state.xp + amount;
-          const XP_PER_LEVEL = 1000;
-          if (newTotalXp >= XP_PER_LEVEL) {
-            return { xp: newTotalXp - XP_PER_LEVEL, level: state.level + 1 };
-          }
-          return { xp: newTotalXp };
-        });
-        get().checkAchievements();
-      },
+      addXP: (amount: number) => set((state) => ({ xp: state.xp + amount })),
 
-      checkAchievements: () => {
-        const { currentStreak, level, unlockedBadges } = get();
-        const newBadges = [...unlockedBadges];
-        const unlock = (id: string) => { if (!newBadges.includes(id)) newBadges.push(id); };
-
-        if (level >= 5) unlock("early_bird");
-        if (level >= 10) unlock("focus_master");
-        if (currentStreak >= 7) unlock("week_warrior");
-
-        if (newBadges.length !== unlockedBadges.length) set({ unlockedBadges: newBadges });
-      },
+      clearNewBadges: () => set({ newlyUnlockedBadges: [] }),
 
       recordSession: (durationMinutes: number, projectId: number | null) => {
         const today = getTodayKey();
@@ -139,11 +124,16 @@ export const useStatsStore = create<StatsState>()(
         setSyncStatus("syncing");
         try {
           const { getAuthedApi } = await import("@/lib/api");
-          // Use /api/sessions/complete
           const { data, error } = await getAuthedApi().api.sessions.complete.post(params);
           if (error) throw new Error("Failed to sync session");
           
-          // Data is refreshed globally after sync
+          const d = data as any;
+          if (d.newlyUnlocked && d.newlyUnlocked.length > 0) {
+            set((state) => ({
+              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)],
+              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)])]
+            }));
+          }
           await get().fetchStats();
           setSyncStatus("synced");
         } catch (err) {
@@ -189,10 +179,15 @@ if (typeof window !== "undefined") {
         useStatsStore.getState().recordSession(focusDuration, projectId);
 
         // 2. Sync to Backend (Atomic Transaction)
+        const { hasPaused: wasPaused } = useTimerStore.getState();
+        const ambientSound = useSettingsStore.getState().soundSettings.ambientSound;
+
         await useStatsStore.getState().syncSessionToBackend({
           duration: 25 * 60, // 25 minutes in seconds
           sessionType: "focus",
-          taskId: (activeTaskId as number) ?? undefined
+          taskId: (activeTaskId as number) ?? undefined,
+          wasPaused,
+          ambientSound
         });
         
         // 3. Refresh tasks to update actPomos
