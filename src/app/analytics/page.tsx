@@ -38,7 +38,7 @@ export default function AnalyticsPage() {
             Analytics
           </h1>
           <p className="text-[10px] font-label uppercase tracking-[0.4em] text-pf-on-surface-variant/40">
-            Performance Metrics • Deep Work Allocation
+            Performance Metrics &bull; Deep Work Allocation
           </p>
         </header>
 
@@ -54,7 +54,6 @@ export default function AnalyticsPage() {
 
             <ActivityHeatmap />
 
-            {/* Badges Section */}
             <section className="space-y-8 pt-8 border-t border-white/5">
               <header className="flex items-center justify-between">
                 <div className="space-y-2">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Timer, ListTodo, BarChart3, Settings, ChevronLeft, Coffee, MessageSquare } from "lucide-react";
+import { Timer, ListTodo, BarChart3, Settings, ChevronLeft, Coffee, MessageSquare, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore, SUPPORT_LINKS } from "@/store/ui-store";
@@ -180,6 +180,38 @@ export function SideNavbar() {
             </div>
           )}
         </a>
+        
+        {/* Handbook Content Guide (Glossy Style) */}
+        <Link 
+          href="/handbook" 
+          className={cn(
+            "flex items-center gap-4 px-6 py-2 transition-all duration-200 border-r-4 border-transparent text-pf-on-surface-variant/30 hover:bg-pf-primary/5 hover:text-pf-primary group/handbook relative overflow-hidden focus:outline-none",
+            pathname === "/handbook" && "bg-pf-primary/5 text-pf-primary border-pf-primary"
+          )}
+        >
+          <div className="absolute inset-0 bg-pf-primary/5 opacity-0 group-active/handbook:opacity-100 transition-opacity" />
+          <motion.div whileTap={{ scale: 0.9 }}>
+            <BookOpen size={18} className={cn("transition-colors shrink-0", !isSidebarOpen && "mx-auto")} />
+          </motion.div>
+          <AnimatePresence mode="wait">
+            {isSidebarOpen && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="font-label uppercase tracking-[0.2em] text-[8px] font-bold whitespace-nowrap"
+              >
+                PomoPulse Handbook
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {!isSidebarOpen && (
+            <div className="absolute left-full ml-4 px-3 py-1 bg-pf-surface-container-high text-pf-on-surface text-[10px] font-bold rounded-md opacity-0 group-hover/handbook:opacity-100 pointer-events-none transition-opacity whitespace-nowrap border border-white/10 shadow-xl z-[70]">
+              View System Guide
+            </div>
+          )}
+        </Link>
 
         {/* Version Tag */}
         <div className={cn("px-8 overflow-hidden pt-2", !isSidebarOpen && "px-0 text-center")}>

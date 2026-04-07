@@ -41,11 +41,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
 
         if (error) {
-          const errMsg = (error as any).value?.error || "Registration failed";
-          throw new Error(errMsg);
+          const errData = error.value as { error?: string };
+          throw new Error(errData?.error || "Registration failed");
         }
-        if (data && (data as any).user && (data as any).token) {
-          setAuth((data as any).user, (data as any).token);
+        if (data) {
+          const d = data as { user: { id: number; username: string; email: string }; token: string }; 
+          setAuth(d.user, d.token);
           
           setLoadingMsg("Syncing local data...");
           const { useTaskStore } = await import("@/store/task-store");
@@ -60,11 +61,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
 
         if (error) {
-          const errMsg = (error as any).value?.error || "Login failed";
-          throw new Error(errMsg);
+          const errData = error.value as { error?: string };
+          throw new Error(errData?.error || "Login failed");
         }
-        if (data && (data as any).user && (data as any).token) {
-          setAuth((data as any).user, (data as any).token);
+        if (data) {
+          const d = data as { user: { id: number; username: string; email: string }; token: string };
+          setAuth(d.user, d.token);
 
           setLoadingMsg("Syncing cloud data...");
           const { useTaskStore } = await import("@/store/task-store");
@@ -73,8 +75,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           onClose();
         }
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Authentication failed";
+      setError(message);
     } finally {
       setLoading(false);
       setLoadingMsg("");

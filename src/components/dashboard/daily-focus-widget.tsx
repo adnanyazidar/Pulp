@@ -10,7 +10,10 @@ import {
   ListChecks,
   Trash2,
   RotateCcw,
+  Info,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -142,6 +145,18 @@ export function DailyFocusWidget() {
           <span className="font-label uppercase tracking-[0.25em] text-[10px] text-pf-primary font-bold transition-theme">
             Daily Focus
           </span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-0.5 text-pf-primary/30 hover:text-pf-primary transition-colors cursor-help">
+                  <Info size={12} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {TOOLTIPS.dailyFocus}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="flex items-center gap-2">
           {completedNotes.length > 0 && (

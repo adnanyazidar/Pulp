@@ -18,7 +18,7 @@ interface BadgeDef {
   name: string;
   description: string;
   category: BadgeCategory;
-  icon: any;
+  icon: React.ElementType;
   requirement: string;
 }
 

@@ -38,7 +38,10 @@ export function SoundscapeConfig({ settings, onUpdate }: SoundscapeConfigProps) 
     }
   };
 
-  const handleUpdate = (key: keyof SettingsState["soundSettings"], value: any) => {
+  const handleUpdate = <K extends keyof SettingsState["soundSettings"]>(
+    key: K,
+    value: SettingsState["soundSettings"][K]
+  ) => {
     onUpdate({
       ...settings,
       [key]: value

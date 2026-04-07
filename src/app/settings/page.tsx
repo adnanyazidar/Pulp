@@ -33,7 +33,7 @@ export default function SettingsPage() {
       themeSettings: { ...store.themeSettings },
       uiSettings: { ...store.uiSettings },
     });
-  }, [store.timerDurations, store.soundSettings, store.themeSettings, store.uiSettings]);
+  }, [store.timerDurations, store.soundSettings, store.themeSettings, store.uiSettings, store]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -46,7 +46,7 @@ export default function SettingsPage() {
     setTimeout(() => setShowSaved(false), 2000);
   };
 
-  const updateDraft = (key: keyof typeof draft, value: any) => {
+  const updateDraft = <K extends keyof typeof draft>(key: K, value: typeof draft[K]) => {
     setDraft(prev => ({
       ...prev,
       [key]: value
@@ -64,7 +64,7 @@ export default function SettingsPage() {
               Settings
             </h1>
             <p className="text-[10px] font-label uppercase tracking-[0.4em] text-pf-on-surface-variant/40">
-              Editorial Configuration • Version 1.4.2
+              Editorial Configuration &bull; Version 1.4.2
             </p>
           </div>
           
@@ -142,7 +142,7 @@ export default function SettingsPage() {
         {/* Footer Quote */}
         <footer className="pt-20 text-center opacity-20 hover:opacity-40 transition-opacity">
           <p className="font-headline italic text-pf-on-surface-variant/60 text-lg">
-            "Focus is a matter of deciding what things you're not going to do."
+            &quot;Focus is a matter of deciding what things you&apos;re not going to do.&quot;
           </p>
         </footer>
 

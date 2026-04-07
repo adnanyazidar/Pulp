@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Settings, User, Menu, Cloud, CloudOff, CloudSync, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store/ui-store";
 import { useAuthStore } from "@/store/auth-store";
@@ -16,6 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 
 export function TopNavbar() {
   const pathname = usePathname();
@@ -52,12 +55,21 @@ export function TopNavbar() {
         <div className="flex items-center justify-end gap-3 md:gap-6 flex-1">
           {/* Cloud Sync Indicator */}
           {isAuthenticated && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-              <SyncIcon />
-              <span className="text-[10px] font-medium uppercase tracking-wider text-pf-on-surface-variant/40 hidden sm:block">
-                {syncStatus}
-              </span>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 cursor-help transition-colors hover:bg-white/10">
+                    <SyncIcon />
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-pf-on-surface-variant/40 hidden sm:block">
+                      {syncStatus}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {TOOLTIPS.syncIndicator}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
 
           {/* Settings Icon */}
@@ -91,7 +103,7 @@ export function TopNavbar() {
                 >
                   <div className="w-8 h-8 rounded-full bg-pf-primary/20 flex items-center justify-center text-pf-primary font-medium overflow-hidden">
                     {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                      <Image src={user.avatarUrl} alt={user.username || "User"} width={32} height={32} className="w-full h-full object-cover" />
                     ) : (
                       user?.username?.charAt(0).toUpperCase()
                     )}

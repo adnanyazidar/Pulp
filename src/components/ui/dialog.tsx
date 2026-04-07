@@ -52,7 +52,8 @@ const DialogContent = React.forwardRef<
         {...props}
       >
         <div className="relative">
-          {(children as any)}
+          {/* @ts-expect-error - children vs motion.div types */}
+          {children}
         </div>
         <BaseDialog.Close className="absolute right-6 top-6 p-2 rounded-full hover:bg-white/5 text-pf-on-surface-variant/40 hover:text-pf-on-surface transition-all">
           <X size={20} />

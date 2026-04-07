@@ -26,7 +26,7 @@ export interface SettingsState {
 
   // Actions
   updateTimerDuration: (mode: "focus" | "shortBreak" | "longBreak", minutes: number) => void;
-  updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: any) => void;
+  updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: number | boolean) => void;
   updateThemeAccent: (color: AccentColor) => void;
   updateUISetting: (key: keyof SettingsState["uiSettings"], value: boolean) => void;
   updateSettings: (draft: Partial<SettingsState>) => Promise<void>;
@@ -68,10 +68,15 @@ export const useSettingsStore = create<SettingsState>()(
       fetchSettings: async () => {
         try {
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.settings.get();
-          if (error) throw new Error("Failed to fetch settings");
+          const { data } = await getAuthedApi().api.settings.get();
           if (data) {
-            const d = data as any;
+            const d = data as { 
+              focusDuration?: number; 
+              shortBreakDuration?: number; 
+              longBreakDuration?: number; 
+              accentColor?: AccentColor; 
+              autoStartBreaks?: boolean;
+            };
             set({
               timerDurations: {
                 focus: d.focusDuration ?? 25,
@@ -86,13 +91,14 @@ export const useSettingsStore = create<SettingsState>()(
                 showTabTimer: get().uiSettings.showTabTimer,
               }
             });
-            if (typeof document !== "undefined" && (data as any).accentColor) {
-              const color = (data as any).accentColor as AccentColor;
+            if (typeof document !== "undefined" && d.accentColor) {
+              const color = d.accentColor as AccentColor;
               document.documentElement.style.setProperty("--pf-primary", ACCENT_COLORS[color] || ACCENT_COLORS.coral);
             }
           }
-        } catch (err: any) {
-          console.error("Settings sync error:", err);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : "Failed to fetch settings";
+          console.error("Settings sync error:", message);
         }
       },
 
@@ -110,20 +116,21 @@ export const useSettingsStore = create<SettingsState>()(
 
           const { getAuthedApi } = await import("@/lib/api");
           const fieldMap = { focus: 'focusDuration', shortBreak: 'shortBreakDuration', longBreak: 'longBreakDuration' };
-          const { data, error } = await getAuthedApi().api.settings.patch({ [fieldMap[mode]]: minutes });
-          if (data && (data as any).newlyUnlocked?.length > 0) {
-            const { useStatsStore } = await import("./stats-store");
-            useStatsStore.setState((state) => ({
-              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)],
-              unlockedBadges: [...new Set([...state.unlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)])]
-            }));
-          }
+          const { data } = await getAuthedApi().api.settings.patch({ [fieldMap[mode]]: minutes });
+            const d = data as { newlyUnlocked?: { id: string }[] };
+            if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
+              const { useStatsStore } = await import("./stats-store");
+              useStatsStore.setState((state) => ({
+                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map(b => b.id)],
+                unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map(b => b.id)])]
+              }));
+            }
         } catch (err) {
           set({ timerDurations: prev });
         }
       },
 
-      updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: any) =>
+      updateSoundSetting: (key: keyof SettingsState["soundSettings"], value: number | boolean) =>
         set((state: SettingsState) => ({
           soundSettings: { ...state.soundSettings, [key]: value },
         })),
@@ -142,12 +149,13 @@ export const useSettingsStore = create<SettingsState>()(
           if (!token) return;
 
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.settings.patch({ accentColor: color });
-          if (data && (data as any).newlyUnlocked?.length > 0) {
+          const { data } = await getAuthedApi().api.settings.patch({ accentColor: color });
+          const d = data as { newlyUnlocked?: { id: string }[] };
+          if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
             const { useStatsStore } = await import("./stats-store");
             useStatsStore.setState((state) => ({
-              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)],
-              unlockedBadges: [...new Set([...state.unlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)])]
+              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map(b => b.id)],
+              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map(b => b.id)])]
             }));
           }
         } catch (err) {
@@ -169,12 +177,13 @@ export const useSettingsStore = create<SettingsState>()(
             if (!token) return;
 
             const { getAuthedApi } = await import("@/lib/api");
-            const { data, error } = await getAuthedApi().api.settings.patch({ autoStartBreaks: value });
-            if (data && (data as any).newlyUnlocked?.length > 0) {
+            const { data } = await getAuthedApi().api.settings.patch({ autoStartBreaks: value });
+            const d = data as { newlyUnlocked?: { id: string }[] };
+            if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
               const { useStatsStore } = await import("./stats-store");
               useStatsStore.setState((state) => ({
-                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)],
-                unlockedBadges: [...new Set([...state.unlockedBadges, ...((data as any).newlyUnlocked as any[]).map(b => b.id)])]
+                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map(b => b.id)],
+                unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map(b => b.id)])]
               }));
             }
           } catch (err) {
@@ -207,7 +216,7 @@ export const useSettingsStore = create<SettingsState>()(
           const { getAuthedApi } = await import("@/lib/api");
           
           // Map draft to backend schema
-          const payload: any = {};
+          const payload: Record<string, string | number | boolean> = {};
           if (draft.timerDurations) {
             if (draft.timerDurations.focus) payload.focusDuration = draft.timerDurations.focus;
             if (draft.timerDurations.shortBreak) payload.shortBreakDuration = draft.timerDurations.shortBreak;
@@ -222,16 +231,15 @@ export const useSettingsStore = create<SettingsState>()(
           }
 
           if (Object.keys(payload).length > 0) {
-            const { data, error } = await getAuthedApi().api.settings.patch(payload);
-            if (error) throw new Error("Failed to sync settings");
+            const { data } = await getAuthedApi().api.settings.patch(payload);
             
             // Capture newly unlocked badges
-            const d = data as any;
+            const d = data as { newlyUnlocked?: { id: string }[] };
             if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
               const { useStatsStore } = await import("./stats-store");
               useStatsStore.setState((state) => ({
-                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)],
-                unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)])]
+                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map(b => b.id)],
+                unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map(b => b.id)])]
               }));
             }
           }

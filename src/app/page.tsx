@@ -136,16 +136,23 @@ export default function Home() {
           <TimerControls />
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-          <ActiveTaskCard />
-          <AmbientCard />
+        {/* Dashboard Grid - Focus Center Pattern */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+          {/* Row 1: The Mission (Active Task) */}
+          <div className="md:col-span-2">
+            <ActiveTaskCard />
+          </div>
 
-          {/* Row 2: Daily Focus + Media Hub */}
-          <div className="h-[400px]">
+          {/* Row 2: The Strategy (Daily Focus + Environment) */}
+          <div className="h-[450px]">
             <DailyFocusWidget />
           </div>
-          <div className="h-[400px]">
+          <div className="h-[450px]">
+            <AmbientCard />
+          </div>
+
+          {/* Row 3: The Vibe (Focus Media Hub) */}
+          <div className="md:col-span-2">
             <MediaHub />
           </div>
         </div>

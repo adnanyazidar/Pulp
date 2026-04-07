@@ -68,26 +68,27 @@ export const useTaskStore = create<TaskState>()(
           const authedApi = getAuthedApi();
           const { data, error } = await authedApi.api.tasks.get();
           if (error) throw new Error("Failed to fetch tasks");
-          const taskList = (data as any[]) || [];
+          const taskList = (data as Task[]) || [];
 
           // Auto-migrate orphaned tasks to the first project
           const { projects } = get();
           if (projects.length > 0) {
             const firstProjectId = projects[0].id;
-            const orphans = taskList.filter((t: any) => !t.projectId);
+            const orphans = taskList.filter((t) => !t.projectId);
             for (const orphan of orphans) {
               orphan.projectId = firstProjectId;
               try {
-                await (authedApi.api.tasks as any)[orphan.id.toString()].patch({ projectId: firstProjectId } as any);
+                await authedApi.api.tasks[orphan.id.toString()].patch({ projectId: firstProjectId });
               } catch {}
             }
           }
 
           set({ tasks: taskList });
-        } catch (err: any) {
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "An unknown error occurred";
           // Don't set error on 401s during initial load
-          if (err.message !== "Unauthorized") {
-            set({ error: err.message });
+          if (message !== "Unauthorized") {
+            set({ error: message });
           }
         } finally {
           set({ isLoading: false });
@@ -105,11 +106,11 @@ export const useTaskStore = create<TaskState>()(
           const authedApi = getAuthedApi();
           const { data, error } = await authedApi.api.tasks.projects.get();
           if (error) throw new Error("Failed to fetch projects");
-          const projectList = (data as any[]) || [];
+          const projectList = (data as Project[]) || [];
           
           // Self-healing: create default projects if they are missing
           const defaultNames = ["Work", "Study", "Personal"];
-          const existingNames = projectList.map((p: any) => p.name);
+          const existingNames = projectList.map((p) => p.name);
           const missingDefaults = defaultNames.filter(name => !existingNames.includes(name));
 
           if (missingDefaults.length > 0) {
@@ -129,12 +130,12 @@ export const useTaskStore = create<TaskState>()(
             // Re-fetch after creation to get official IDs
             const { data: refreshed } = await authedApi.api.tasks.projects.get();
             if (refreshed) {
-              set({ projects: refreshed as any[] });
+              set({ projects: refreshed as Project[] });
             }
           } else {
             set({ projects: projectList });
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error(err);
         }
       },
@@ -167,16 +168,16 @@ export const useTaskStore = create<TaskState>()(
           }
 
           const authedApi = getAuthedApi();
-          const { data, error } = await authedApi.api.tasks.post({
+          const { data } = await authedApi.api.tasks.post({
             ...taskData,
             projectId: taskData.projectId && taskData.projectId > 0 ? taskData.projectId : undefined
           });
-          if (error) throw new Error("Failed to create task");
-          if (data && (data as any).success) {
+          if (data) {
             await get().fetchTasks();
           }
-        } catch (err: any) {
-          set({ error: err.message });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to add task";
+          set({ error: message });
           throw err;
         }
       },
@@ -197,20 +198,34 @@ export const useTaskStore = create<TaskState>()(
 
           const { getAuthedApi } = await import("@/lib/api");
           const authedApi = getAuthedApi();
-          const { data, error } = await (authedApi.api.tasks as any)[id.toString()].patch(updates as any);
-          if (error) throw new Error("Failed to update task");
+          
+          // Filter updates to only include allowed fields for the backend
+          const allowedFields = ["content", "projectId", "priority", "estPomos", "actPomos", "isCompleted"];
+          const filteredUpdates = Object.keys(updates)
+            .filter(key => allowedFields.includes(key))
+            .reduce((obj, key) => {
+              // Convert null to undefined for backend compatibility (e.g. projectId)
+              // @ts-expect-error - dynamic key
+              const val = updates[key];
+              // @ts-expect-error - dynamic key
+              obj[key] = val === null ? undefined : val;
+              return obj;
+            }, {});
+
+          const { data } = await authedApi.api.tasks[id.toString()].patch(filteredUpdates);
 
           // Capture newly unlocked badges (e.g., Clean Sweep, The Organizer)
-          const d = data as any;
+          const d = data as { newlyUnlocked?: { id: string }[] };
           if (d?.newlyUnlocked && d.newlyUnlocked.length > 0) {
             const { useStatsStore } = await import("./stats-store");
             useStatsStore.setState((state) => ({
-              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)],
-              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)])]
+              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map((b) => b.id)],
+              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map((b) => b.id)])]
             }));
           }
-        } catch (err: any) {
-          set({ tasks: previousTasks, error: err.message });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to update task";
+          set({ tasks: previousTasks, error: message });
           throw err;
         }
       },
@@ -232,10 +247,10 @@ export const useTaskStore = create<TaskState>()(
 
           const { getAuthedApi } = await import("@/lib/api");
           const authedApi = getAuthedApi();
-          const { error } = await (authedApi.api.tasks as any)[id.toString()].delete();
-          if (error) throw new Error("Failed to delete task");
-        } catch (err: any) {
-          set({ tasks: previousTasks, error: err.message });
+          await authedApi.api.tasks[id.toString()].delete();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to delete task";
+          set({ tasks: previousTasks, error: message });
           throw err;
         }
       },
@@ -258,15 +273,14 @@ export const useTaskStore = create<TaskState>()(
 
           const authedApi = getAuthedApi();
           // We use addTask logic but with original data
-          const { data, error } = await authedApi.api.tasks.post({
+          const { data } = await authedApi.api.tasks.post({
             content: task.content,
             projectId: task.projectId && task.projectId > 0 ? task.projectId : undefined,
             priority: task.priority,
             estPomos: task.estPomos,
           });
-          if (error) throw new Error("Failed to restore task");
-          await get().fetchTasks();
-        } catch (err: any) {
+          if (data) await get().fetchTasks();
+        } catch (err) {
           console.error(err);
         }
       },
@@ -314,8 +328,9 @@ export const useTaskStore = create<TaskState>()(
           const { error } = await authedApi.api.tasks.projects.post(projectData);
           if (error) throw new Error("Failed to create project");
           await get().fetchProjects();
-        } catch (err: any) {
-          set({ error: err.message });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to create project";
+          set({ error: message });
         }
       },
 
@@ -346,8 +361,8 @@ export const useTaskStore = create<TaskState>()(
           
           for (const lp of localProjects) {
             const { data, error } = await authedApi.api.tasks.projects.post({ name: lp.name, color: lp.color });
-            if (!error && data && (data as any).id) {
-              projectIdMap[lp.id] = (data as any).id;
+            if (!error && data && (data as { id: number }).id) {
+              projectIdMap[lp.id] = (data as { id: number }).id;
             }
           }
 

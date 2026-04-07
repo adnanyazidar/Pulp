@@ -1,7 +1,9 @@
 "use client";
 
 import { useTaskStore } from "@/store/task-store";
-import { Edit3, CheckCircle2, Play, Target } from "lucide-react";
+import { Edit3, CheckCircle2, Play, Target, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 
 export function ActiveTaskCard() {
   const { tasks, activeTaskId } = useTaskStore();
@@ -21,11 +23,23 @@ export function ActiveTaskCard() {
             <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-on-surface-variant/40 font-bold">
               Active Task
             </p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-0.5 text-pf-on-surface-variant/20 hover:text-pf-primary transition-colors cursor-help">
+                    <Info size={12} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {TOOLTIPS.activeTask}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <h3 className="font-headline text-2xl md:text-3xl font-extrabold tracking-tight text-pf-on-surface-variant/40 mb-2">
+          <h3 className="font-headline text-3xl md:text-5xl font-extrabold tracking-tight text-pf-on-surface-variant/20 mb-3 animate-pulse">
             No Task Selected
           </h3>
-          <p className="text-pf-on-surface-variant/30 text-sm">
+          <p className="text-pf-on-surface-variant/30 text-sm md:text-base max-w-xl">
             Go to Tasks and click the <Play size={12} className="inline text-pf-primary" /> icon to set your focus
           </p>
         </div>
@@ -44,7 +58,9 @@ export function ActiveTaskCard() {
   const projectColor = activeTask.projectColor || undefined;
 
   return (
-    <div className="bg-pf-primary/5 border border-pf-primary/20 p-8 rounded-2xl flex flex-col justify-between min-h-[200px] relative overflow-hidden group hover:bg-pf-primary/[0.08] transition-all duration-300">
+    <div className="bg-pf-primary/5 border border-pf-primary/20 p-10 md:p-14 rounded-[2rem] flex flex-col justify-between min-h-[280px] relative overflow-hidden group hover:bg-pf-primary/[0.08] transition-all duration-500 shadow-2xl shadow-pf-primary/5">
+      {/* 🔮 Multi-layered Glow */}
+      <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-pf-primary/20 blur-[120px] rounded-full opacity-30 group-hover:opacity-60 transition-opacity" />
       {/* Decorative Icon */}
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         <Edit3 className="w-24 h-24 transition-theme" />
@@ -56,6 +72,18 @@ export function ActiveTaskCard() {
           <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-primary font-bold transition-theme">
             Active Task
           </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-0.5 text-pf-primary/30 hover:text-pf-primary transition-colors cursor-help">
+                  <Info size={12} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {TOOLTIPS.activeTask}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {activeTask.projectName && (
             <span
               className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full"
@@ -68,11 +96,11 @@ export function ActiveTaskCard() {
             </span>
           )}
         </div>
-        <h3 className="font-headline text-3xl md:text-4xl font-extrabold tracking-tight text-pf-on-surface mb-2">
+        <h3 className="font-headline text-4xl md:text-6xl font-black tracking-tight text-pf-on-surface mb-4 leading-tight">
           {activeTask.content}
         </h3>
-        <p className="text-pf-on-surface-variant/60 text-sm">
-          {activeTask.priority} priority • {activeTask.actPomos}/{activeTask.estPomos} pomos
+        <p className="text-pf-on-surface-variant/60 text-base md:text-lg">
+          {activeTask.priority} priority &bull; {activeTask.actPomos}/{activeTask.estPomos} pomos
         </p>
       </div>
 

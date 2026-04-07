@@ -46,12 +46,11 @@ export const useMediaStore = create<MediaState>()(
           if (!token) return; // Guest mode will just use persisted offline items.
 
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.tasks.media.get();
-          if (error) throw new Error("Failed to fetch playlists");
+          const { data } = await getAuthedApi().api.tasks.media.get();
           if (data) {
             // Keep local custom playlists alongside the fetched ones
             const currentLocal = get().playlists.filter((p: Playlist) => !p.id.toString().startsWith("preset-") && Number(p.id) < 0);
-            set({ playlists: [...PRESET_PLAYLISTS, ...currentLocal, ...(data as any[])] });
+            set({ playlists: [...PRESET_PLAYLISTS, ...currentLocal, ...(data as Playlist[])] });
           }
         } catch (err) {
           console.error(err);
@@ -102,8 +101,8 @@ export const useMediaStore = create<MediaState>()(
           }
 
           const { getAuthedApi } = await import("@/lib/api");
-          const { error } = await (getAuthedApi().api.tasks.media as any)[id.toString()].delete();
-          if (error) throw new Error("Failed to remove playlist");
+          const authedApi = getAuthedApi();
+          await authedApi.api.tasks.media[id.toString()].delete();
           await get().fetchPlaylists();
         } catch (err) {
           console.error(err);
@@ -112,10 +111,11 @@ export const useMediaStore = create<MediaState>()(
     }),
     {
       name: "pulp-media",
-      merge: (persistedState: any, currentState: any) => {
-         const merged = { ...currentState, ...persistedState };
+      merge: (persistedState: unknown, currentState: MediaState) => {
+         const p = persistedState as Partial<MediaState>;
+         const merged = { ...currentState, ...p };
          // Merge custom playlists, ignoring any stale presets stored locally
-         const customPlaylists = (persistedState.playlists || []).filter((p: Playlist) => !p.id.toString().startsWith("preset-"));
+         const customPlaylists = (p.playlists || []).filter((pl: Playlist) => !pl.id.toString().startsWith("preset-"));
          merged.playlists = [...currentState.playlists, ...customPlaylists];
          return merged;
       }

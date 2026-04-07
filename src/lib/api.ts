@@ -3,7 +3,7 @@ import type { App } from '../../backend/src/index';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-// @ts-ignore: Elysia version mismatch between frontend and backend
+// @ts-expect-error: Elysia version mismatch between frontend and backend
 export const api = edenTreaty<App>(BASE_URL);
 
 /**
@@ -23,7 +23,7 @@ export function getAuthedApi() {
     }
   })();
 
-  // @ts-ignore
+  // @ts-expect-error: dynamic treaty access
   return edenTreaty<App>(BASE_URL, {
     $fetch: {
       headers: token ? { Authorization: `Bearer ${token}` } : {}

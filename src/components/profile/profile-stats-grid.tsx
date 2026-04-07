@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useStatsStore } from "@/store/stats-store";
-import { Clock, TrendingUp } from "lucide-react";
+import { Clock, TrendingUp, Info } from "lucide-react";
 import { motion, useSpring, useTransform } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 
 function AnimatedNumber({ value }: { value: number }) {
   const spring = useSpring(0, { bounce: 0, duration: 2000 });
@@ -91,8 +93,20 @@ export function ProfileStatsGrid() {
       {/* Medium Card: Level  */}
       <div className="bg-pf-surface-container-low/60 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between border border-white/5 shadow-xl shadow-black/20">
         <div>
-          <span className="text-pf-on-surface-variant font-label text-[10px] uppercase tracking-[0.3em] font-bold">
+          <span className="text-pf-on-surface-variant font-label text-[10px] uppercase tracking-[0.3em] font-bold flex items-center gap-2">
             User Level
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-0.5 text-pf-on-surface-variant/20 hover:text-pf-primary transition-colors cursor-help outline-none">
+                    <Info size={12} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {TOOLTIPS.userLevel}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </span>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="font-headline text-4xl lg:text-[40px] xl:text-5xl font-black text-[#a2c9ff] tracking-[-0.05em] uppercase whitespace-nowrap">

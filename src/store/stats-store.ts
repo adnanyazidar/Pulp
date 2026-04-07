@@ -68,15 +68,22 @@ export const useStatsStore = create<StatsState>()(
           if (error) throw new Error("Failed to fetch analytics");
           
           if (data) {
-            const d = data as any;
+            interface AnalyticsSummary {
+              xp: number;
+              level: number;
+              currentStreak: number;
+              history: { date: string; minutes: number }[];
+              badges: { badgeId: string }[];
+            }
+            const d = data as unknown as AnalyticsSummary;
             set({
               xp: d.xp ?? 0,
               level: d.level ?? 1,
               currentStreak: d.currentStreak ?? 0,
-              analyticsHistory: d.history ?? [],
-              unlockedBadges: (d.badges || []).map((b: any) => b.badgeId),
+              analyticsHistory: d.history || [],
+              unlockedBadges: (d.badges || []).map(b => b.badgeId),
               // Update dailyHistory for components still using it
-              dailyHistory: (d.history || []).reduce((acc: any, curr: any) => ({
+              dailyHistory: (d.history || []).reduce((acc: Record<string, number>, curr: { date: string; minutes: number }) => ({
                 ...acc, [curr.date]: curr.minutes
               }), {})
             });
@@ -124,15 +131,24 @@ export const useStatsStore = create<StatsState>()(
         setSyncStatus("syncing");
         try {
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.sessions.complete.post(params);
-          if (error) throw new Error("Failed to sync session");
+          const { data } = await getAuthedApi().api.sessions.complete.post({ 
+            duration: params.duration, 
+            sessionType: params.sessionType, 
+            taskId: params.taskId,
+            rating: params.rating,
+            wasPaused: params.wasPaused,
+            ambientSound: params.ambientSound
+          });
           
-          const d = data as any;
-          if (d.newlyUnlocked && d.newlyUnlocked.length > 0) {
-            set((state) => ({
-              newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)],
-              unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked.map((b: any) => b.id)])]
-            }));
+          if (data) {
+            const d = data as { xpEarned?: number; newlyUnlocked?: { id: string }[] };
+            if (d.xpEarned) get().addXP(d.xpEarned);
+            if (d.newlyUnlocked && d.newlyUnlocked.length > 0) {
+              set((state) => ({
+                newlyUnlockedBadges: [...state.newlyUnlockedBadges, ...d.newlyUnlocked!.map(b => b.id)],
+                unlockedBadges: [...new Set([...state.unlockedBadges, ...d.newlyUnlocked!.map(b => b.id)])]
+              }));
+            }
           }
           await get().fetchStats();
           setSyncStatus("synced");
@@ -162,12 +178,12 @@ export const useStatsStore = create<StatsState>()(
 if (typeof window !== "undefined") {
   let lastProcessedTimestamp: number | null = null;
 
-  useTimerStore.subscribe(async (state: any) => {
+  useTimerStore.subscribe(async (timerState) => {
     // Only process if lastSessionFinishedAt changed AND it's not the initial state
-    if (state.lastSessionFinishedAt && state.lastSessionFinishedAt !== lastProcessedTimestamp) {
+    if (timerState.lastSessionFinishedAt && timerState.lastSessionFinishedAt !== lastProcessedTimestamp) {
       // Small defensive check for mode (since state updates are batch-processed)
       // If mode is now break, it means a focus session just finished.
-      const finishedMode = state.mode.includes("Break") ? "focus" : "break"; 
+      const finishedMode = timerState.mode.includes("Break") ? "focus" : "break"; 
       
       if (finishedMode === "focus") {
         const { activeTaskId, tasks } = useTaskStore.getState();
@@ -193,7 +209,7 @@ if (typeof window !== "undefined") {
         // 3. Refresh tasks to update actPomos
         if (activeTaskId) await useTaskStore.getState().fetchTasks();
       }
-      lastProcessedTimestamp = state.lastSessionFinishedAt;
+      lastProcessedTimestamp = timerState.lastSessionFinishedAt;
     }
   });
 }

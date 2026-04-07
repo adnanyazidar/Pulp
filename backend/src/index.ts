@@ -457,6 +457,8 @@ const app = new Elysia()
         const statsRecords = await db.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
         const stats = statsRecords[0];
 
+        const badgesRecords = await db.select().from(userBadges).where(eq(userBadges.userId, userId));
+
         const todayKey = new Date().toISOString().split('T')[0];
         const todayFocus = history.find(h => h.date === todayKey)?.minutes || 0;
 
@@ -465,7 +467,8 @@ const app = new Elysia()
           currentStreak: stats?.currentStreak || 0,
           level: stats?.level || 1,
           xp: stats?.xp || 0,
-          history
+          history,
+          badges: badgesRecords || []
         };
       })
       .post('/feedback', async ({ body, userId }) => {

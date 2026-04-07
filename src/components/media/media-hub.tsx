@@ -1,7 +1,9 @@
 "use client";
 
 import { useMediaStore } from "@/store/media-store";
-import { Play, Plus, BookAudio, Library, Trash2 } from "lucide-react";
+import { Play, Plus, BookAudio, Library, Trash2, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { detectPlatform, fetchYouTubeTitle } from "@/lib/media-utils";
@@ -56,6 +58,18 @@ export function MediaHub() {
         <h2 className="font-headline font-black text-2xl uppercase tracking-tighter text-pf-on-surface flex items-center gap-3">
           <BookAudio className="text-pf-primary" size={24} />
           Focus Media
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-0.5 text-pf-primary/30 hover:text-pf-primary transition-colors cursor-help">
+                  <Info size={14} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-pf-surface-container-high border-white/5">
+                {TOOLTIPS.mediaHub}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </h2>
         <div className="flex bg-black/40 p-1 rounded-xl">
           <button 
@@ -105,8 +119,8 @@ export function MediaHub() {
         </button>
       </form>
 
-      {/* Library Grid */}
-      <div className="flex-1 overflow-y-auto pr-2 space-y-3 relative z-10 custom-scrollbar">
+      {/* Library Grid - Multi-column for 'Focus Center' Footer vibe */}
+      <div className="flex-1 overflow-y-auto pr-2 relative z-10 custom-scrollbar scrollbar-thin">
         {currentList.length === 0 && showSaved && (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
             <Library size={32} className="mb-2" />
@@ -114,48 +128,53 @@ export function MediaHub() {
           </div>
         )}
 
-        {currentList.map((item) => (
-          <motion.div 
-            key={item.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/5 p-3 rounded-xl transition-all cursor-pointer group/item"
-            onClick={() => playMedia(item.url)}
-          >
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 rounded-lg bg-black/40 flex items-center justify-center shrink-0 border border-white/5 group-hover/item:border-pf-primary/50 transition-colors">
-                <Play size={14} className="text-pf-primary opacity-50 group-hover/item:opacity-100 transition-opacity" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {currentList.map((item) => (
+            <motion.div 
+              key={item.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ y: -2 }}
+              className="flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl transition-all cursor-pointer group/item hover:border-pf-primary/30 shadow-lg hover:shadow-pf-primary/5"
+              onClick={() => playMedia(item.url)}
+            >
+              <div className="flex items-center gap-4 overflow-hidden">
+                <div className="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center shrink-0 border border-white/5 group-hover/item:border-pf-primary/40 transition-colors shadow-inner">
+                  <Play size={16} className="text-pf-primary opacity-40 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                </div>
+                <div className="flex flex-col truncate">
+                  <span className="font-bold text-sm text-pf-on-surface truncate pr-2 group-hover/item:text-pf-primary transition-colors">
+                    {item.title}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-widest text-pf-secondary font-bold opacity-60">
+                    {item.platform}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col truncate">
-                <span className="font-bold text-sm text-pf-on-surface truncate pr-4">
-                  {item.title}
-                </span>
-                <span className="text-[10px] uppercase tracking-widest text-[#66d9cc] font-bold opacity-70">
-                  {item.platform}
-                </span>
+              
+              {/* Actions */}
+              <div className="shrink-0">
+                {!showSaved ? (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); savePlaylist(item.title, item.url, item.platform); }}
+                    className="p-2 text-white/20 hover:text-pf-primary hover:bg-pf-primary/10 rounded-xl transition-all"
+                    title="Save to Library"
+                  >
+                    <Plus size={18} />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); removePlaylist(item.id); }}
+                    className="p-2 text-white/20 hover:text-pf-error hover:bg-pf-error/10 rounded-xl transition-all"
+                    title="Remove from Library"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
               </div>
-            </div>
-            
-            {/* Quick Save button for presets */}
-            {!showSaved ? (
-              <button 
-                onClick={(e) => { e.stopPropagation(); savePlaylist(item.title, item.url, item.platform); }}
-                className="opacity-0 group-hover/item:opacity-100 p-2 text-white/40 hover:text-pf-primary hover:bg-white/5 rounded-lg transition-all"
-                title="Save to Library"
-              >
-                <Plus size={16} />
-              </button>
-            ) : (
-              <button 
-                onClick={(e) => { e.stopPropagation(); removePlaylist(item.id); }}
-                className="opacity-0 group-hover/item:opacity-100 p-2 text-white/40 hover:text-pf-error hover:bg-white/5 rounded-lg transition-all"
-                title="Remove from Library"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

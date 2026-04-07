@@ -1,8 +1,10 @@
 "use client";
 
-import { CloudRain, Volume2, VolumeX, Music, MousePointer2 } from "lucide-react";
+import { CloudRain, Volume2, VolumeX, Music, MousePointer2, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useTimerStore } from "@/store/timer-store";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOOLTIPS } from "@/constants/copy";
 
 export function AmbientCard() {
   const {
@@ -28,12 +30,24 @@ export function AmbientCard() {
   ];
 
   return (
-    <div className="bg-pf-surface-container-low p-8 rounded-2xl flex flex-col gap-8 min-h-[200px] border border-white/5 hover:bg-pf-surface-container transition-all duration-300 group">
+    <div className="bg-pf-surface-container-low p-8 rounded-2xl flex flex-col gap-8 min-h-[200px] h-full border border-white/5 hover:bg-pf-surface-container transition-all duration-300 group">
       {/* Sound Type Selection */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-on-surface-variant">
+          <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-on-surface-variant flex items-center gap-2">
             Environment
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-0.5 text-pf-on-surface-variant/20 hover:text-pf-primary transition-colors cursor-help">
+                    <Info size={12} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {TOOLTIPS.environment}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </p>
           <button
             onClick={toggleAmbient}
@@ -91,7 +105,7 @@ export function AmbientCard() {
             return (
               <button
                 key={opt.id}
-                onClick={() => setClickSoundId(opt.id as any)}
+                onClick={() => setClickSoundId(opt.id as "soft" | "tactile" | "none")}
                 className={`flex-1 px-2 py-2 rounded-lg border transition-all text-center cursor-pointer ${
                   isActive
                     ? "bg-pf-primary/10 border-pf-primary/30 text-pf-primary"

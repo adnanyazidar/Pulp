@@ -27,7 +27,7 @@ export default function TasksPage() {
             Tasks
           </h1>
           <p className="text-[10px] font-label uppercase tracking-[0.4em] text-pf-on-surface-variant/40">
-            Precision Management • Essential Flow
+            Precision Management &bull; Essential Flow
           </p>
         </header>
 

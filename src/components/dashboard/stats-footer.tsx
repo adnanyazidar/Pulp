@@ -25,7 +25,7 @@ export function StatsFooter() {
 
       <div className="text-center group hover:scale-[1.02] transition-all duration-300 cursor-default">
         <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-on-surface-variant mb-1">
-          Today's Total
+          Today&apos;s Total
         </p>
         <p className="font-headline font-bold text-2xl group-hover:text-pf-primary transition-colors">
           {hours > 0 ? `${hours}h ` : ""}
