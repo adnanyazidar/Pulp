@@ -9,6 +9,7 @@ import { TimerProgress } from "@/components/timer/timer-progress";
 import { TimerControls } from "@/components/timer/timer-controls";
 import { ActiveTaskCard } from "@/components/dashboard/active-task-card";
 import { AmbientCard } from "@/components/dashboard/ambient-card";
+import { DailyFocusWidget } from "@/components/dashboard/daily-focus-widget";
 import { MediaHub } from "@/components/media/media-hub";
 import { StatsFooter } from "@/components/dashboard/stats-footer";
 
@@ -139,8 +140,12 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
           <ActiveTaskCard />
           <AmbientCard />
-          
-          <div className="md:col-span-2 h-[340px]">
+
+          {/* Row 2: Daily Focus + Media Hub */}
+          <div className="h-[400px]">
+            <DailyFocusWidget />
+          </div>
+          <div className="h-[400px]">
             <MediaHub />
           </div>
         </div>
