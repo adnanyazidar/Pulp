@@ -22,10 +22,10 @@ const manrope = Manrope({
 import { CelebrationModal } from "@/components/ui/celebration-modal";
 
 export const metadata: Metadata = {
-  title: "PomoFocus | Stay in Flow",
+  title: "PomoPulse — Minimalist Pomodoro & Deep Work Station",
   description:
-    "A beautifully crafted Pomodoro timer that helps you stay focused, manage tasks, and track your productivity with ambient soundscapes.",
-  keywords: ["pomodoro", "timer", "productivity", "focus", "task management"],
+    "Elevate your productivity with PomoPulse. Immersive ambient sounds, integrated media hub, and elite focus analytics. Free forever.",
+  keywords: ["pomodoro", "timer", "productivity", "focus", "task management", "pomopulse"],
 };
 
 export default function RootLayout({

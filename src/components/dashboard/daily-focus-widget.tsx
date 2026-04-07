@@ -171,7 +171,7 @@ export function DailyFocusWidget() {
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Add a note… (press N)"
+            placeholder="What's your focus today?"
             className="flex-1 bg-transparent border-none text-sm text-pf-on-surface placeholder:text-pf-on-surface-variant/25 focus:outline-none font-medium"
           />
           {inputValue.trim() && (

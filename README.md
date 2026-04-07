@@ -1,4 +1,6 @@
-# PomoFocus (Pulp)
+# PomoPulse (Pulp)
+
+*Master your rhythm. Stay in flow.*
 
 A high-performance, aesthetically pleasing Pomodoro application built with Next.js and Elysia.js. Featuring real-time "Bulletproof Sync" between Timer and Analytics modules, integrated task management, and deep gamification.
 

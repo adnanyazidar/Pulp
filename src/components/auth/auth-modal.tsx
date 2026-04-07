@@ -112,7 +112,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {/* Header */}
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-pf-display font-medium text-pf-on-surface mb-2">
-                {mode === "login" ? "Welcome Back" : "Join PomoFocus"}
+                {mode === "login" ? "Welcome Back" : "Join PomoPulse"}
               </h2>
               <p className="text-pf-on-surface-variant/60">
                 {mode === "login" 

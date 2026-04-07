@@ -63,8 +63,8 @@ export default function Home() {
     const timeDisplay = formatTime(timeRemaining);
     const modeLabel = getModeLabel(mode);
     document.title = isRunning
-      ? `(${timeDisplay}) ${modeLabel} | PomoFocus`
-      : `${modeLabel} | PomoFocus`;
+      ? `(${timeDisplay}) ${modeLabel} | PomoPulse`
+      : `${modeLabel} | PomoPulse`;
   }, [timeRemaining, mode, isRunning]);
 
   // Ambient Audio & Volume Sync

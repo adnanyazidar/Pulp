@@ -15,12 +15,12 @@ export function SupportCreatorCard() {
             <Heart size={20} className="text-[#3b322a] fill-[#3b322a]" />
           </div>
           <h4 className="font-headline text-2xl font-bold text-[#dabe9d] tracking-tighter">
-            Support PomoFocus
+            Support PomoPulse
           </h4>
         </div>
         
         <p className="text-[12px] font-medium leading-relaxed text-[#bcaea1] opacity-90 mb-8">
-          PomoFocus is 100% free and open. If this tool helps you stay in flow and reach your goals, consider supporting its growth. 
+          PomoPulse is 100% free and open. If this tool helps you stay in flow and reach your goals, consider supporting its growth. 
         </p>
 
         <a

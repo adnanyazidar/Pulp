@@ -50,7 +50,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* ─── PomoFocus Custom Color Tokens ─── */
+  /* ─── PomoPulse Custom Color Tokens ─── */
   --color-pf-primary: var(--pf-primary);
   --color-pf-primary-container: var(--pf-primary-container);
   --color-pf-secondary: var(--pf-secondary);
@@ -132,7 +132,7 @@
   --sidebar-border: rgba(255, 255, 255, 0.05);
   --sidebar-ring: #ac8884;
 
-  /* ─── PomoFocus Palette (Dynamic via mode classes) ─── */
+  /* ─── PomoPulse Palette (Dynamic via mode classes) ─── */
   --pf-primary: #ffb4aa;
   --pf-primary-container: #ff5446;
   --pf-secondary: #66d9cc;

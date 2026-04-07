@@ -148,12 +148,12 @@ export const useStatsStore = create<StatsState>()(
         const csvContent = "data:text/csv;charset=utf-8,Date,Minutes\n" + dates.map((date: string) => `${date},${dailyHistory[date]}`).join("\n");
         const link = document.createElement("a");
         link.href = encodeURI(csvContent);
-        link.download = "pomofocus_report.csv";
+        link.download = "pomopulse_report.csv";
         link.click();
       },
     }),
     {
-      name: "pulp-stats"
+      name: "pomopulse-stats"
     }
   )
 );
