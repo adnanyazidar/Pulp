@@ -1,56 +1,75 @@
 /**
  * ✍️ PomoPulse Editorial Copybook
- * Centralized text constants for consistent branding and easier i18n support.
+ * Refined for Ultra-Premium (Apple/Linear) Aesthetic.
  */
 
 export const TOOLTIPS = {
-  activeTask: "Select a task from the main list. The session will be automatically recorded after the timer ends.",
-  dailyFocus: "Your private scratchpad. Data is stored locally in your browser for maximum privacy.",
-  environment: "Nature sound mixer. Can be played simultaneously with external music.",
-  mediaHub: "Paste a YouTube/Spotify link. The metadata title will be retrieved via the OEmbed API.",
-  userLevel: "XP is earned from focus duration. Level up every 1000 XP.",
-  syncIndicator: "Cloud Sync Status: A checked cloud means data is securely on the server.",
+  activeTask: "Select a task to anchor your session. Progress is tracked automatically as you complete each cycle.",
+  dailyFocus: "A private space for quick notes. Stored locally on your device.",
+  environment: "Blend background sound with your own audio for a more immersive workspace.",
+  mediaHub: "Paste a YouTube or Spotify link to keep your audio in sync with your session.",
+  userLevel: "Each minute of focus builds progress. Consistency unlocks growth.",
+  syncIndicator: "Your data is securely synced and up to date.",
 };
 
 export const HANDBOOK = {
   seo: {
-    title: "PomoPulse Handbook — Master Your Productivity Rhythm",
-    description: "Learn how to use PomoPulse's unique XP system, ambient mixer, and cloud sync to elevate your deep work sessions.",
+    title: "PomoPulse Handbook — Focus, Designed.",
+    description: "Learn the principles of meaningful work, rhythm, and the Pulse system. Built for clarity, consistency, and calm.",
   },
   hero: {
-    title: "Welcome to the Rhythm of Productivity",
-    content: "PomoPulse bukan sekadar timer. Ini adalah pusat kendali untuk menguasai waktu, membangun ritme kerja yang stabil, dan mencapai kondisi Flow State yang mendalam. Mari pelajari bagaimana aplikasi ini bekerja untuk Anda.",
+    title: "Focus, Designed.",
+    subtitle: "A better way to work.",
+    content: "PomoPulse is not just a timer. It’s a system for doing meaningful work — with clarity, consistency, and calm. Built on the principles of the Pomodoro Technique, we help you structure your time, reduce mental fatigue, and sustain deep focus without burnout.",
   },
   sections: [
     {
+      id: "philosophy",
+      title: "Focus is not forced.",
+      subtitle: "It’s built through rhythm.",
+      content: "Most productivity tools try to make you do more. PomoPulse is designed to help you do what matters — without friction.",
+      icon: "Zap",
+    },
+    {
       id: "timer-logic",
-      title: "The Core Mechanic (The Timer)",
-      content: "Teknik Pomodoro membagi waktu Anda menjadi interval 25 menit fokus penuh, dipisahkan oleh istirahat pendek. Konsistensi dalam siklus ini membantu otak Anda mempertahankan energi mental tanpa merasa terbakar (burnout).",
+      title: "The Core System",
+      content: "At the heart of PomoPulse is a simple structure: 25 minutes of uninterrupted focus, followed by short, intentional breaks. A repeatable cycle that trains your attention. Consistency over intensity. That’s how real progress compounds.",
       icon: "Timer",
     },
     {
       id: "pulse-system",
-      title: "The Pulse System (Gamification)",
-      content: "Setiap detik yang Anda habiskan dalam fokus dihitung sebagai XP (Experience Points). Kumpulkan 1000 XP untuk naik ke level berikutnya. Semakin tinggi level Anda, semakin kuat reputasi produktivitas Anda.",
+      title: "The Pulse System",
+      content: "Progress should be visible, not overwhelming. Every session contributes to a system that reflects your effort over time. This isn’t gamification for distraction. It’s feedback for momentum.",
       details: [
-        "1 Minute Focus = 4 XP",
-        "Threshold Level = 1000 XP",
-        "Streaks: Focus daily to keep your rhythm alive.",
+        "XP (Experience Points): Every minute of focus earns progress.",
+        "Levels: Growth, measured through consistency — not pressure.",
+        "Streaks: A quiet signal of commitment. One day at a time.",
+        "Badges: Milestones that mark discipline, not just completion.",
       ],
-      icon: "Zap",
+      icon: "Sparkles",
     },
     {
-      id: "audio-architecture",
-      title: "Immersion & Soundscapes",
-      content: "Produktivitas membutuhkan suasana. PomoPulse memungkinkan Anda menggabungkan dua lapisan audio: Ambient Noise untuk memblokir gangguan, dan External Media untuk playlist favorit Anda.",
+      id: "environment",
+      title: "Environment, Refined",
+      content: "Focus depends on your environment. PomoPulse gives you a controlled, distraction-free atmosphere through layered audio. Ambient Noise provides continuous soundscapes, while Media Integration lets you bring your own playlists without breaking flow.",
       icon: "Volume2",
     },
     {
-      id: "data-integrity",
-      title: "Privacy & Cloud Sync",
-      content: "Kami menghargai progres Anda. Fitur Smart Merge kami secara otomatis memindahkan seluruh progres Anda dari mode tamu ke akun permanen saat Anda mendaftar.",
+      id: "continuity",
+      title: "Built for Continuity",
+      content: "Your progress should move with you. Start instantly in Guest Mode with local-first data. When you evolve from guest to member, your history evolves with you through Smart Merge. No resets. No friction. Just continuity.",
+      icon: "ChevronRight",
+    },
+    {
+      id: "privacy",
+      title: "Privacy by Design",
+      content: "Your focus is personal. PomoPulse is designed to respect that with local-first data handling, transparent synchronization, and zero unnecessary interruptions. Productivity tools should never become distractions.",
       icon: "ShieldCheck",
     }
   ],
-  footer: "Siap untuk memulai ritme baru hari ini? Kembali ke Dashboard dan nyalakan Pulse pertama Anda.",
+  cta: {
+    title: "Start Your First Session",
+    content: "No pressure. No noise. Just 25 minutes of focused work.",
+    button: "Launch Dashboard"
+  }
 };

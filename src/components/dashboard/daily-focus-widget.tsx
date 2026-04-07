@@ -265,6 +265,13 @@ export function DailyFocusWidget() {
             </AnimatePresence>
           </div>
         )}
+
+        {/* ─── Privacy Disclaimer ─── */}
+        <div className="mt-auto px-3 py-2 border-t border-white/5 opacity-25 hover:opacity-100 transition-opacity">
+          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-center leading-relaxed">
+            Notes are local & cleared upon logout for your privacy.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -41,16 +41,22 @@ export const useAuthStore = create<AuthState>()(
       },
       
       logout: () => {
-        // 1. Hapus Token & User Data
+        // 1. Reset In-Memory Stores (to be safe before redirect)
+        import('@/store/daily-focus-store').then(m => {
+          m.useDailyFocusStore.getState().clearAll();
+        });
+
+        // 2. Hapus Token & User Data
         set({ token: null, user: null, isAuthenticated: false, syncStatus: "synced" });
 
-        // 2. Bersihkan LocalStorage Persist (Manual)
+        // 3. Bersihkan LocalStorage Persist (Manual)
         localStorage.removeItem('pulp-tasks');
         localStorage.removeItem('pulp-stats');
         localStorage.removeItem('pulp-settings');
+        localStorage.removeItem('pulp-daily-scratchpad');
         localStorage.removeItem('pulp-auth'); // Clear auth persist too just in case
 
-        // 3. Kick back to Home and Refresh
+        // 4. Kick back to Home and Refresh
         window.location.href = '/';
       },
       
