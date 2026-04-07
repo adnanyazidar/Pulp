@@ -65,12 +65,30 @@ const app = new Elysia()
           currentStreak: 0,
         });
 
-        // 4. Insert Default Project
-        await tx.insert(projects).values({
-          userId,
-          name: 'Work',
-          color: '#FF6B6B',
-        });
+        // 4. Insert Default Projects
+        const defaultProjects = [
+          { name: 'Work', color: '#FF6B6B' },
+          { name: 'Study', color: '#66D9CC' },
+          { name: 'Personal', color: '#A2C9FF' },
+        ];
+        
+        for (const p of defaultProjects) {
+          // Check if it already exists for some weird reason (e.g., partial registration retry)
+          const existing = await tx.select().from(projects).where(
+            and(
+              eq(projects.userId, userId),
+              eq(projects.name, p.name)
+            )
+          ).limit(1);
+
+          if (existing.length === 0) {
+            await tx.insert(projects).values({
+              userId,
+              name: p.name,
+              color: p.color,
+            });
+          }
+        }
 
         return { id: userId, username, email };
       });
@@ -176,13 +194,49 @@ const app = new Elysia()
               .get('/', async ({ userId }) => {
                 return await db.select().from(projects).where(eq(projects.userId, userId));
               })
-              .post('/', async ({ body, userId }) => {
-                const [insertResult] = await db.insert(projects).values({
-                  userId,
-                  name: body.name,
-                  color: body.color || '#FFFFFF',
-                });
-                return { id: insertResult.insertId, ...body };
+              .post('/', async ({ body, userId, set }) => {
+                // Defensive duplicate check (fallback to DB constraint)
+                const existing = await db.select().from(projects).where(
+                  and(
+                    eq(projects.userId, userId),
+                    eq(projects.name, body.name)
+                  )
+                ).limit(1);
+
+                if (existing.length > 0 && existing[0]) {
+                  set.status = 200; // Return existing but don't error
+                  return { 
+                    id: existing[0].id, 
+                    ...body, 
+                    alreadyExisted: true,
+                    message: "Project already exists" 
+                  };
+                }
+
+                try {
+                  const [insertResult] = await db.insert(projects).values({
+                    userId,
+                    name: body.name,
+                    color: body.color || '#FFFFFF',
+                  });
+                  return { id: insertResult.insertId, ...body };
+                } catch (err: any) {
+                  // Catch the unique constraint violation just in case
+                  if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
+                    const finalExisting = await db.select().from(projects).where(
+                      and(
+                        eq(projects.userId, userId),
+                        eq(projects.name, body.name)
+                      )
+                    ).limit(1);
+                    return { 
+                      id: finalExisting[0]?.id, 
+                      ...body, 
+                      alreadyExisted: true 
+                    };
+                  }
+                  throw err;
+                }
               }, {
                 body: t.Object({
                   name: t.String(),
@@ -273,44 +327,78 @@ const app = new Elysia()
           autoStartBreaks: t.Boolean()
         }))
       })
-      .post('/sessions', async ({ body, userId }) => {
-         const result = await db.transaction(async (tx) => {
-            await tx.insert(sessions).values({
-               userId,
-               duration: body.duration,
-               sessionType: body.sessionType,
-               taskId: body.taskId,
-               rating: body.rating,
-            });
+      .post('/sessions/complete', async ({ body, userId }) => {
+        const { duration, sessionType, taskId, rating } = body;
+        
+        return await db.transaction(async (tx) => {
+          // 1. Insert session record
+          await tx.insert(sessions).values({
+            userId,
+            taskId,
+            duration,
+            sessionType,
+            rating,
+          });
 
-            // Update user stats naive logic
-            const userStatRecords = await tx.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
-            const current = userStatRecords[0];
-            if (current) {
-                const xpGained = body.sessionType === 'focus' ? Math.floor(body.duration / 60) * 10 : 0;
-                
-                let newXp = (current.xp || 0) + xpGained;
-                let newLevel = current.level || 1;
-                let levelUp = false;
-
-                // 100 XP per level
-                if (newXp >= newLevel * 100) {
-                    newLevel++;
-                    levelUp = true;
-                }
-
-                await tx.update(userStats).set({
-                   xp: newXp,
-                   level: newLevel,
-                   totalFocusTime: (current.totalFocusTime || 0) + (body.sessionType === 'focus' ? body.duration : 0)
-                }).where(eq(userStats.userId, userId));
-
-                return { xpGained, levelUp };
+          // 2. If it's a focus session, update task and stats
+          if (sessionType === 'focus') {
+            // Increment actPomos
+            if (taskId) {
+              await tx.update(tasks)
+                .set({ actPomos: sql`${tasks.actPomos} + 1` })
+                .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)));
             }
-            return { xpGained: 0, levelUp: false };
-         });
 
-        return { success: true, gamification: result };
+            // Update user stats (XP, level, streak)
+            const statsRecords = await tx.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
+            const stats = statsRecords[0];
+
+            if (stats) {
+              const minutes = Math.round(duration / 60);
+              const xpGained = minutes * 10;
+              const newXp = (stats.xp || 0) + xpGained;
+              const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+              const newTotalFocusTime = (stats.totalFocusTime || 0) + minutes;
+
+              // Streak logic (basic)
+              const today = new Date();
+              const lastActive = stats.lastActiveAt ? new Date(stats.lastActiveAt) : null;
+              let newStreak = stats.currentStreak || 0;
+
+              if (!lastActive || lastActive.toDateString() !== today.toDateString()) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (lastActive && lastActive.toDateString() === yesterday.toDateString()) {
+                  newStreak += 1;
+                } else {
+                  newStreak = 1;
+                }
+              }
+
+              await tx.update(userStats)
+                .set({
+                  xp: newXp,
+                  level: newLevel,
+                  totalFocusTime: newTotalFocusTime,
+                  currentStreak: newStreak,
+                  lastActiveAt: today
+                })
+                .where(eq(userStats.userId, userId));
+
+              return {
+                success: true,
+                gamification: {
+                  xp: newXp,
+                  level: newLevel,
+                  currentStreak: newStreak,
+                  xpGained
+                }
+              };
+            }
+          }
+
+          return { success: true };
+        });
       }, {
         body: t.Object({
           duration: t.Number(),
@@ -318,6 +406,41 @@ const app = new Elysia()
           taskId: t.Optional(t.Number()),
           rating: t.Optional(t.Number())
         })
+      })
+      .get('/analytics/summary', async ({ userId }) => {
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
+
+        // 1. Daily Aggregates (90 days)
+        const history = await db.select({
+          date: sql<string>`DATE(${sessions.createdAt})`,
+          minutes: sql<number>`CAST(SUM(ROUND(${sessions.duration} / 60)) AS SIGNED)`
+        })
+        .from(sessions)
+        .where(
+          and(
+            eq(sessions.userId, userId),
+            sql`${sessions.createdAt} >= ${dateStr}`,
+            eq(sessions.sessionType, 'focus')
+          )
+        )
+        .groupBy(sql`DATE(${sessions.createdAt})`);
+
+        // 2. Fetch current stats for the rest of the summary
+        const statsRecords = await db.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
+        const stats = statsRecords[0];
+
+        const todayKey = new Date().toISOString().split('T')[0];
+        const todayFocus = history.find(h => h.date === todayKey)?.minutes || 0;
+
+        return {
+          todayFocusMinutes: todayFocus,
+          currentStreak: stats?.currentStreak || 0,
+          level: stats?.level || 1,
+          xp: stats?.xp || 0,
+          history
+        };
       })
   )
   .listen(3001);

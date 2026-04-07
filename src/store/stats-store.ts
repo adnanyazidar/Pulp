@@ -10,6 +10,7 @@ interface StatsState {
   currentStreak: number;
   lastFocusDate: string | null;
   weeklySessionsCount: number;
+  analyticsHistory: { date: string; minutes: number }[];
 
   // Gamification
   joinDate: string;
@@ -17,6 +18,7 @@ interface StatsState {
   xp: number;
   level: number;
   isLoading: boolean;
+  isUpdating: boolean; // For "flicker" effect/skeleton
 
   // Actions
   fetchStats: () => Promise<void>;
@@ -40,14 +42,16 @@ export const useStatsStore = create<StatsState>()(
       currentStreak: 0,
       lastFocusDate: null,
       weeklySessionsCount: 0,
+      analyticsHistory: [],
       joinDate: new Date().toISOString(),
       unlockedBadges: [],
       xp: 0,
       level: 1,
       isLoading: false,
+      isUpdating: false,
 
       fetchStats: async () => {
-        set({ isLoading: true });
+        set({ isUpdating: true });
         try {
           const raw = localStorage.getItem("pulp-auth");
           if (!raw) return;
@@ -55,20 +59,27 @@ export const useStatsStore = create<StatsState>()(
           if (!token) return;
 
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.me.get();
-          if (error) throw new Error("Failed to fetch stats");
-          if (data && (data as any).stats) {
-            const stats = (data as any).stats;
+          // Use the new /analytics/summary endpoint
+          const { data, error } = await getAuthedApi().api.analytics.summary.get();
+          if (error) throw new Error("Failed to fetch analytics");
+          
+          if (data) {
+            const d = data as any;
             set({
-              xp: stats.xp ?? 0,
-              level: stats.level ?? 1,
-              currentStreak: stats.currentStreak ?? 0,
+              xp: d.xp ?? 0,
+              level: d.level ?? 1,
+              currentStreak: d.currentStreak ?? 0,
+              analyticsHistory: d.history ?? [],
+              // Update dailyHistory for components still using it
+              dailyHistory: (d.history || []).reduce((acc: any, curr: any) => ({
+                ...acc, [curr.date]: curr.minutes
+              }), {})
             });
           }
         } catch (err) {
           console.error(err);
         } finally {
-          set({ isLoading: false });
+          setTimeout(() => set({ isUpdating: false }), 500); // Small delay for UX transition
         }
       },
 
@@ -128,13 +139,12 @@ export const useStatsStore = create<StatsState>()(
         setSyncStatus("syncing");
         try {
           const { getAuthedApi } = await import("@/lib/api");
-          const { data, error } = await getAuthedApi().api.sessions.post(params);
+          // Use /api/sessions/complete
+          const { data, error } = await getAuthedApi().api.sessions.complete.post(params);
           if (error) throw new Error("Failed to sync session");
           
-          if (data && (data as any).gamification) {
-            const { xp, level, currentStreak } = (data as any).gamification;
-            set({ xp, level, currentStreak });
-          }
+          // Data is refreshed globally after sync
+          await get().fetchStats();
           setSyncStatus("synced");
         } catch (err) {
           console.error(err);
@@ -160,21 +170,27 @@ export const useStatsStore = create<StatsState>()(
 
 // Subscribe to timer-store to update stats automatically
 if (typeof window !== "undefined") {
-  let previousAlarmCounter = useTimerStore.getState().alarmCounter;
+  let lastProcessedTimestamp: number | null = null;
 
   useTimerStore.subscribe(async (state: any) => {
-    if (state.alarmCounter > previousAlarmCounter) {
-      if (state.mode === "focus") {
+    // Only process if lastSessionFinishedAt changed AND it's not the initial state
+    if (state.lastSessionFinishedAt && state.lastSessionFinishedAt !== lastProcessedTimestamp) {
+      // Small defensive check for mode (since state updates are batch-processed)
+      // If mode is now break, it means a focus session just finished.
+      const finishedMode = state.mode.includes("Break") ? "focus" : "break"; 
+      
+      if (finishedMode === "focus") {
         const { activeTaskId, tasks } = useTaskStore.getState();
         const activeTask = tasks.find(t => t.id === activeTaskId);
         const projectId = activeTask?.projectId ?? null;
         
-        // 1. Update Local Stats
-        useStatsStore.getState().recordSession(25, projectId);
+        // 1. Update Local Stats (Optimistic)
+        const focusDuration = 25; // 25 minutes
+        useStatsStore.getState().recordSession(focusDuration, projectId);
 
-        // 2. Sync to Backend
+        // 2. Sync to Backend (Atomic Transaction)
         await useStatsStore.getState().syncSessionToBackend({
-          duration: 25 * 60,
+          duration: 25 * 60, // 25 minutes in seconds
           sessionType: "focus",
           taskId: (activeTaskId as number) ?? undefined
         });
@@ -182,7 +198,7 @@ if (typeof window !== "undefined") {
         // 3. Refresh tasks to update actPomos
         if (activeTaskId) await useTaskStore.getState().fetchTasks();
       }
-      previousAlarmCounter = state.alarmCounter;
+      lastProcessedTimestamp = state.lastSessionFinishedAt;
     }
   });
 }

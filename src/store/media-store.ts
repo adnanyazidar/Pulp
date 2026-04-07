@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface Playlist {
-  id: string;
+  id: string | number;
   title: string;
   url: string;
   platform: 'youtube' | 'spotify' | 'soundcloud' | 'custom';
@@ -90,7 +90,7 @@ export const useMediaStore = create<MediaState>()(
       },
       
       removePlaylist: async (id: string | number) => {
-        if (typeof id === 'string' && id.startsWith('preset-')) return;
+        if (id.toString().startsWith('preset-')) return;
 
         try {
           const raw = localStorage.getItem("pulp-auth");

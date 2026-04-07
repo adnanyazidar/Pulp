@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Timer, ListTodo, BarChart3, Settings, ChevronLeft, Coffee } from "lucide-react";
+import { Timer, ListTodo, BarChart3, Settings, ChevronLeft, Coffee, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore, SUPPORT_LINKS } from "@/store/ui-store";
@@ -144,6 +144,39 @@ export function SideNavbar() {
           {!isSidebarOpen && (
             <div className="absolute left-full ml-4 px-3 py-1 bg-[#2a241f] text-[#dabe9d] text-[10px] font-bold rounded-md opacity-0 group-hover/support:opacity-100 pointer-events-none transition-opacity whitespace-nowrap border border-[#bcaea1]/20 shadow-xl z-[70]">
               Support Developer
+            </div>
+          )}
+        </a>
+        
+        {/* Feedback & Bug Report Link (Muted Style) */}
+        <a 
+          href={SUPPORT_LINKS.githubIssues} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className={cn(
+            "flex items-center gap-4 px-6 py-2 transition-all duration-200 border-r-4 border-transparent text-pf-on-surface-variant/30 hover:bg-pf-on-surface/5 hover:text-pf-primary group/feedback relative overflow-hidden focus:outline-none"
+          )}
+        >
+          <div className="absolute inset-0 bg-pf-on-surface/5 opacity-0 group-active/feedback:opacity-100 transition-opacity" />
+          <motion.div whileTap={{ scale: 0.9 }}>
+            <MessageSquare size={18} className={cn("transition-colors shrink-0", !isSidebarOpen && "mx-auto")} />
+          </motion.div>
+          <AnimatePresence mode="wait">
+            {isSidebarOpen && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="font-label uppercase tracking-[0.2em] text-[8px] font-bold whitespace-nowrap"
+              >
+                Feedback & Bug Report
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {!isSidebarOpen && (
+            <div className="absolute left-full ml-4 px-3 py-1 bg-pf-surface-container-high text-pf-on-surface text-[10px] font-bold rounded-md opacity-0 group-hover/feedback:opacity-100 pointer-events-none transition-opacity whitespace-nowrap border border-white/10 shadow-xl z-[70]">
+              Send feedback or report a bug
             </div>
           )}
         </a>

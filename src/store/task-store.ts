@@ -106,19 +106,30 @@ export const useTaskStore = create<TaskState>()(
           if (error) throw new Error("Failed to fetch projects");
           const projectList = (data as any[]) || [];
           
-          // Self-healing: create default projects if user has none
-          if (projectList.length === 0) {
-            const defaultProjects = [
+          // Self-healing: create default projects if they are missing
+          const defaultNames = ["Work", "Study", "Personal"];
+          const existingNames = projectList.map((p: any) => p.name);
+          const missingDefaults = defaultNames.filter(name => !existingNames.includes(name));
+
+          if (missingDefaults.length > 0) {
+            const defaultProjs = [
               { name: "Work", color: "#FF6B6B" },
               { name: "Study", color: "#66D9CC" },
               { name: "Personal", color: "#A2C9FF" },
             ];
-            for (const p of defaultProjects) {
-              await authedApi.api.tasks.projects.post(p);
+            
+            for (const name of missingDefaults) {
+              const p = defaultProjs.find(dp => dp.name === name);
+              if (p) {
+                await authedApi.api.tasks.projects.post(p);
+              }
             }
-            // Re-fetch after creation
+            
+            // Re-fetch after creation to get official IDs
             const { data: refreshed } = await authedApi.api.tasks.projects.get();
-            if (refreshed) set({ projects: refreshed as any[] });
+            if (refreshed) {
+              set({ projects: refreshed as any[] });
+            }
           } else {
             set({ projects: projectList });
           }

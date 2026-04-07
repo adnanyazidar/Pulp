@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 export const SUPPORT_LINKS = {
   saweria: process.env.NEXT_PUBLIC_SAWERIA_URL || "https://saweria.co/adnanyazidar",
   kofi: "https://ko-fi.com/pomofocus",
+  githubIssues: "https://github.com/adnanyazidar/Pulp/issues",
 };
 
 interface UIState {

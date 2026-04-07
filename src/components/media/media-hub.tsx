@@ -4,12 +4,14 @@ import { useMediaStore } from "@/store/media-store";
 import { Play, Plus, BookAudio, Library, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { detectPlatform } from "@/lib/media-utils";
+import { detectPlatform, fetchYouTubeTitle } from "@/lib/media-utils";
+import { Loader2 } from "lucide-react";
 
 export function MediaHub() {
   const { playlists, playMedia, savePlaylist, removePlaylist } = useMediaStore();
   const [inputUrl, setInputUrl] = useState("");
   const [showSaved, setShowSaved] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const handlePlayNow = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,21 +20,29 @@ export function MediaHub() {
     setInputUrl("");
   };
 
-  const handleSaveCustom = () => {
+  const handleSaveCustom = async () => {
     if (!inputUrl) return;
+    setIsFetching(true);
     const platform = detectPlatform(inputUrl);
-    // Descriptive title based on platform
-    const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
-    const title = `My ${platformName} Track`;
     
-    savePlaylist(title, inputUrl, platform);
+    let title = "";
+    if (platform === 'youtube') {
+      const fetchedTitle = await fetchYouTubeTitle(inputUrl);
+      title = fetchedTitle || `My YouTube Track`;
+    } else {
+      const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
+      title = `My ${platformName} Track`;
+    }
+    
+    await savePlaylist(title, inputUrl, platform);
     setInputUrl("");
+    setIsFetching(false);
     setShowSaved(true); // Switch to saved tab to show feedback
   };
 
   const currentList = showSaved 
-    ? playlists.filter((p) => !p.id.startsWith("preset-"))
-    : playlists.filter((p) => p.id.startsWith("preset-"));
+    ? playlists.filter((p) => !p.id.toString().startsWith("preset-"))
+    : playlists.filter((p) => p.id.toString().startsWith("preset-"));
 
   return (
     <div className="bg-pf-surface-container-low/60 backdrop-blur-md rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl border border-white/5 h-full flex flex-col relative overflow-hidden group">
@@ -87,10 +97,11 @@ export function MediaHub() {
         <button 
           type="button"
           onClick={handleSaveCustom}
-          className="bg-pf-surface-bright/20 hover:bg-pf-surface-bright/30 text-pf-on-surface px-6 rounded-xl font-bold transition-all border border-white/10 active:scale-95"
+          disabled={isFetching}
+          className="bg-pf-surface-bright/20 hover:bg-pf-surface-bright/30 text-pf-on-surface px-6 rounded-xl font-bold transition-all border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-wait"
           title="Save to Library"
         >
-          <Plus size={18} />
+          {isFetching ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
         </button>
       </form>
 

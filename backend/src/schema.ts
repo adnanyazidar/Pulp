@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, int, boolean, timestamp, text, mysqlEnum } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, int, boolean, timestamp, text, mysqlEnum, uniqueIndex } from 'drizzle-orm/mysql-core';
 
 // 1. USERS
 export const users = mysqlTable('users', {
@@ -39,7 +39,9 @@ export const projects = mysqlTable('projects', {
   userId: int('user_id').notNull().references(() => users.id),
   name: varchar('name', { length: 100 }).notNull(),
   color: varchar('color', { length: 20 }).default('coral'),
-});
+}, (t) => ({
+  userProjectUnique: uniqueIndex('user_project_unique').on(t.userId, t.name)
+}));
 
 // 5. TASKS
 export const tasks = mysqlTable('tasks', {

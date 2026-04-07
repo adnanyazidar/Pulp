@@ -5,7 +5,7 @@ import { useTimerStore } from "@/store/timer-store";
 import { cn } from "@/lib/utils";
 
 export function WeeklyChart() {
-  const { dailyHistory } = useStatsStore();
+  const { dailyHistory, isUpdating } = useStatsStore();
   const { mode } = useTimerStore();
 
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -23,7 +23,10 @@ export function WeeklyChart() {
   const maxMinutes = Math.max(...last7Days.map((d) => d.minutes), 1);
 
   return (
-    <div className="bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 mb-12">
+    <div className={cn(
+      "bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 mb-12 transition-all duration-700",
+      isUpdating ? "opacity-30 blur-[4px]" : "opacity-100 blur-0"
+    )}>
       <div className="flex items-center justify-between mb-12">
         <div>
           <h3 className="font-headline text-lg font-black text-pf-on-surface">Weekly Progress</h3>

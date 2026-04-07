@@ -16,6 +16,7 @@ interface TimerState {
   isAmbientPlaying: boolean;
   clickSoundId: "soft" | "tactile" | "none";
   alarmCounter: number; // Incremented when session naturally ends
+  lastSessionFinishedAt: number | null; // Timestamp for sync triggers
 
   // Actions
   start: () => void;
@@ -49,6 +50,7 @@ export const useTimerStore = create<TimerState>()(
       isAmbientPlaying: false,
       clickSoundId: "soft",
       alarmCounter: 0,
+      lastSessionFinishedAt: null,
 
       start: () => set({ isRunning: true }),
 
@@ -79,11 +81,12 @@ export const useTimerStore = create<TimerState>()(
 
             set({
               timeRemaining: getModeDuration(nextMode),
-               isRunning: false,
+              isRunning: false,
               mode: nextMode,
               sessionCount: newCount,
               totalFocusToday: totalFocusToday + getModeDuration("focus"),
               alarmCounter: get().alarmCounter + 1,
+              lastSessionFinishedAt: Date.now(),
             });
           } else {
             // Break complete → back to focus
@@ -92,6 +95,7 @@ export const useTimerStore = create<TimerState>()(
               isRunning: false,
               mode: "focus",
               alarmCounter: get().alarmCounter + 1,
+              lastSessionFinishedAt: Date.now(),
             });
           }
           return;

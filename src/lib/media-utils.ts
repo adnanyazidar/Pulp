@@ -33,3 +33,14 @@ export const detectPlatform = (url: string): 'youtube' | 'spotify' | 'soundcloud
   if (url.includes('soundcloud.com')) return 'soundcloud';
   return 'custom';
 };
+export const fetchYouTubeTitle = async (url: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.title || null;
+  } catch (err) {
+    console.error("Failed to fetch YouTube title:", err);
+    return null;
+  }
+};

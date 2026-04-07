@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PomoFocus (Pulp)
 
-## Getting Started
+A high-performance, aesthetically pleasing Pomodoro application built with Next.js and Elysia.js. Featuring real-time "Bulletproof Sync" between Timer and Analytics modules, integrated task management, and deep gamification.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Bulletproof Sync**: Atomic backend transactions ensure that focus sessions, task progress, and user stats (XP, level, streaks) are always consistent.
+- **Customizable Timer**: Focus (25m), Short Break (5m), and Long Break (15m) modes with dynamic theme transitions.
+- **Task Management**: Integrated To-Do list with project grouping (Work, Study, Personal) and Pomodoro estimation.
+- **Analytics Dashboard**: 90-day daily activity heatmap, weekly progress charts, and real-time focus velocity metrics.
+- **Hybrid Auth**: Secure JWT-based cloud synchronization for persistent settings and focus history.
+- **Rich Aesthetics**: Vibrant dark mode with glassmorphism and smooth micro-animations.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Frontend
+- **Framework**: [Next.js 16.2.2](https://nextjs.org/) (App Router, Turbopack)
+- **State Management**: [Zustand](https://zustand.docs.pmnd.rs/) with Persistence
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Styling**: Vanilla CSS & Tailwind CSS
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Backend
+- **Framework**: [ElysiaJS](https://elysiajs.com/) (Bun Runtime)
+- **Database**: [MySQL](https://www.mysql.com/) via [Drizzle ORM](https://orm.drizzle.team/)
+- **API Client**: [Eden Treaty](https://elysiajs.com/eden/treaty) (End-to-end Type Safety)
 
-## Learn More
+## 🚀 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- [Bun](https://bun.sh/)
+- [MySQL](https://www.mysql.com/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository and install dependencies:
+   ```bash
+   bun install
+   cd backend && bun install
+   ```
 
-## Deploy on Vercel
+2. Configure environment variables in `backend/.env`:
+   ```env
+   DATABASE_URL=mysql://user:password@localhost:3306/pulp_ultra
+   JWT_SECRET=your-secret-key
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Initialize the database:
+   ```bash
+   cd backend
+   npx drizzle-kit push
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Start the development server:
+   ```bash
+   bun run dev
+   ```
+
+## 🏗️ Technical Architecture
+
+### Atomic Record Update (Bulletproof Sync)
+The core synchronization logic uses a database transaction to ensure data integrity:
+1. `sessions`: Logs the focus interval.
+2. `tasks`: Increments `act_pomos` for the linked task.
+3. `user_stats`: Updates `xp`, `level`, `totalFocusMinutes`, and `currentStreak`.
+
+### Frontend Revalidation
+The `stats-store` subscribes to the `timer-store` via a "Pulse" signal. When a session finishes, the dashboard immediately re-validates the analytics summary from the source of truth, eliminating desynchronization bugs across multiple tabs.
+
+---
+
+*Transition to a Real Database (MySQL), Hybrid Auth Implementation, and Comprehensive Code Cleanup.*

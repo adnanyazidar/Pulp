@@ -6,7 +6,7 @@ import { Zap, Target, Flame, TrendingUp, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StatsSummary() {
-  const { dailyHistory, totalTasksCompleted, currentStreak, weeklySessionsCount } = useStatsStore();
+  const { dailyHistory, totalTasksCompleted, currentStreak, weeklySessionsCount, isUpdating } = useStatsStore();
   const { tasks } = useTaskStore();
   
   const today = new Date().toISOString().split("T")[0];
@@ -74,7 +74,10 @@ export function StatsSummary() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+    <div className={cn(
+      "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12 transition-all duration-700",
+      isUpdating ? "opacity-40 scale-[0.99] blur-[2px]" : "opacity-100 scale-100 blur-0"
+    )}>
       {stats.map((stat, i) => (
         <div
           key={i}
