@@ -7,7 +7,7 @@ export const poolConnection = mysql.createPool({
   port: 3306,
   user: "root",
   password: "",
-  database: "pulp_ultra",
+  database: process.env.DB_NAME || "pulp_ultra",
 });
 
 export const db = drizzle(poolConnection, { schema, mode: 'default' });

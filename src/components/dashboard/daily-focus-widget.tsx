@@ -37,6 +37,7 @@ function DailyNoteItem({ note }: { note: DailyNote }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
+      data-testid="daily-note-item"
       className="group/note flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.03] transition-all duration-200 relative"
     >
       {/* Checkbox */}
@@ -184,6 +185,7 @@ export function DailyFocusWidget() {
           />
           <input
             ref={inputRef}
+            data-testid="daily-note-input"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="What's your focus today?"

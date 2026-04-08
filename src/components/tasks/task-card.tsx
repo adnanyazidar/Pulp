@@ -41,6 +41,7 @@ export function TaskCard({ task, project }: TaskCardProps) {
         <div className="flex items-center gap-6">
           {/* Checkbox */}
           <button
+            data-testid="task-complete-btn"
             onClick={() => {
               toggleComplete(task.id);
               if (!task.isCompleted) {
@@ -65,6 +66,7 @@ export function TaskCard({ task, project }: TaskCardProps) {
 
           {/* Play Arrow (Hidden by default, shows on hover or if active) */}
           <button
+            data-testid="task-activate-btn"
             onClick={() => setActiveTask(isActive ? null : task.id)}
             className={cn(
               "absolute -left-2 transition-all cursor-pointer",
@@ -112,13 +114,14 @@ export function TaskCard({ task, project }: TaskCardProps) {
         {/* Power Menu (Three-dot Dropdown) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-2 text-pf-on-surface-variant/40 hover:text-pf-primary hover:bg-white/5 rounded-full transition-all">
+            <button data-testid="task-power-menu-btn" className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-2 text-pf-on-surface-variant/40 hover:text-pf-primary hover:bg-white/5 rounded-full transition-all">
               <MoreVertical size={16} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
             <DropdownMenuContent align="end" className="glass min-w-[140px] border border-white/10 p-1.5 shadow-2xl">
               <DropdownMenuItem
+                data-testid="task-edit-menu"
                 onClick={() => setIsEditOpen(true)}
                 className="flex items-center gap-3 font-label font-bold text-xs uppercase tracking-widest text-pf-on-surface hover:bg-pf-primary/10 hover:text-pf-primary rounded-lg transition-all focus:bg-pf-primary/10 cursor-pointer"
               >
@@ -126,6 +129,7 @@ export function TaskCard({ task, project }: TaskCardProps) {
                 Edit Task
               </DropdownMenuItem>
               <DropdownMenuItem
+                data-testid="task-delete-menu"
                 onClick={() => setIsDeleteOpen(true)}
                 className="flex items-center gap-3 font-label font-bold text-xs uppercase tracking-widest text-pf-primary/60 hover:bg-pf-primary/10 hover:text-pf-primary rounded-lg transition-all focus:bg-pf-primary/10 cursor-pointer"
               >

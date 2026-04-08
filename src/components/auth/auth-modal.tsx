@@ -107,6 +107,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {/* Close Button */}
             <button
               onClick={onClose}
+              data-testid="auth-close-btn"
               className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/5 transition-colors text-pf-on-surface-variant/40 hover:text-pf-on-surface"
             >
               <X size={20} />
@@ -132,6 +133,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-pf-on-surface-variant/40 group-focus-within:text-pf-primary transition-colors" size={18} />
                     <input
                       type="text"
+                      data-testid="auth-username-input"
                       placeholder="Username"
                       required
                       value={formData.username}
@@ -145,6 +147,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-pf-on-surface-variant/40 group-focus-within:text-pf-primary transition-colors" size={18} />
                   <input
                     type="email"
+                    data-testid="auth-email-input"
                     placeholder="Email address"
                     required
                     value={formData.email}
@@ -157,6 +160,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-pf-on-surface-variant/40 group-focus-within:text-pf-primary transition-colors" size={18} />
                   <input
                     type="password"
+                    data-testid="auth-password-input"
                     placeholder="Password"
                     required
                     value={formData.password}
@@ -178,6 +182,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
               <button
                 type="submit"
+                data-testid="auth-submit-btn"
                 disabled={loading}
                 className="w-full h-14 rounded-2xl bg-pf-primary hover:bg-pf-primary-variant text-pf-on-primary font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-pf-primary/20 hover:shadow-pf-primary/40 active:scale-[0.98] disabled:opacity-50"
               >
@@ -201,6 +206,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {mode === "login" ? "New here?" : "Already have an account?"}{" "}
                 <button
                   onClick={() => setMode(mode === "login" ? "register" : "login")}
+                  data-testid="auth-toggle-mode-btn"
                   className="text-pf-primary hover:underline font-medium"
                 >
                   {mode === "login" ? "Create an account" : "Sign in instead"}
