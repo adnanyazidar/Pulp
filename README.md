@@ -39,11 +39,11 @@ The project uses a **Mono-Architecture** where the backend runs seamlessly insid
    bun install
    ```
 
-2. Configure environment variables in `.env` (or `.env.local`):
-   ```env
-   DATABASE_URL=mysql://user:password@hostname:4000/database?ssl={"rejectUnauthorized":true}
-   JWT_SECRET=your-super-secret-key-pulp
-   ```
+2. **Environment Variables**
+   Create a `.env` file in the root directory and provide the following variables (or copy from `.env.example`):
+
+   `DATABASE_URL` = Your MySQL connection string (TiDB Cloud)  
+   `JWT_SECRET` = Your random secure string for JWT encryption
 
 3. Push the database schema:
    ```bash
