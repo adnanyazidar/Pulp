@@ -485,6 +485,6 @@ const app = new Elysia()
         })
       })
   )
-  .listen(3001);
+  .listen(parseInt(process.env.PORT || '3001'));
 
 export type App = typeof app;
