@@ -2,6 +2,8 @@
 
 *Master your rhythm. Stay in flow.*
 
+**Lead Developer**: Adnan Yazid Ardiansyah (@oramzy)
+
 A high-performance, aesthetically pleasing Pomodoro application built with an advanced **Mono-Architecture** combining Next.js and ElysiaJS. Featuring real-time "Bulletproof Sync," integrated task management, Focus Media Hub, and deep gamification.
 
 ## ✨ Key Features
@@ -20,6 +22,7 @@ A high-performance, aesthetically pleasing Pomodoro application built with an ad
 - **Type Safety**: [Eden Treaty](https://elysiajs.com/eden/treaty) for flawless end-to-end typing
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS with dynamic themes
 - **Security**: Authentication powered by `bcryptjs` and `@elysiajs/jwt`
+- **Testing**: [Playwright](https://playwright.dev/) for automated End-to-End Testing
 
 ## 🚀 Environment Setup & Installation
 
@@ -52,8 +55,23 @@ The project uses a **Mono-Architecture** where the backend runs seamlessly insid
    bun run dev
    ```
 
+## 🧪 Quality Assurance
+
+PomoPulp maintains robust stability through a comprehensive End-to-End (E2E) testing framework. The testing suite focuses on simulating actual user behavior across critical features:
+- **Authentication**: Verifying solid login flows, cloud credential migrations, and session persistence.
+- **Timer Mechanics**: Validating countdown algorithms, phase transitions (Focus, Short Break, Long Break), and theme responsiveness.
+- **Task Management**: Ensuring reliable CRUD operations, streak tracking, and bulletproof database synchronization.
+
+Run the E2E testing suite locally:
+```bash
+bun run test:e2e
+```
+
 ## 🌐 Deployment Strategy
 
 PomoPulp is built for **zero-cost infrastructure** and ultimate developer experience.
 
 - **Single-Click Deployment on Vercel**: Push to `main`, and Vercel will automatically compile the Next.js frontend and mount the ElysiaJS backend as blazing-fast Serverless Functions (`/api/*`), entirely escaping CORS issues and network latency.
+
+---
+© 2024 Adnan Yazid Ardiansyah (@oramzy). All rights reserved.
