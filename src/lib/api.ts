@@ -1,9 +1,10 @@
 import { edenTreaty } from '@elysiajs/eden';
-import type { App } from '../../backend/src/index';
+import type { App } from '@/server/app';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BASE_URL = typeof window !== 'undefined'
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-// @ts-expect-error: Elysia version mismatch between frontend and backend
 export const api = edenTreaty<App>(BASE_URL);
 
 /**
@@ -23,7 +24,6 @@ export function getAuthedApi() {
     }
   })();
 
-  // @ts-expect-error: dynamic treaty access
   return edenTreaty<App>(BASE_URL, {
     $fetch: {
       headers: token ? { Authorization: `Bearer ${token}` } : {}

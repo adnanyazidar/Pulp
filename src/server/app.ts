@@ -1,15 +1,12 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
-import { cors } from "@elysiajs/cors";
+import { hash, compare } from "bcryptjs";
 import { db } from "./db";
 import { users, settings, userStats, projects, tasks, sessions, userPlaylists, userBadges } from "./schema";
 import { eq, sql, and, desc } from 'drizzle-orm';
 import { checkAndUnlockBadges } from "./badges";
 
-const app = new Elysia()
-  .use(cors({
-    origin: ['https://pomopulp.vercel.app', 'http://localhost:3000', /\.vercel\.app$/]
-  }))
+export const app = new Elysia()
   .use(
     jwt({
       name: 'jwt',
@@ -41,7 +38,7 @@ const app = new Elysia()
         return { error: "Email already in use" };
       }
 
-      const passwordHash = await Bun.password.hash(password);
+      const passwordHash = await hash(password, 10);
 
       const result = await db.transaction(async (tx) => {
         // 1. Insert User
@@ -123,7 +120,7 @@ const app = new Elysia()
       return { error: "Invalid email or password" };
     }
 
-    const isMatch = await Bun.password.verify(password, user.passwordHash);
+    const isMatch = await compare(password, user.passwordHash);
     if (!isMatch) {
       set.status = 400;
       return { error: "Invalid email or password" };
@@ -484,7 +481,6 @@ const app = new Elysia()
           category: t.Optional(t.String())
         })
       })
-  )
-  .listen(parseInt(process.env.PORT || '3001'));
+  );
 
 export type App = typeof app;
