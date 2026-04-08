@@ -225,7 +225,7 @@ export function SideNavbar() {
               transition={{ delay: 0.5 }}
               className="text-[7px] font-label uppercase tracking-[0.2em] text-pf-primary/30 whitespace-nowrap"
             >
-              Made with ❤️ by oramzy
+              Made with ❤️ by adnan
             </motion.span>
           )}
         </div>

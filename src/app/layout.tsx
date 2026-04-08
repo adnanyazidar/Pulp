@@ -24,7 +24,7 @@ import { CelebrationModal } from "@/components/ui/celebration-modal";
 export const metadata: Metadata = {
   title: "PomoPulp — Master Your Rhythm, Stay in Flow",
   description:
-    "Elevate your productivity with PomoPulp. Featuring an immersive ambient mixer, integrated Spotify/YouTube media hub, and elite focus analytics. Crafted by oramzy.",
+    "Elevate your productivity with PomoPulp. Featuring an immersive ambient mixer, integrated Spotify/YouTube media hub, and elite focus analytics. Crafted by adnan.",
   keywords: ["pomodoro", "timer", "productivity", "focus", "task management", "pomopulp"],
 };
 
