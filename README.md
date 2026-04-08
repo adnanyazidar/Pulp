@@ -1,73 +1,59 @@
-# PomoPulse (Pulp)
+# PomoPulp (Pulp)
 
 *Master your rhythm. Stay in flow.*
 
-A high-performance, aesthetically pleasing Pomodoro application built with Next.js and Elysia.js. Featuring real-time "Bulletproof Sync" between Timer and Analytics modules, integrated task management, and deep gamification.
+A high-performance, aesthetically pleasing Pomodoro application built with an advanced **Mono-Architecture** combining Next.js and ElysiaJS. Featuring real-time "Bulletproof Sync," integrated task management, Focus Media Hub, and deep gamification.
 
-## ✨ Features
+## ✨ Key Features
 
-- **Bulletproof Sync**: Atomic backend transactions ensure that focus sessions, task progress, and user stats (XP, level, streaks) are always consistent.
-- **Customizable Timer**: Focus (25m), Short Break (5m), and Long Break (15m) modes with dynamic theme transitions.
-- **Task Management**: Integrated To-Do list with project grouping (Work, Study, Personal) and Pomodoro estimation.
-- **Analytics Dashboard**: 90-day daily activity heatmap, weekly progress charts, and real-time focus velocity metrics.
-- **Hybrid Auth**: Secure JWT-based cloud synchronization for persistent settings and focus history.
-- **Rich Aesthetics**: Vibrant dark mode with glassmorphism and smooth micro-animations.
+- **Bulletproof Sync**: Atomic backend transactions ensure that focus sessions, task progress, and user stats are always flawlessly synchronized.
+- **Hybrid Auth & Smart Merge Migration**: Secure JWT-based cloud synchronizations with frictionless merging of local and cloud states.
+- **Focus Media Hub**: Integrated workspace for your favorite ambient sounds (Rain, Cafe) and YouTube/Spotify playlists.
+- **Elite Gamification**: Level up, earn XP, maintain streaks, and unlock Elite Badges to turn discipline into a rewarding game.
+- **Analytics Heatmap**: 90-day daily activity tracking, progress charts, and real-time focus velocity metrics.
 
-## 🛠️ Tech Stack
+## 🛠️ Refined Tech Stack
 
-### Frontend
-- **Framework**: [Next.js 16.2.2](https://nextjs.org/) (App Router, Turbopack)
-- **State Management**: [Zustand](https://zustand.docs.pmnd.rs/) with Persistence
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Styling**: Vanilla CSS & Tailwind CSS
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/) with Serverless API Routes
+- **Backend API**: [ElysiaJS](https://elysiajs.com/) (Next.js Integrated Hybrid)
+- **Database**: [TiDB Cloud Serverless (MySQL)](https://tidb.cloud/) via [Drizzle ORM](https://orm.drizzle.team/)
+- **Type Safety**: [Eden Treaty](https://elysiajs.com/eden/treaty) for flawless end-to-end typing
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS with dynamic themes
+- **Security**: Authentication powered by `bcryptjs` and `@elysiajs/jwt`
 
-### Backend
-- **Framework**: [ElysiaJS](https://elysiajs.com/) (Bun Runtime)
-- **Database**: [MySQL](https://www.mysql.com/) via [Drizzle ORM](https://orm.drizzle.team/)
-- **API Client**: [Eden Treaty](https://elysiajs.com/eden/treaty) (End-to-end Type Safety)
+## 🚀 Environment Setup & Installation
 
-## 🚀 Getting Started
+The project uses a **Mono-Architecture** where the backend runs seamlessly inside Next.js API routes. (No separate `backend/` folder needed!)
 
 ### Prerequisites
 - [Bun](https://bun.sh/)
-- [MySQL](https://www.mysql.com/)
+- A MySQL Database (e.g., TiDB Serverless)
 
 ### Installation
 
-1. Clone the repository and install dependencies:
+1. Clone the repository and install dependencies at the root:
    ```bash
    bun install
-   cd backend && bun install
    ```
 
-2. Configure environment variables in `backend/.env`:
+2. Configure environment variables in `.env` (or `.env.local`):
    ```env
-   DATABASE_URL=mysql://user:password@localhost:3306/pulp_ultra
-   JWT_SECRET=your-secret-key
+   DATABASE_URL=mysql://user:password@hostname:4000/database?ssl={"rejectUnauthorized":true}
+   JWT_SECRET=your-super-secret-key-pulp
    ```
 
-3. Initialize the database:
+3. Push the database schema:
    ```bash
-   cd backend
-   npx drizzle-kit push
+   bunx drizzle-kit push
    ```
 
-4. Start the development server:
+4. Start the development server (Frontend and API run together):
    ```bash
    bun run dev
    ```
 
-## 🏗️ Technical Architecture
+## 🌐 Deployment Strategy
 
-### Atomic Record Update (Bulletproof Sync)
-The core synchronization logic uses a database transaction to ensure data integrity:
-1. `sessions`: Logs the focus interval.
-2. `tasks`: Increments `act_pomos` for the linked task.
-3. `user_stats`: Updates `xp`, `level`, `totalFocusMinutes`, and `currentStreak`.
+PomoPulp is built for **zero-cost infrastructure** and ultimate developer experience.
 
-### Frontend Revalidation
-The `stats-store` subscribes to the `timer-store` via a "Pulse" signal. When a session finishes, the dashboard immediately re-validates the analytics summary from the source of truth, eliminating desynchronization bugs across multiple tabs.
-
----
-
-*Transition to a Real Database (MySQL), Hybrid Auth Implementation, and Comprehensive Code Cleanup.*
+- **Single-Click Deployment on Vercel**: Push to `main`, and Vercel will automatically compile the Next.js frontend and mount the ElysiaJS backend as blazing-fast Serverless Functions (`/api/*`), entirely escaping CORS issues and network latency.

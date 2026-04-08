@@ -1,46 +1,45 @@
-# 🚀 PomoPulse v1.0 — Official Release
+# 🚀 PomoPulp v1.0 — Official Mono-Architecture Release
 
-We are beyond excited to announce the official birth of **PomoPulse**! 🍎✨
+We are beyond excited to announce the official birth of **PomoPulp**! 🍊✨
 
-PomoPulse is not just another timer; it's a productivity station designed for those who want to master their rhythm and stay in a deep flow state. This release marks the transition from our initial prototype to a fully-featured, production-ready application.
+PomoPulp is not just another timer; it's an elite productivity station designed for those who want to master their rhythm and stay in a deep flow state. This milestone release marks our transition to a fully-featured, production-ready Mono-Architecture application deployed seamlessly in the cloud.
 
 ---
 
 ## 🌟 What's New?
 
-### 1. New Brand Identity: PomoPulse
-- **The Name:** "Pulse" represents the heartbeat of your productivity. A rhythmic, energetic, and living approach to deep work.
+### 1. New Brand Identity: PomoPulp
+- **The Name:** "Pulp" represents the core essence of work—stripping away distractions to reach the purest state of focus.
 - **Tagline:** *"Master your rhythm. Stay in flow."*
-- **Visuals:** Refined coral accents that symbolize energy and focus (the "Pulse" icon).
+- **Visuals:** Modern, vibrant dark-mode aesthetics with glassmorphism and micro-animations.
 
-### 2. Bulletproof Sync (V1.0)
-- **Real-Time Synergy:** Our backend is now "Acid-Tested." Every focus session, task completion, and XP gain is synchronized atomically with our MySQL database.
-- **Cloud-Native:** Secure JWT authentication keeps your focus history, preferences, and achievements synced across all your devices.
+### 2. Elysia-Next.js Hybrid Architecture
+- **Zero-Cost Infrastructure:** The ElysiaJS backend has been natively integrated into Next.js API Routes! This allows for a **Single-Click Deployment on Vercel** without requiring external backend hosting like Koyeb or Render.
+- **Zero CORS:** The frontend and backend live entirely on the same domain (`pomopulp.vercel.app`), guaranteeing zero latency and removing cross-origin headaches forever.
 
-### 3. Immersive Focus Environment
-- **Ambient Hub:** Integrated rain and study soundscapes with refined volume controls.
-- **Media Integration:** A dedicated space for your favorite work-from-home playlists and tools.
-- **Dynamic Themes:** UI colors that breathe with your timer modes (Focus, Short Break, Long Break).
-
-### 4. Elite Analytics & Gamification
-- **Productivity Pulse:** Track your daily work rhythm with high-precision heatmaps and activity charts.
-- **Elite Badges:** New "Elite Collection" badge system to reward your consistency and milestones.
-- **XP & Leveling:** A robust gamification engine that turns discipline into a game.
+### 3. Ultimate Productivity Arsenal (Key Features)
+- **Focus Media Hub:** An integrated space for ambient soundscapes (Rain, Cafe) and your favorite YouTube/Spotify productivity playlists.
+- **Hybrid Auth & Smart Merge Migration:** A flawless login experience that automatically merges your local, anonymous focus data into your new cloud account.
+- **Elite Gamification:** Track your workflow through a comprehensive XP system, level achievements, daily streaks, and the newly implemented "Elite Badges" collection.
+- **Analytics Heatmap:** Visualize your consistency with a beautiful GitHub-style 90-day focus heatmap and detailed velocity metrics.
 
 ---
 
-## 🛠️ Technical Improvements
-- **Backend Refactor:** Migrated to **ElysiaJS** and **Drizzle ORM** (MySQL) for extreme performance and type safety.
-- **Frontend Optimization:** Upgraded to **Next.js 16** with Turbopack for lightning-fast navigation.
-- **Zustand Persistence:** Refined local state management with a seamless cloud-sync migration path.
+## 🛠️ Refined Tech Stack
+- **Framework:** Next.js 15 (App Router)
+- **Backend:** ElysiaJS natively mounted as Serverless Functions
+- **Database:** Drizzle ORM connecting to TiDB Cloud (Serverless MySQL)
+- **End-to-End Safety:** Eden Treaty integration ensuring strict API types
+- **Styling:** Tailwind CSS v4 & robust component architecture
+- **Security:** Standardized Node hashing via `bcryptjs`
 
 ---
 
 ## 🏁 The Future
-PomoPulse is here to stay, and this is only the beginning. Expect more ambient soundscapes, advanced team collaboration features, and deeper mobile optimization in the coming months.
+PomoPulp is here to stay, and this is only the beginning. Expect more ambient soundscapes, advanced data exports, and deeper analytics tools in the coming months.
 
-**Get started today at [pomopulse.app](https://pomopulse.app)!**
+**Get started today at [pomopulp.vercel.app](https://pomopulp.vercel.app)!**
 
 ---
 
-*“Don't watch the clock; do what it does. Keep going.”* 🚀🍎🔥
+*“Don't watch the clock; do what it does. Keep going.”* 🚀🍊🔥
