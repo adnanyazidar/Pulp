@@ -7,7 +7,9 @@ import { eq, sql, and, desc } from 'drizzle-orm';
 import { checkAndUnlockBadges } from "./badges";
 
 const app = new Elysia()
-  .use(cors())
+  .use(cors({
+    origin: ['https://pomopulse.vercel.app', /\.vercel\.app$/]
+  }))
   .use(
     jwt({
       name: 'jwt',
