@@ -8,7 +8,6 @@ import { CommunityRankCard } from "@/components/profile/community-rank-card";
 import { MilestonesBadges } from "@/components/profile/milestones-badges";
 import { PreferencesLinks } from "@/components/profile/preferences-links";
 import { SupportCreatorCard } from "@/components/profile/support-creator-card";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { useAuthStore } from "@/store/auth-store";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -84,7 +83,7 @@ export default function ProfilePage() {
 
       </div>
       
-      <BottomNavbar />
+
     </div>
   );
 }

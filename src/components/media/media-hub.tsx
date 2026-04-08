@@ -54,7 +54,7 @@ export function MediaHub() {
         <BookAudio size={160} />
       </div>
 
-      <div className="flex items-center justify-between relative z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
         <h2 className="font-headline font-black text-2xl uppercase tracking-tighter text-pf-on-surface flex items-center gap-3">
           <BookAudio className="text-pf-primary" size={24} />
           Focus Media
@@ -93,30 +93,32 @@ export function MediaHub() {
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handlePlayNow} className="flex gap-2 relative z-10">
+      <form onSubmit={handlePlayNow} className="flex flex-col sm:flex-row gap-2 relative z-10">
         <input 
           type="text" 
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
           placeholder="Paste Spotify, YouTube, or SoundCloud link..."
-          className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-pf-on-surface placeholder:text-white/20 focus:outline-none focus:border-pf-primary transition-colors"
+          className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-pf-on-surface placeholder:text-white/20 focus:outline-none focus:border-pf-primary transition-colors"
         />
-        <button 
-          type="submit"
-          className="bg-pf-primary hover:bg-[#ff5446] text-[#5c0002] px-6 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(255,107,107,0.3)] hover:shadow-[0_0_25px_rgba(255,107,107,0.5)] active:scale-95"
-          title="Play Now"
-        >
-          <Play size={18} className="fill-[#5c0002]" />
-        </button>
-        <button 
-          type="button"
-          onClick={handleSaveCustom}
-          disabled={isFetching}
-          className="bg-pf-surface-bright/20 hover:bg-pf-surface-bright/30 text-pf-on-surface px-6 rounded-xl font-bold transition-all border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-wait"
-          title="Save to Library"
-        >
-          {isFetching ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            type="submit"
+            className="flex-1 sm:flex-initial bg-pf-primary hover:bg-[#ff5446] text-[#5c0002] px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(255,107,107,0.3)] hover:shadow-[0_0_25px_rgba(255,107,107,0.5)] active:scale-95 flex items-center justify-center"
+            title="Play Now"
+          >
+            <Play size={18} className="fill-[#5c0002]" />
+          </button>
+          <button 
+            type="button"
+            onClick={handleSaveCustom}
+            disabled={isFetching}
+            className="flex-1 sm:flex-initial bg-pf-surface-bright/20 hover:bg-pf-surface-bright/30 text-pf-on-surface px-6 py-3 rounded-xl font-bold transition-all border border-white/10 active:scale-95 disabled:opacity-50 disabled:cursor-wait flex items-center justify-center"
+            title="Save to Library"
+          >
+            {isFetching ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+          </button>
+        </div>
       </form>
 
       {/* Library Grid - Multi-column for 'Focus Center' Footer vibe */}

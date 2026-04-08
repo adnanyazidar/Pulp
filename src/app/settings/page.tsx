@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { SettingSection } from "@/components/settings/setting-section";
 import { TimerConfig } from "@/components/settings/timer-config";
 import { SoundscapeConfig } from "@/components/settings/soundscape-config";
@@ -148,7 +147,7 @@ export default function SettingsPage() {
 
       </div>
       
-      <BottomNavbar />
+
     </div>
   );
 }

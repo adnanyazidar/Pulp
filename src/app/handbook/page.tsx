@@ -6,7 +6,6 @@ import {
   Timer, Zap, Volume2, ShieldCheck, 
   ChevronRight, Sparkles, BookOpen
 } from "lucide-react";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -130,7 +129,7 @@ export default function HandbookPage() {
 
       </article>
 
-      <BottomNavbar />
+
     </div>
   );
 }

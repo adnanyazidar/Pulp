@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { CreateTask } from "@/components/tasks/create-task";
 import { TaskList } from "@/components/tasks/task-list";
 import { ContextualFab } from "@/components/tasks/contextual-fab";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 
 export default function TasksPage() {
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -38,7 +37,7 @@ export default function TasksPage() {
       </div>
 
       <ContextualFab />
-      <BottomNavbar />
+
     </div>
   );
 }

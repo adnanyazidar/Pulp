@@ -30,7 +30,7 @@ export function SideNavbar() {
       variants={sidebarVariants}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "bg-pf-surface border-r border-pf-outline/10 flex-col py-8 z-50 relative group/sidebar h-screen flex-shrink-0",
+        "bg-pf-surface border-r border-pf-outline/10 flex-col py-8 z-50 relative group/sidebar h-[100dvh] flex-shrink-0 overflow-y-auto custom-scrollbar",
         "fixed inset-y-0 left-0 md:relative md:flex",
         isSidebarOpen ? "flex w-[260px]" : "hidden md:flex w-[72px]"
       )}
@@ -213,11 +213,21 @@ export function SideNavbar() {
           )}
         </Link>
 
-        {/* Version Tag */}
-        <div className={cn("px-8 overflow-hidden pt-2", !isSidebarOpen && "px-0 text-center")}>
+        {/* Version & Credit Section */}
+        <div className={cn("px-8 overflow-hidden pt-2 pb-4 flex flex-col gap-1", !isSidebarOpen && "px-0 text-center")}>
           <span className="text-[8px] font-label uppercase tracking-[0.4em] text-pf-on-surface-variant/20 whitespace-nowrap">
             {isSidebarOpen ? "v1.4.2 PREMIUM" : "V1.4"}
           </span>
+          {isSidebarOpen && (
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-[7px] font-label uppercase tracking-[0.2em] text-pf-primary/30 whitespace-nowrap"
+            >
+              Made with ❤️ by oramzy
+            </motion.span>
+          )}
         </div>
       </div>
     </motion.nav>

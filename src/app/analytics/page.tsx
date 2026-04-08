@@ -8,7 +8,6 @@ import { ActivityHeatmap } from "@/components/analytics/activity-heatmap";
 import { BadgeGrid } from "@/components/analytics/badge-grid";
 import { useStatsStore } from "@/store/stats-store";
 import { useAuthStore } from "@/store/auth-store";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +93,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <BottomNavbar />
+
     </div>
   );
 }

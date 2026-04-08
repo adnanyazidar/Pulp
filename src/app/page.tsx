@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTimerStore, formatTime, getModeLabel } from "@/store/timer-store";
-import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { ModeSelector } from "@/components/timer/mode-selector";
 import { TimerDisplay } from "@/components/timer/timer-display";
 import { TimerProgress } from "@/components/timer/timer-progress";
@@ -161,7 +160,7 @@ export default function Home() {
         <StatsFooter />
       </div>
 
-      <BottomNavbar />
+
     </div>
   );
 }

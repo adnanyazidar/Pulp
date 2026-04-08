@@ -5,6 +5,7 @@ import { SideNavbar } from "@/components/layout/side-navbar";
 import { TopNavbar } from "@/components/layout/top-navbar";
 import { BackgroundAtmosphere } from "@/components/layout/background-atmosphere";
 import { MediaPlayerEmbed } from "@/components/media/media-player-embed";
+import { BottomNavbar } from "@/components/layout/bottom-navbar";
 import { useUIStore } from "@/store/ui-store";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -36,7 +37,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
         
         <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
           <BackgroundAtmosphere />
-          <main className="w-full relative z-10 p-4 md:p-8">
+          <main className="w-full relative z-10 p-4 md:p-8 pb-24 md:pb-8">
             {children}
           </main>
           
@@ -44,6 +45,9 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           <MediaPlayerEmbed />
 
         </div>
+
+        {/* 📱 Bottom Nav — mobile only, auto-hidden on md+ */}
+        <BottomNavbar />
       </div>
     </div>
   );
