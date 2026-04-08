@@ -30,12 +30,12 @@ export function SideNavbar() {
       variants={sidebarVariants}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "bg-pf-surface border-r border-pf-outline/10 flex-col py-8 z-50 relative group/sidebar h-[100dvh] flex-shrink-0 overflow-y-auto custom-scrollbar",
+        "bg-pf-surface border-r border-pf-outline/10 flex-col z-50 relative group/sidebar h-[100dvh] flex-shrink-0",
         "fixed inset-y-0 left-0 md:relative md:flex",
         isSidebarOpen ? "flex w-[260px]" : "hidden md:flex w-[72px]"
       )}
     >
-      {/* 🚀 Collapse Toggle (Chevron Center Edge) */}
+      {/* 🚀 Collapse Toggle (Chevron Center Edge) - Placed outside scrollable area to prevent clipping */}
       <button
         onClick={toggleSidebar}
         className="absolute -right-3 top-20 bg-pf-primary text-pf-on-primary rounded-full p-1 border border-white/10 shadow-lg opacity-0 group-hover/sidebar:opacity-100 transition-opacity z-[60] cursor-pointer"
@@ -48,6 +48,9 @@ export function SideNavbar() {
           <ChevronLeft size={16} />
         </motion.div>
       </button>
+
+      {/* 🚀 Scrollable Wrapper */}
+      <div className="flex-1 flex flex-col py-8 overflow-y-auto overflow-x-hidden custom-scrollbar">
 
       {/* Logo Section */}
       <div className={cn("px-6 mb-12 flex items-center gap-3 overflow-hidden", !isSidebarOpen && "justify-center")}>
@@ -228,6 +231,7 @@ export function SideNavbar() {
               Made with ❤️ by adnan
             </motion.span>
           )}
+        </div>
         </div>
       </div>
     </motion.nav>
