@@ -1,5 +1,5 @@
 /**
- * ✍️ PomoPulse Editorial Copybook
+ * ✍️ PomoPulp Editorial Copybook
  * Refined for Ultra-Premium (Apple/Linear) Aesthetic.
  */
 
@@ -14,26 +14,26 @@ export const TOOLTIPS = {
 
 export const HANDBOOK = {
   seo: {
-    title: "PomoPulse Handbook — Focus, Designed.",
+    title: "PomoPulp Handbook — Focus, Designed.",
     description: "Learn the principles of meaningful work, rhythm, and the Pulse system. Built for clarity, consistency, and calm.",
   },
   hero: {
     title: "Focus, Designed.",
     subtitle: "A better way to work.",
-    content: "PomoPulse is not just a timer. It’s a system for doing meaningful work — with clarity, consistency, and calm. Built on the principles of the Pomodoro Technique, we help you structure your time, reduce mental fatigue, and sustain deep focus without burnout.",
+    content: "PomoPulp is not just a timer. It’s a system for doing meaningful work — with clarity, consistency, and calm. Built on the principles of the Pomodoro Technique, we help you structure your time, reduce mental fatigue, and sustain deep focus without burnout.",
   },
   sections: [
     {
       id: "philosophy",
       title: "Focus is not forced.",
       subtitle: "It’s built through rhythm.",
-      content: "Most productivity tools try to make you do more. PomoPulse is designed to help you do what matters — without friction.",
+      content: "Most productivity tools try to make you do more. PomoPulp is designed to help you do what matters — without friction.",
       icon: "Zap",
     },
     {
       id: "timer-logic",
       title: "The Core System",
-      content: "At the heart of PomoPulse is a simple structure: 25 minutes of uninterrupted focus, followed by short, intentional breaks. A repeatable cycle that trains your attention. Consistency over intensity. That’s how real progress compounds.",
+      content: "At the heart of PomoPulp is a simple structure: 25 minutes of uninterrupted focus, followed by short, intentional breaks. A repeatable cycle that trains your attention. Consistency over intensity. That’s how real progress compounds.",
       icon: "Timer",
     },
     {
@@ -51,7 +51,7 @@ export const HANDBOOK = {
     {
       id: "environment",
       title: "Environment, Refined",
-      content: "Focus depends on your environment. PomoPulse gives you a controlled, distraction-free atmosphere through layered audio. Ambient Noise provides continuous soundscapes, while Media Integration lets you bring your own playlists without breaking flow.",
+      content: "Focus depends on your environment. PomoPulp gives you a controlled, distraction-free atmosphere through layered audio. Ambient Noise provides continuous soundscapes, while Media Integration lets you bring your own playlists without breaking flow.",
       icon: "Volume2",
     },
     {
@@ -63,7 +63,7 @@ export const HANDBOOK = {
     {
       id: "privacy",
       title: "Privacy by Design",
-      content: "Your focus is personal. PomoPulse is designed to respect that with local-first data handling, transparent synchronization, and zero unnecessary interruptions. Productivity tools should never become distractions.",
+      content: "Your focus is personal. PomoPulp is designed to respect that with local-first data handling, transparent synchronization, and zero unnecessary interruptions. Productivity tools should never become distractions.",
       icon: "ShieldCheck",
     }
   ],

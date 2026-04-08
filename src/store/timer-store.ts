@@ -147,7 +147,7 @@ export const useTimerStore = create<TimerState>()(
         set((s) => ({ isAmbientPlaying: !s.isAmbientPlaying })),
     }),
     {
-      name: "pomopulse-timer",
+      name: "pomopulp-timer",
       partialize: (state) => ({
         mode: state.mode,
         timeRemaining: state.timeRemaining,

@@ -10,7 +10,7 @@ export function TabTitleManager() {
 
   useEffect(() => {
     if (!isRunning) {
-      document.title = "PomoPulse — Master your rhythm";
+      document.title = "PomoPulp — Stay in Flow";
       return;
     }
 
@@ -18,7 +18,7 @@ export function TabTitleManager() {
     const timeStr = formatTime(timeRemaining);
     const taskPart = activeTask ? ` ${activeTask.content}` : "";
 
-    document.title = `(${timeStr})${taskPart} | PomoPulse`;
+    document.title = `(${timeStr})${taskPart} | PomoPulp`;
   }, [timeRemaining, isRunning, activeTaskId, tasks]);
 
   return null;

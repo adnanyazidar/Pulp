@@ -8,7 +8,7 @@ import { checkAndUnlockBadges } from "./badges";
 
 const app = new Elysia()
   .use(cors({
-    origin: ['https://pomopulse.vercel.app', /\.vercel\.app$/]
+    origin: ['https://pomopulp.vercel.app', 'http://localhost:3000', /\.vercel\.app$/]
   }))
   .use(
     jwt({

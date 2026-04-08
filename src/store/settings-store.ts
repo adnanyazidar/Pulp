@@ -258,7 +258,7 @@ export const useSettingsStore = create<SettingsState>()(
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `pomopulse_backup_${new Date().toISOString().split("T")[0]}.json`;
+        link.download = `pomopulp_backup_${new Date().toISOString().split("T")[0]}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -272,7 +272,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
     }),
     {
-      name: "pomopulse-settings",
+      name: "pomopulp-settings",
       onRehydrateStorage: () => (state) => {
         if (state && typeof document !== "undefined") {
           document.documentElement.style.setProperty(

@@ -61,10 +61,10 @@ export function SideNavbar() {
               className="flex flex-col whitespace-nowrap"
             >
               <h1 className="font-headline font-black text-pf-primary uppercase text-[10px] tracking-[0.4em]">
-                PomoPulse
+                PomoPulp
               </h1>
               <p className="font-label uppercase tracking-[0.2em] text-[10px] text-pf-on-surface-variant/40 mt-1">
-                Master your rhythm
+                Stay in Flow
               </p>
             </motion.div>
           )}
@@ -201,7 +201,7 @@ export function SideNavbar() {
                 exit={{ opacity: 0, x: -10 }}
                 className="font-label uppercase tracking-[0.2em] text-[8px] font-bold whitespace-nowrap"
               >
-                PomoPulse Handbook
+                PomoPulp Handbook
               </motion.span>
             )}
           </AnimatePresence>

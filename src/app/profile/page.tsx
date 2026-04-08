@@ -66,7 +66,7 @@ export default function ProfilePage() {
                   <Lock size={28} />
                 </div>
                 <h2 className="text-2xl font-pf-display font-medium text-pf-on-surface mb-3">
-                  Become a PomoPulse Elite.
+                  Become a PomoPulp Elite.
                 </h2>
                 <p className="text-pf-on-surface-variant/60 max-w-sm mb-8">
                   Sign in to manage your account, claim your community rank, and save your preferences securely in the cloud.

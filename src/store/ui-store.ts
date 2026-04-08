@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 
 export const SUPPORT_LINKS = {
   saweria: process.env.NEXT_PUBLIC_SAWERIA_URL || "https://saweria.co/adnanyazidar",
-  kofi: "https://ko-fi.com/pomopulse",
+  kofi: "https://ko-fi.com/pomopulp",
   githubIssues: "https://github.com/adnanyazidar/Pulp/issues",
 };
 
@@ -21,7 +21,7 @@ export const useUIStore = create<UIState>()(
       setSidebarOpen: (isOpen: boolean) => set({ isSidebarOpen: isOpen }),
     }),
     {
-      name: "pomopulse-ui",
+      name: "pomopulp-ui",
     }
   )
 );
