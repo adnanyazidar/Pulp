@@ -2,7 +2,7 @@
 
 *Master your rhythm. Stay in flow.*
 
-**Lead Developer**: Adnan Yazid Ardiansyah (@oramzy)
+**Lead Developer**: Adnan Yazid Ardiansyah
 
 A high-performance, aesthetically pleasing Pomodoro application built with an advanced **Mono-Architecture** combining Next.js and ElysiaJS. Featuring real-time "Bulletproof Sync," integrated task management, Focus Media Hub, and deep gamification.
 
@@ -74,4 +74,4 @@ PomoPulp is built for **zero-cost infrastructure** and ultimate developer experi
 - **Single-Click Deployment on Vercel**: Push to `main`, and Vercel will automatically compile the Next.js frontend and mount the ElysiaJS backend as blazing-fast Serverless Functions (`/api/*`), entirely escaping CORS issues and network latency.
 
 ---
-© 2024 Adnan Yazid Ardiansyah (@oramzy). All rights reserved.
+© 2026 Adnan Yazid Ardiansyah. All rights reserved.
