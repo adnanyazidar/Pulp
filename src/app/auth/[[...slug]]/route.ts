@@ -1,6 +1,8 @@
 import { app } from '@/server/app';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 export const GET = app.handle;
 export const POST = app.handle;

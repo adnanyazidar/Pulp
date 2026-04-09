@@ -15,17 +15,40 @@ export const app = new Elysia()
   )
   .get('/api/health', async () => {
     try {
+      console.log('🩺 Health Check: Checking database connection...');
       const result = await db.execute(sql`SHOW TABLES`);
-      return { status: 'ok', database: 'pulp_ultra', tables: result[0] };
+      const tables = result[0] as unknown as any[];
+      return { 
+        status: 'ok', 
+        database: 'pulp_ultra', 
+        tablesFound: tables.length,
+        timestamp: new Date().toISOString()
+      };
     } catch (err: any) {
-      console.error('Health Check Error:', err);
-      return { status: 'error', error: err.message, code: err.code };
+      console.error('❌ Health Check Failed:', err);
+      return { 
+        status: 'error', 
+        message: err.message, 
+        code: err.code,
+        hint: 'Check DATABASE_URL and TiDB Cloud IP Access List (0.0.0.0/0)'
+      };
     }
   })
-  .onError(({ error, code }) => {
-    console.error('🦊 Elysia Error:', code);
-    console.error(error);
-    return { error: (error as any).message || 'Unknown error' };
+  .onError(({ error, code, request }) => {
+    const url = new URL(request.url);
+    const errorMessage = (error as any).message || 'Unknown error';
+    console.error(`🦊 Elysia Error [${code}] at ${url.pathname}:`, errorMessage);
+    
+    // Provide a cleaner error message for known DB issues
+    if (errorMessage.includes('Failed query') || errorMessage.includes('ECONNREFUSED')) {
+      return { 
+        error: "Database connection failed. Please check production environment variables.",
+        code: 500,
+        details: errorMessage 
+      };
+    }
+
+    return { error: errorMessage, code };
   })
   .post('/auth/register', async ({ body, jwt, set }) => {
     const { username, email, password } = body;
