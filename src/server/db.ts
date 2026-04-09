@@ -24,6 +24,7 @@ if (rawUri) {
       password: decodeURIComponent(url.password),
       database: dbName,
       ssl: { 
+        minVersion: 'TLSv1.2',
         rejectUnauthorized: true, 
       }, 
       waitForConnections: true, 
@@ -31,11 +32,16 @@ if (rawUri) {
       queueLimit: 0,
       connectTimeout: 10000, // 10s timeout
     });
-  } catch (err: any) {
-    console.error("❌ DB Init Error (Parsing):", err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("❌ DB Init Error (Parsing):", err.message);
+    }
     poolInstance = mysql.createPool({
       uri: rawUri,
-      ssl: { rejectUnauthorized: true },
+      ssl: { 
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true 
+      },
       connectionLimit: 1
     });
   }
