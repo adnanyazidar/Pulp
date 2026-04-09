@@ -13,22 +13,26 @@ let poolInstance;
 if (rawUri) {
   try {
     const url = new URL(rawUri);
+    const dbName = url.pathname.replace("/", "") || "pulp_ultra";
+    
+    console.log(`📡 DB Init: Connecting to ${url.hostname} as ${url.username} (DB: ${dbName})`);
+    
     poolInstance = mysql.createPool({ 
       host: url.hostname, 
       port: parseInt(url.port) || 3306, 
       user: url.username, 
-      password: decodeURIComponent(url.password), // Decodes special characters (@, #, etc.)
-      database: url.pathname.replace("/", ""), // Extracts database name
+      password: decodeURIComponent(url.password),
+      database: dbName,
       ssl: { 
         rejectUnauthorized: true, 
       }, 
       waitForConnections: true, 
-      connectionLimit: 1, // Serverless-optimized
+      connectionLimit: 1, 
       queueLimit: 0,
+      connectTimeout: 10000, // 10s timeout
     });
-  } catch (err) {
-    console.error("Failed to parse DATABASE_URL:", err);
-    // Fallback to raw string if URL parsing fails for some reason
+  } catch (err: any) {
+    console.error("❌ DB Init Error (Parsing):", err.message);
     poolInstance = mysql.createPool({
       uri: rawUri,
       ssl: { rejectUnauthorized: true },
@@ -36,6 +40,7 @@ if (rawUri) {
     });
   }
 } else {
+  console.log("📂 DB Init: Falling back to Localhost");
   poolInstance = mysql.createPool({
     host: "localhost",
     port: 3306,
