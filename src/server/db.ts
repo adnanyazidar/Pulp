@@ -6,24 +6,19 @@ const rawUri = process.env.DATABASE_URL;
 
 /**
  * Configure Database Connection
- * Manual parsing to avoid driver URI parsing bugs and handle special characters.
- * Uses rejectUnauthorized: false for TiDB Cloud compatibility on Vercel serverless.
+ * Prioritizes direct URI usage for better TiDB Serverless compatibility.
+ * Uses rejectUnauthorized: false for Vercel/TiDB SSL handshake.
  */
 let poolInstance: mysql.Pool;
 
 if (rawUri) {
   try {
     const url = new URL(rawUri);
-    const dbName = url.pathname.replace("/", "") || "pulp_ultra";
+    console.log(`📡 DB Init: Attempting connection to ${url.hostname}`);
     
-    console.log(`📡 DB Init: Connecting to ${url.hostname} as ${url.username} (DB: ${dbName})`);
-    
+    // Using the URI directly is often more robust for TiDB Cloud
     poolInstance = mysql.createPool({ 
-      host: url.hostname, 
-      port: parseInt(url.port) || 4000, 
-      user: url.username, 
-      password: decodeURIComponent(url.password),
-      database: dbName,
+      uri: rawUri,
       ssl: { 
         minVersion: 'TLSv1.2',
         rejectUnauthorized: false, 
@@ -31,7 +26,7 @@ if (rawUri) {
       waitForConnections: true, 
       connectionLimit: 3, 
       queueLimit: 0,
-      connectTimeout: 20000, // 20s timeout for cold starts
+      connectTimeout: 20000,
       enableKeepAlive: true,
       keepAliveInitialDelay: 10000,
     });
@@ -40,7 +35,7 @@ if (rawUri) {
       console.error("❌ DB Init Error (Parsing):", err.message);
     }
     poolInstance = mysql.createPool({
-      uri: rawUri,
+      uri: rawUri || "",
       ssl: { 
         minVersion: 'TLSv1.2',
         rejectUnauthorized: false 
@@ -64,9 +59,8 @@ if (rawUri) {
 
 /**
  * Validate the database connection by executing a simple query.
- * Returns the raw error for proper surfacing in health checks.
  */
-export async function validateConnection(): Promise<{ ok: boolean; error?: string; code?: string; tables?: number }> {
+export async function validateConnection(): Promise<{ ok: boolean; error?: string; code?: string; tables?: number; host?: string }> {
   try {
     const conn = await poolInstance.getConnection();
     try {
@@ -77,10 +71,15 @@ export async function validateConnection(): Promise<{ ok: boolean; error?: strin
       conn.release();
     }
   } catch (err: any) {
+    let host = 'unknown';
+    if (rawUri) {
+       try { host = new URL(rawUri).hostname; } catch {}
+    }
     return { 
       ok: false, 
       error: err.message || 'Unknown connection error',
       code: err.code || err.errno?.toString() || 'UNKNOWN',
+      host: host
     };
   }
 }
