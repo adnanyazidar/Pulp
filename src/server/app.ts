@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { hash, compare } from "bcryptjs";
-import { db } from "./db";
+import { db, validateConnection } from "./db";
 import { users, settings, userStats, projects, tasks, sessions, userPlaylists, userBadges } from "./schema";
 import { eq, sql, and, desc } from 'drizzle-orm';
 import { checkAndUnlockBadges } from "./badges";
@@ -14,37 +14,43 @@ export const app = new Elysia()
     })
   )
   .get('/api/health', async () => {
-    try {
-      console.log('🩺 Health Check: Checking database connection...');
-      const result = await db.execute(sql`SHOW TABLES`);
-      const tables = result[0] as unknown as any[];
+    console.log('🩺 Health Check: Checking database connection...');
+    const hasDbUrl = !!process.env.DATABASE_URL;
+    const result = await validateConnection();
+    
+    if (result.ok) {
       return { 
         status: 'ok', 
         database: 'pulp_ultra', 
-        tablesFound: tables.length,
+        tablesFound: result.tables,
+        hasDbUrl,
         timestamp: new Date().toISOString()
       };
-    } catch (err: any) {
-      console.error('❌ Health Check Failed:', err);
-      return { 
-        status: 'error', 
-        message: err.message, 
-        code: err.code,
-        hint: 'Check DATABASE_URL and TiDB Cloud IP Access List (0.0.0.0/0)'
-      };
     }
+    
+    console.error('❌ Health Check Failed:', result.error, result.code);
+    return { 
+      status: 'error', 
+      message: result.error, 
+      code: result.code,
+      hasDbUrl,
+      hint: 'Check DATABASE_URL and TiDB Cloud IP Access List (0.0.0.0/0)'
+    };
   })
   .onError(({ error, code, request }) => {
     const url = new URL(request.url);
-    const errorMessage = (error as any).message || 'Unknown error';
-    console.error(`🦊 Elysia Error [${code}] at ${url.pathname}:`, errorMessage);
+    const rootCause = (error as any).cause;
+    const errorMessage = rootCause?.message || (error as any).message || 'Unknown error';
+    const errorCode = rootCause?.code || (error as any).code;
+    console.error(`🦊 Elysia Error [${code}] at ${url.pathname}:`, errorMessage, errorCode);
     
     // Provide a cleaner error message for known DB issues
-    if (errorMessage.includes('Failed query') || errorMessage.includes('ECONNREFUSED')) {
+    if (errorMessage.includes('Failed query') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ETIMEDOUT')) {
       return { 
         error: "Database connection failed. Please check production environment variables.",
         code: 500,
-        details: errorMessage 
+        details: errorMessage,
+        dbErrorCode: errorCode,
       };
     }
 

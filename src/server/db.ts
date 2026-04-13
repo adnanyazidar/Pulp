@@ -6,9 +6,10 @@ const rawUri = process.env.DATABASE_URL;
 
 /**
  * Configure Database Connection
- * "Bulletproof" manual parsing to avoid driver URI parsing bugs and handle special characters.
+ * Manual parsing to avoid driver URI parsing bugs and handle special characters.
+ * Uses rejectUnauthorized: false for TiDB Cloud compatibility on Vercel serverless.
  */
-let poolInstance;
+let poolInstance: mysql.Pool;
 
 if (rawUri) {
   try {
@@ -19,18 +20,20 @@ if (rawUri) {
     
     poolInstance = mysql.createPool({ 
       host: url.hostname, 
-      port: parseInt(url.port) || 3306, 
+      port: parseInt(url.port) || 4000, 
       user: url.username, 
       password: decodeURIComponent(url.password),
       database: dbName,
       ssl: { 
         minVersion: 'TLSv1.2',
-        rejectUnauthorized: true, 
+        rejectUnauthorized: false, 
       }, 
       waitForConnections: true, 
-      connectionLimit: 1, 
+      connectionLimit: 3, 
       queueLimit: 0,
-      connectTimeout: 10000, // 10s timeout
+      connectTimeout: 20000, // 20s timeout for cold starts
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -40,9 +43,10 @@ if (rawUri) {
       uri: rawUri,
       ssl: { 
         minVersion: 'TLSv1.2',
-        rejectUnauthorized: true 
+        rejectUnauthorized: false 
       },
-      connectionLimit: 1
+      connectionLimit: 3,
+      connectTimeout: 20000,
     });
   }
 } else {
@@ -56,6 +60,29 @@ if (rawUri) {
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
     connectionLimit: 10
   });
+}
+
+/**
+ * Validate the database connection by executing a simple query.
+ * Returns the raw error for proper surfacing in health checks.
+ */
+export async function validateConnection(): Promise<{ ok: boolean; error?: string; code?: string; tables?: number }> {
+  try {
+    const conn = await poolInstance.getConnection();
+    try {
+      const [rows] = await conn.query('SHOW TABLES');
+      const tables = rows as unknown as any[];
+      return { ok: true, tables: tables.length };
+    } finally {
+      conn.release();
+    }
+  } catch (err: any) {
+    return { 
+      ok: false, 
+      error: err.message || 'Unknown connection error',
+      code: err.code || err.errno?.toString() || 'UNKNOWN',
+    };
+  }
 }
 
 export const poolConnection = poolInstance;
