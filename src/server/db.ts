@@ -14,6 +14,12 @@ let poolInstance: mysql.Pool;
 if (rawUri) {
   try {
     const url = new URL(rawUri);
+    const isPlaceholder = url.password === '<PASSWORD>' || url.password === 'PASSWORD';
+    
+    if (isPlaceholder) {
+      console.warn("⚠️ WARNING: DATABASE_URL seems to contain a password placeholder!");
+    }
+
     console.log(`📡 DB Init: Attempting connection to ${url.hostname}`);
     
     // Using the URI directly is often more robust for TiDB Cloud
@@ -72,14 +78,20 @@ export async function validateConnection(): Promise<{ ok: boolean; error?: strin
     }
   } catch (err: any) {
     let host = 'unknown';
+    let isPlaceholder = false;
     if (rawUri) {
-       try { host = new URL(rawUri).hostname; } catch {}
+       try { 
+         const url = new URL(rawUri);
+         host = url.hostname; 
+         isPlaceholder = url.password === '<PASSWORD>' || url.password === 'PASSWORD';
+       } catch {}
     }
     return { 
       ok: false, 
       error: err.message || 'Unknown connection error',
       code: err.code || err.errno?.toString() || 'UNKNOWN',
-      host: host
+      host: host,
+      passwordIsPlaceholder: isPlaceholder
     };
   }
 }
