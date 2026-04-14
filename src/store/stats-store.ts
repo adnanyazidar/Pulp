@@ -212,7 +212,18 @@ if (typeof window !== "undefined") {
         });
         
         // 3. Refresh tasks to update actPomos
-        if (activeTaskId) await useTaskStore.getState().fetchTasks();
+        if (activeTaskId) {
+          await useTaskStore.getState().fetchTasks();
+          
+          // 4. Auto-complete check
+          const { tasks, updateTask, triggerCelebration } = useTaskStore.getState();
+          const updatedTask = tasks.find(t => t.id === activeTaskId);
+          
+          if (updatedTask && !updatedTask.isCompleted && updatedTask.actPomos >= updatedTask.estPomos) {
+            await updateTask(activeTaskId, { isCompleted: true });
+            triggerCelebration();
+          }
+        }
       }
       lastProcessedTimestamp = timerState.lastSessionFinishedAt;
     }

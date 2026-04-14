@@ -56,5 +56,35 @@ export function useSound() {
     }
   }, []);
 
-  return { playSound, stopSound };
+  const playSuccess = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    // Haptic Feedback for mobile (Samsung A34)
+    if (navigator.vibrate) {
+      navigator.vibrate([50, 30, 50]); // Short double pulse
+    }
+
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.3); // C6
+
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+      console.warn("Web Audio chime failed:", e);
+    }
+  }, []);
+
+  return { playSound, stopSound, playSuccess };
 }

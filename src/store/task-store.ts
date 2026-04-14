@@ -25,6 +25,7 @@ interface TaskState {
   activeTaskId: number | null;
   isLoading: boolean;
   error: string | null;
+  showCelebration: boolean;
 
   // Actions
   fetchTasks: () => Promise<void>;
@@ -39,6 +40,8 @@ interface TaskState {
   
   addProject: (project: { name: string; color?: string }) => Promise<void>;
   syncLocalToCloud: () => Promise<void>;
+  triggerCelebration: () => void;
+  clearCelebration: () => void;
 }
 
 import { persist } from "zustand/middleware";
@@ -55,6 +58,7 @@ export const useTaskStore = create<TaskState>()(
       activeTaskId: null,
       isLoading: false,
       error: null,
+      showCelebration: false,
 
       fetchTasks: async () => {
         try {
@@ -401,7 +405,10 @@ export const useTaskStore = create<TaskState>()(
         } catch (err) {
           console.error("Migration failed:", err);
         }
-      }
+      },
+
+      triggerCelebration: () => set({ showCelebration: true }),
+      clearCelebration: () => set({ showCelebration: false }),
     }),
     {
       name: "pulp-tasks"
