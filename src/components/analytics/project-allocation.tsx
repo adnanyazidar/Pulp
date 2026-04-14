@@ -33,7 +33,9 @@ export function ProjectAllocation() {
         {projects.map((project) => {
           const minutes = projectStats[project.id] || 0;
           const percentage = totalMinutes > 0 ? (minutes / totalMinutes) * 100 : 0;
-          const hours = (minutes / 60).toFixed(1);
+          const isHours = minutes >= 60;
+          const displayTime = isHours ? (minutes / 60).toFixed(1) : minutes;
+          const displayUnit = isHours ? "H" : "M";
 
           return (
             <div key={project.id} className="space-y-3">
@@ -46,7 +48,7 @@ export function ProjectAllocation() {
                   <span className="text-pf-on-surface">{project.name}</span>
                 </div>
                 <div className="flex gap-4">
-                  <span className="text-pf-on-surface-variant/40">{hours}h</span>
+                  <span className="text-pf-on-surface-variant/40">{displayTime}{displayUnit}</span>
                   <span className="text-pf-on-surface">{percentage.toFixed(0)}%</span>
                 </div>
               </div>

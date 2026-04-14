@@ -11,7 +11,9 @@ export function StatsSummary() {
   
   const today = new Date().toISOString().split("T")[0];
   const minutesToday = dailyHistory[today] || 0;
-  const hoursToday = (minutesToday / 60).toFixed(1);
+  const showHours = minutesToday >= 60;
+  const displayTime = showHours ? (minutesToday / 60).toFixed(1) : minutesToday;
+  const timeUnit = showHours ? "HOURS" : "MIN";
 
   // Calculate Avg. Session (Weekly)
   const totalWeeklyMinutes = Object.values(dailyHistory).slice(0, 7).reduce((a, b) => a + b, 0);
@@ -21,14 +23,15 @@ export function StatsSummary() {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.isCompleted).length;
   const velocity = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const velocityTrend = velocity === 0 ? "Start Working" : velocity >= 70 ? "Optimal Speed" : "Steady Flow";
 
   const zapIcon = Target;
 
   const stats = [
     {
       label: "Today's Focus",
-      value: hoursToday,
-      unit: "HOURS",
+      value: displayTime,
+      unit: timeUnit,
       icon: Zap,
       color: "text-pf-primary",
       trend: "+12% from yesterday",
@@ -49,7 +52,7 @@ export function StatsSummary() {
       unit: "%",
       icon: TrendingUp,
       color: "text-pf-tertiary",
-      trend: "Optimal speed",
+      trend: velocityTrend,
       trendColor: "text-pf-tertiary",
       showProgress: true,
     },
