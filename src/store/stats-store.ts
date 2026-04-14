@@ -3,6 +3,7 @@ import { useTimerStore } from "./timer-store";
 import { useSettingsStore } from "./settings-store";
 import { useTaskStore } from "./task-store";
 import { useAuthStore } from "./auth-store";
+import { getLocalDateKey, formatTimezoneOffset } from "@/lib/date-utils";
 
 interface StatsState {
   dailyHistory: Record<string, number>; // date string -> total minutes
@@ -12,6 +13,7 @@ interface StatsState {
   lastFocusDate: string | null;
   weeklySessionsCount: number;
   analyticsHistory: { date: string; minutes: number }[];
+  hourlyDistribution: { hour: number; minutes: number }[];
 
   isUpdating: boolean;
   newlyUnlockedBadges: string[]; // For celebration trigger
@@ -32,7 +34,7 @@ interface StatsState {
   downloadCSV: () => void;
 }
 
-const getTodayKey = () => new Date().toLocaleDateString('en-CA'); // Stable YYYY-MM-DD local format
+const getTodayKey = () => getLocalDateKey();
 
 import { persist } from "zustand/middleware";
 
@@ -46,6 +48,7 @@ export const useStatsStore = create<StatsState>()(
       lastFocusDate: null,
       weeklySessionsCount: 0,
       analyticsHistory: [],
+      hourlyDistribution: [],
       joinDate: new Date().toISOString(),
       unlockedBadges: [],
       xp: 0,
@@ -64,12 +67,7 @@ export const useStatsStore = create<StatsState>()(
 
           const { getAuthedApi } = await import("@/lib/api");
           
-          // Calculate timezone offset for the backend (e.g., +07:00)
-          const offsetMinutes = -new Date().getTimezoneOffset();
-          const hours = Math.floor(Math.abs(offsetMinutes) / 60);
-          const mins = Math.abs(offsetMinutes) % 60;
-          const sign = offsetMinutes >= 0 ? "+" : "-";
-          const tzOffset = `${sign}${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+          const tzOffset = formatTimezoneOffset();
 
           // Use the new /analytics/summary endpoint
           const { data, error } = await getAuthedApi().api.analytics.summary.get({
@@ -84,6 +82,7 @@ export const useStatsStore = create<StatsState>()(
               currentStreak: number;
               history: { date: string; minutes: number }[];
               projectDistribution: { projectId: number; minutes: number }[];
+              hourlyDistribution: { hour: number; minutes: number }[];
               badges: { badgeId: string }[];
             }
             const d = data as unknown as AnalyticsSummary;
@@ -92,6 +91,7 @@ export const useStatsStore = create<StatsState>()(
               level: d.level ?? 1,
               currentStreak: d.currentStreak ?? 0,
               analyticsHistory: d.history || [],
+              hourlyDistribution: d.hourlyDistribution || [],
               unlockedBadges: (d.badges || []).map(b => b.badgeId),
               // Update dailyHistory for components still using it
               dailyHistory: (d.history || []).reduce((acc: Record<string, number>, curr: { date: string; minutes: number }) => ({
@@ -146,12 +146,7 @@ export const useStatsStore = create<StatsState>()(
         setSyncStatus("syncing");
         try {
           const { getAuthedApi } = await import("@/lib/api");
-          // Calculate timezone offset for the backend (e.g., +07:00)
-          const offsetMinutes = -new Date().getTimezoneOffset();
-          const hours = Math.floor(Math.abs(offsetMinutes) / 60);
-          const mins = Math.abs(offsetMinutes) % 60;
-          const sign = offsetMinutes >= 0 ? "+" : "-";
-          const tzOffset = `${sign}${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+          const tzOffset = formatTimezoneOffset();
 
           const { data } = await getAuthedApi().api.sessions.complete.post({ 
             duration: params.duration, 

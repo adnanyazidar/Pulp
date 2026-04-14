@@ -2,6 +2,7 @@
 
 import { useStatsStore } from "@/store/stats-store";
 import { cn } from "@/lib/utils";
+import { getLocalDateKey } from "@/lib/date-utils";
 
 export function ActivityHeatmap() {
   const { dailyHistory, isUpdating } = useStatsStore();
@@ -12,7 +13,7 @@ export function ActivityHeatmap() {
   const heatmapData = Array.from({ length: daysInHeatmap }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (daysInHeatmap - 1 - i));
-    const key = d.toISOString().split("T")[0];
+    const key = getLocalDateKey(d);
     return {
       minutes: dailyHistory[key] || 0,
       date: key,

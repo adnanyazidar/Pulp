@@ -3,6 +3,7 @@
 import { useStatsStore } from "@/store/stats-store";
 import { useTimerStore } from "@/store/timer-store";
 import { cn } from "@/lib/utils";
+import { getLocalDateKey } from "@/lib/date-utils";
 
 export function WeeklyChart() {
   const { dailyHistory, isUpdating } = useStatsStore();
@@ -12,7 +13,7 @@ export function WeeklyChart() {
   const last7Days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const key = d.toISOString().split("T")[0];
+    const key = getLocalDateKey(d);
     return {
       day: days[d.getDay()],
       minutes: dailyHistory[key] || 0,

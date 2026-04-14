@@ -4,12 +4,18 @@ import { useStatsStore } from "@/store/stats-store";
 import { useTaskStore } from "@/store/task-store";
 import { Zap, Target, Flame, TrendingUp, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getLocalDateKey } from "@/lib/date-utils";
+import { useEffect } from "react";
 
 export function StatsSummary() {
-  const { dailyHistory, totalTasksCompleted, currentStreak, weeklySessionsCount, isUpdating } = useStatsStore();
+  const { dailyHistory, totalTasksCompleted, currentStreak, weeklySessionsCount, hourlyDistribution, fetchStats, isUpdating } = useStatsStore();
   const { tasks } = useTaskStore();
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
   
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDateKey();
   const minutesToday = dailyHistory[today] || 0;
   const showHours = minutesToday >= 60;
   const displayTime = showHours ? (minutesToday / 60).toFixed(1) : minutesToday;
@@ -67,11 +73,22 @@ export function StatsSummary() {
     },
     {
       label: "Peak Focus",
-      value: "09:42",
-      unit: "AM",
+      value: (() => {
+        if (hourlyDistribution.length === 0) return "--:--";
+        const peak = hourlyDistribution[0];
+        const hour = peak.hour;
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour.toString().padStart(2, '0')}:00`;
+      })(),
+      unit: (() => {
+        if (hourlyDistribution.length === 0) return "";
+        const peak = hourlyDistribution[0];
+        return peak.hour >= 12 ? 'PM' : 'AM';
+      })(),
       icon: zapIcon,
       color: "text-pf-secondary",
-      trend: "Morning Phase",
+      trend: hourlyDistribution.length > 0 ? (hourlyDistribution[0].hour < 12 ? "Morning Phase" : "Afternoon Phase") : "Not enough data",
       trendColor: "text-pf-secondary",
     },
   ];

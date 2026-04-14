@@ -517,6 +517,37 @@ export const app = new Elysia()
           console.error("❌ Analytics Project Query Error:", e.message);
         }
 
+        // 1.7 Hourly Distribution (For Peak Focus)
+        const hourlySql = `
+          SELECT 
+            HOUR(CONVERT_TZ(created_at, '+00:00', ?)) as hour,
+            CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes
+          FROM sessions
+          WHERE user_id = ? 
+            AND session_type = 'focus'
+            AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+          GROUP BY HOUR(CONVERT_TZ(created_at, '+00:00', ?))
+          ORDER BY minutes DESC
+        `;
+
+        let hourlyDistribution: Array<{ hour: number, minutes: number }> = [];
+        try {
+          const [rows] = await db.execute(sql`
+            SELECT 
+              HOUR(CONVERT_TZ(created_at, '+00:00', ${offset})) as hour,
+              CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes
+            FROM sessions
+            WHERE user_id = ${userId} 
+              AND session_type = 'focus'
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY HOUR(CONVERT_TZ(created_at, '+00:00', ${offset}))
+            ORDER BY minutes DESC
+          `);
+          hourlyDistribution = rows as unknown as Array<{ hour: number, minutes: number }>;
+        } catch (e: any) {
+          console.error("❌ Analytics Hourly Query Error:", e.message);
+        }
+
         // 2. Fetch current stats for the rest of the summary
         const statsRecords = await db.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
         const stats = statsRecords[0];
@@ -536,6 +567,7 @@ export const app = new Elysia()
           xp: stats?.xp || 0,
           history,
           projectDistribution,
+          hourlyDistribution,
           badges: badgesRecords || []
         };
       }, {
