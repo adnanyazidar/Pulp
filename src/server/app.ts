@@ -405,16 +405,24 @@ export const app = new Elysia()
 
               // Streak logic (Timezone-Aware)
               const tzOffset = (body as any).tzOffset || '+00:00';
+              const sign = tzOffset.startsWith('-') ? -1 : 1;
+              const parts = tzOffset.replace(/[+-]/, '').split(':');
+              const offsetHours = (parseInt(parts[0]) || 0) * sign;
+              const offsetMinutes = (parseInt(parts[1]) || 0) * sign;
               
-              // Get today's date in user's timezone
-              const [todayResult] = await tx.execute(sql`SELECT DATE(CONVERT_TZ(NOW(), '+00:00', ${tzOffset})) as local_today`);
+              // Get today's date in user's timezone using DATE_ADD
+              const [todayResult] = await tx.execute(sql`
+                SELECT DATE(DATE_ADD(DATE_ADD(NOW(), INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) as local_today
+              `);
               const localTodayStr = (todayResult as any)[0].local_today;
               const localToday = new Date(localTodayStr);
               
-              // Get last active date in user's timezone
+              // Get last active date in user's timezone using DATE_ADD
               let localLastActive = null;
               if (stats.lastActiveAt) {
-                const [lastActiveResult] = await tx.execute(sql`SELECT DATE(CONVERT_TZ(${stats.lastActiveAt}, '+00:00', ${tzOffset})) as local_last_active`);
+                const [lastActiveResult] = await tx.execute(sql`
+                  SELECT DATE(DATE_ADD(DATE_ADD(${stats.lastActiveAt}, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) as local_last_active
+                `);
                 const lastActiveStr = (lastActiveResult as any)[0].local_last_active;
                 localLastActive = new Date(lastActiveStr);
               }
@@ -476,24 +484,29 @@ export const app = new Elysia()
           tzOffset: t.Optional(t.String())
         })
       })
-      .get('/analytics/summary', async ({ userId, query: { tzOffset } }) => {
+      .get('/analytics/summary', async ({ userId, query }) => {
         const ninetyDaysAgo = new Date();
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
         const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
         
-        const offset = tzOffset || '+00:00';
+        const tzOffset = (query as any).tzOffset || '+00:00';
+        const sign = tzOffset.startsWith('-') ? -1 : 1;
+        const parts = tzOffset.replace(/[+-]/, '').split(':');
+        const offsetHours = (parseInt(parts[0]) || 0) * sign;
+        const offsetMinutes = (parseInt(parts[1]) || 0) * sign;
 
+        // 1. Daily Aggregates (90 days) - Timezone-Aware using DATE_ADD
         let history: Array<{ date: string, minutes: number }> = [];
         try {
           const [rows] = await db.execute(sql`
             SELECT 
-              DATE_FORMAT(DATE(CONVERT_TZ(created_at, '+00:00', ${offset})), '%Y-%m-%d') as date, 
+              DATE_FORMAT(DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), '%Y-%m-%d') as date, 
               CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
             FROM sessions 
             WHERE user_id = ${userId} 
               AND created_at >= ${dateStr} 
               AND session_type = 'focus'
-            GROUP BY DATE(CONVERT_TZ(created_at, '+00:00', ${offset}))
+            GROUP BY DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE))
           `);
           history = rows as unknown as Array<{ date: string, minutes: number }>;
         } catch (e: any) {
@@ -517,30 +530,18 @@ export const app = new Elysia()
           console.error("❌ Analytics Project Query Error:", e.message);
         }
 
-        // 1.7 Hourly Distribution (For Peak Focus)
-        const hourlySql = `
-          SELECT 
-            HOUR(CONVERT_TZ(created_at, '+00:00', ?)) as hour,
-            CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes
-          FROM sessions
-          WHERE user_id = ? 
-            AND session_type = 'focus'
-            AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-          GROUP BY HOUR(CONVERT_TZ(created_at, '+00:00', ?))
-          ORDER BY minutes DESC
-        `;
-
+        // 1.7 Hourly Distribution (For Peak Focus) - Timezone-Aware using DATE_ADD
         let hourlyDistribution: Array<{ hour: number, minutes: number }> = [];
         try {
           const [rows] = await db.execute(sql`
             SELECT 
-              HOUR(CONVERT_TZ(created_at, '+00:00', ${offset})) as hour,
+              HOUR(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) as hour,
               CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes
             FROM sessions
             WHERE user_id = ${userId} 
               AND session_type = 'focus'
               AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-            GROUP BY HOUR(CONVERT_TZ(created_at, '+00:00', ${offset}))
+            GROUP BY hour
             ORDER BY minutes DESC
           `);
           hourlyDistribution = rows as unknown as Array<{ hour: number, minutes: number }>;
@@ -554,8 +555,10 @@ export const app = new Elysia()
 
         const badgesRecords = await db.select().from(userBadges).where(eq(userBadges.userId, userId));
 
-        // Get local today key to match history bucket
-        const [todayResult] = await db.execute(sql`SELECT DATE_FORMAT(DATE(CONVERT_TZ(NOW(), '+00:00', ${offset})), '%Y-%m-%d') as local_today`);
+        // Get local today key to match history bucket using DATE_ADD
+        const [todayResult] = await db.execute(sql`
+          SELECT DATE_FORMAT(DATE(DATE_ADD(DATE_ADD(NOW(), INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), '%Y-%m-%d') as local_today
+        `);
         const todayKey = (todayResult as any)[0].local_today;
         
         const todayFocus = history.find(h => h.date === todayKey)?.minutes || 0;

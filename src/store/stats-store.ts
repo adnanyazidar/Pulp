@@ -94,9 +94,11 @@ export const useStatsStore = create<StatsState>()(
               hourlyDistribution: d.hourlyDistribution || [],
               unlockedBadges: (d.badges || []).map(b => b.badgeId),
               // Update dailyHistory for components still using it
-              dailyHistory: (d.history || []).reduce((acc: Record<string, number>, curr: { date: string; minutes: number }) => ({
-                ...acc, [curr.date]: curr.minutes
-              }), {}),
+              dailyHistory: (d.history || [])
+                .filter(h => h && h.date) // Defensive check against null keys
+                .reduce((acc: Record<string, number>, curr: { date: string; minutes: number }) => ({
+                  ...acc, [curr.date]: curr.minutes
+                }), {}),
               // Update projectStats from server data (Overwrite stale data)
               projectStats: (d.projectDistribution || []).reduce((acc: Record<number, number>, curr: { projectId: number; minutes: number }) => ({
                 ...acc, [curr.projectId]: curr.minutes
