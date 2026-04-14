@@ -266,7 +266,18 @@ export const useSettingsStore = create<SettingsState>()(
 
       resetData: () => {
         if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
-          localStorage.clear();
+          // Surgically remove only app data keys, preserving 'pulp-auth' session
+          const keysToReset = [
+            'pomopulp-settings',
+            'pomopulp-stats',
+            'pulp-tasks',
+            'pomopulp-timer',
+            'pulp-daily-scratchpad',
+            'pulp-media',
+            'pomopulp-ui'
+          ];
+          
+          keysToReset.forEach(key => localStorage.removeItem(key));
           window.location.reload();
         }
       },

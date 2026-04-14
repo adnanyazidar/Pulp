@@ -18,6 +18,7 @@ interface TimerState {
   alarmCounter: number; // Incremented when session naturally ends
   lastSessionFinishedAt: number | null; // Timestamp for sync triggers
   hasPaused: boolean; // Tracking for "Zen Master" badge
+  expectedEndTime: number | null; // For background tab stability
 
   // Actions
   start: () => void;
@@ -53,22 +54,42 @@ export const useTimerStore = create<TimerState>()(
       alarmCounter: 0,
       lastSessionFinishedAt: null,
       hasPaused: false,
+      expectedEndTime: null,
 
-      start: () => set({ isRunning: true }),
+      start: () => {
+        const { timeRemaining } = get();
+        set({ 
+          isRunning: true, 
+          expectedEndTime: Date.now() + (timeRemaining * 1000) 
+        });
+      },
 
-      pause: () => set({ isRunning: false, hasPaused: true }),
+      pause: () => {
+        const { expectedEndTime } = get();
+        if (expectedEndTime) {
+          const remaining = Math.max(0, Math.round((expectedEndTime - Date.now()) / 1000));
+          set({ timeRemaining: remaining });
+        }
+        set({ isRunning: false, hasPaused: true, expectedEndTime: null });
+      },
 
       reset: () => {
         const { mode } = get();
-        set({ timeRemaining: getModeDuration(mode), isRunning: false, hasPaused: false });
+        set({ 
+          timeRemaining: getModeDuration(mode), 
+          isRunning: false, 
+          hasPaused: false,
+          expectedEndTime: null 
+        });
       },
 
       tick: () => {
-        const { timeRemaining, isRunning, mode, sessionCount, totalFocusToday } =
+        const { expectedEndTime, isRunning, mode, sessionCount, totalFocusToday } =
           get();
-        if (!isRunning || timeRemaining <= 0) return;
+        if (!isRunning || !expectedEndTime) return;
 
-        const next = timeRemaining - 1;
+        const now = Date.now();
+        const next = Math.max(0, Math.round((expectedEndTime - now) / 1000));
 
         if (next <= 0) {
           // Session complete
@@ -112,6 +133,7 @@ export const useTimerStore = create<TimerState>()(
           timeRemaining: getModeDuration(mode),
           isRunning: false,
           hasPaused: false,
+          expectedEndTime: null,
         });
       },
 
@@ -126,6 +148,7 @@ export const useTimerStore = create<TimerState>()(
             isRunning: false,
             sessionCount: newCount,
             hasPaused: false,
+            expectedEndTime: null,
           });
         } else {
           set({
@@ -133,6 +156,7 @@ export const useTimerStore = create<TimerState>()(
             timeRemaining: getModeDuration("focus"),
             isRunning: false,
             hasPaused: false,
+            expectedEndTime: null,
           });
         }
       },
