@@ -6,13 +6,16 @@ import { cn } from "@/lib/utils";
 import { Download } from "lucide-react";
 
 export function ProjectAllocation() {
-  const { projectStats, downloadCSV } = useStatsStore();
+  const { projectStats, isUpdating, downloadCSV } = useStatsStore();
   const { projects } = useTaskStore();
 
   const totalMinutes = Object.values(projectStats).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 mb-12">
+    <div className={cn(
+      "bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 mb-12 transition-all duration-700",
+      isUpdating ? "opacity-30 blur-[4px]" : "opacity-100 blur-0"
+    )}>
       <div className="flex items-center justify-between mb-12">
         <div>
           <h3 className="font-headline text-lg font-black text-pf-on-surface">Temporal Allocation</h3>

@@ -51,12 +51,33 @@ export const useAuthStore = create<AuthState>()(
 
         // 3. Bersihkan LocalStorage Persist (Manual)
         localStorage.removeItem('pulp-tasks');
-        localStorage.removeItem('pulp-stats');
-        localStorage.removeItem('pulp-settings');
+        localStorage.removeItem('pomopulp-stats'); // Fixed: was pulp-stats
+        localStorage.removeItem('pomopulp-settings'); // Fixed: was pulp-settings
         localStorage.removeItem('pulp-daily-scratchpad');
+        localStorage.removeItem('pomopulp-timer');
+        localStorage.removeItem('pulp-media');
+        localStorage.removeItem('pomopulp-ui');
         localStorage.removeItem('pulp-auth'); // Clear auth persist too just in case
 
-        // 4. Kick back to Home and Refresh
+        // 4. Reset Memory State for stats gracefully before redirect
+        import('@/store/stats-store').then(m => {
+          m.useStatsStore.setState({
+            dailyHistory: {},
+            projectStats: {},
+            totalTasksCompleted: 0,
+            currentStreak: 0,
+            lastFocusDate: null,
+            weeklySessionsCount: 0,
+            analyticsHistory: [],
+            unlockedBadges: [],
+            xp: 0,
+            level: 1,
+            isUpdating: false,
+            newlyUnlockedBadges: [],
+          });
+        });
+
+        // 5. Kick back to Home and Refresh
         window.location.href = '/';
       },
       

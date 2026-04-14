@@ -467,9 +467,9 @@ export const app = new Elysia()
         const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
 
         // 1. Daily Aggregates (90 days) - Using Raw SQL for TiDB Serverless compatibility
-        const rawSql = `
+        const historySql = `
           SELECT 
-            DATE(created_at) as date, 
+            DATE_FORMAT(DATE(created_at), '%Y-%m-%d') as date, 
             CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
           FROM sessions 
           WHERE user_id = ? 
@@ -481,11 +481,33 @@ export const app = new Elysia()
         let history: Array<{ date: string, minutes: number }> = [];
         try {
           const [rows] = await db.execute(
-            sql.raw(rawSql.replace('?', userId.toString()).replace('?', "'" + dateStr + "'"))
+            sql.raw(historySql.replace('?', userId.toString()).replace('?', "'" + dateStr + "'"))
           );
           history = rows as unknown as Array<{ date: string, minutes: number }>;
         } catch (e: any) {
           console.error("❌ Analytics History Query Error:", e.message);
+        }
+
+        // 1.5 Project Distribution - Using Raw SQL to join sessions with tasks
+        const projectSql = `
+          SELECT 
+            t.project_id as projectId, 
+            CAST(SUM(ROUND(s.duration / 60)) AS SIGNED) as minutes 
+          FROM sessions s
+          JOIN tasks t ON s.task_id = t.id
+          WHERE s.user_id = ? 
+            AND s.session_type = 'focus'
+          GROUP BY t.project_id
+        `;
+
+        let projectDistribution: Array<{ projectId: number, minutes: number }> = [];
+        try {
+          const [rows] = await db.execute(
+            sql.raw(projectSql.replace('?', userId.toString()))
+          );
+          projectDistribution = rows as unknown as Array<{ projectId: number, minutes: number }>;
+        } catch (e: any) {
+          console.error("❌ Analytics Project Query Error:", e.message);
         }
 
         // 2. Fetch current stats for the rest of the summary
@@ -503,6 +525,7 @@ export const app = new Elysia()
           level: stats?.level || 1,
           xp: stats?.xp || 0,
           history,
+          projectDistribution,
           badges: badgesRecords || []
         };
       })

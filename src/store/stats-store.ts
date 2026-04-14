@@ -73,6 +73,7 @@ export const useStatsStore = create<StatsState>()(
               level: number;
               currentStreak: number;
               history: { date: string; minutes: number }[];
+              projectDistribution: { projectId: number; minutes: number }[];
               badges: { badgeId: string }[];
             }
             const d = data as unknown as AnalyticsSummary;
@@ -85,6 +86,10 @@ export const useStatsStore = create<StatsState>()(
               // Update dailyHistory for components still using it
               dailyHistory: (d.history || []).reduce((acc: Record<string, number>, curr: { date: string; minutes: number }) => ({
                 ...acc, [curr.date]: curr.minutes
+              }), {}),
+              // Update projectStats from server data (Overwrite stale data)
+              projectStats: (d.projectDistribution || []).reduce((acc: Record<number, number>, curr: { projectId: number; minutes: number }) => ({
+                ...acc, [curr.projectId]: curr.minutes
               }), {})
             });
           }
