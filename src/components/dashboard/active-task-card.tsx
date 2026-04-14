@@ -12,7 +12,7 @@ export function ActiveTaskCard() {
   const { tasks, activeTaskId, showCelebration, clearCelebration } = useTaskStore();
   const activeTask = tasks.find((t) => t.id === activeTaskId);
   const { playSuccess } = useSound();
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; color: string; rotation: number }[]>([]);
 
   useEffect(() => {
     if (showCelebration) {
@@ -25,6 +25,7 @@ export function ActiveTaskCard() {
         x: Math.random() * 100 - 50,
         y: Math.random() * -100 - 50,
         color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
       }));
       setParticles(newParticles);
 
@@ -100,7 +101,7 @@ export function ActiveTaskCard() {
               y: p.y * 2, 
               scale: [0, 1, 0.5], 
               opacity: [1, 1, 0],
-              rotate: Math.random() * 360
+              rotate: p.rotation
             }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeOut" }}

@@ -35,6 +35,22 @@ PomoPulp is not just another timer; it's an elite productivity station designed 
 
 ---
 
+## 🍊 v1.1 — The Bulletproof Update (Current)
+
+This update focuses on making PomoPulp's data engine truly world-class, ensuring absolute stability for a global user base across different timezones.
+
+### 🏠 Timezone-Aware Intelligence
+- **Bulletproof Analytics**: Replaced standard timezone functions with deterministic `DATE_ADD + INTERVAL` SQL logic. This ensures accurate focus tracking on TiDB Cloud without requiring system-level timezone table configurations.
+- **Unified Date Standard**: Implemented a core `getLocalDateKey` utility using the `en-CA` (YYYY-MM-DD) standard. No more "blind spots" between browser timestamps and database records.
+- **Midnight Streak Protection**: Refined streak restoration logic to accurately detect "Yesterday" based on your local biological clock, preventing accidental streak resets during late-night focus sessions.
+
+### 🛡️ Hardened Synchronization
+- **Dynamic Metrics**: The "Peak Focus" engine is now alive! It calculates your most productive hours from real-time session density instead of static placeholders.
+- **Atomic Auth Sync**: Enhanced the Logout and Re-login flow to protect active data synchronization, ensuring your statistical progress remains intact even during immediate account transitions.
+- **API Guardrails**: Standardized Eden Treaty parameter handling (`$query` & `$headers`) across the frontend for flawless end-to-end type safety.
+
+---
+
 ## 🏁 The Future
 PomoPulp is here to stay, and this is only the beginning. Expect more ambient soundscapes, advanced data exports, and deeper analytics tools in the coming months.
 

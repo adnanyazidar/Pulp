@@ -9,6 +9,7 @@ A high-performance, aesthetically pleasing Pomodoro application built with an ad
 ## ✨ Key Features
 
 - **Bulletproof Sync**: Atomic backend transactions ensure that focus sessions, task progress, and user stats are always flawlessly synchronized.
+- **Deterministic Timezone Engine**: Robust `DATE_ADD` logic ensures accurate global tracking even on serverless environments without timezone tables.
 - **Hybrid Auth & Smart Merge Migration**: Secure JWT-based cloud synchronizations with frictionless merging of local and cloud states.
 - **Focus Media Hub**: Integrated workspace for your favorite ambient sounds (Rain, Cafe) and YouTube/Spotify playlists.
 - **Elite Gamification**: Level up, earn XP, maintain streaks, and unlock Elite Badges to turn discipline into a rewarding game.
