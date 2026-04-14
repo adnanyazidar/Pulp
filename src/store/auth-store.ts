@@ -25,7 +25,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -41,25 +41,32 @@ export const useAuthStore = create<AuthState>()(
       },
       
       logout: () => {
-        // 1. Reset In-Memory Stores (to be safe before redirect)
+        const state = get();
+        
+        // If we are currently syncing, we should ideally wait or warn, 
+        // but for now we'll prioritize the user's intent to exit.
+        // We set syncStatus to offline to prevent further sync attempts.
+        set({ token: null, user: null, isAuthenticated: false, syncStatus: "offline" });
+
+        // 1. Reset In-Memory Stores
         import('@/store/daily-focus-store').then(m => {
           m.useDailyFocusStore.getState().clearAll();
         });
 
-        // 2. Hapus Token & User Data
-        set({ token: null, user: null, isAuthenticated: false, syncStatus: "synced" });
+        // 2. Clear LocalStorage Persist (Manual)
+        const keysToClear = [
+          'pulp-tasks', 
+          'pomopulp-stats', 
+          'pomopulp-settings', 
+          'pulp-daily-scratchpad', 
+          'pomopulp-timer', 
+          'pulp-media', 
+          'pomopulp-ui', 
+          'pulp-auth'
+        ];
+        keysToClear.forEach(key => localStorage.removeItem(key));
 
-        // 3. Bersihkan LocalStorage Persist (Manual)
-        localStorage.removeItem('pulp-tasks');
-        localStorage.removeItem('pomopulp-stats'); // Fixed: was pulp-stats
-        localStorage.removeItem('pomopulp-settings'); // Fixed: was pulp-settings
-        localStorage.removeItem('pulp-daily-scratchpad');
-        localStorage.removeItem('pomopulp-timer');
-        localStorage.removeItem('pulp-media');
-        localStorage.removeItem('pomopulp-ui');
-        localStorage.removeItem('pulp-auth'); // Clear auth persist too just in case
-
-        // 4. Reset Memory State for stats gracefully before redirect
+        // 3. Reset Memory State for stats
         import('@/store/stats-store').then(m => {
           m.useStatsStore.setState({
             dailyHistory: {},
@@ -77,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
           });
         });
 
-        // 5. Kick back to Home and Refresh
+        // 4. Kick back to Home and Refresh
         window.location.href = '/';
       },
       

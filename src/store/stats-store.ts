@@ -32,7 +32,7 @@ interface StatsState {
   downloadCSV: () => void;
 }
 
-const getTodayKey = () => new Date().toISOString().split("T")[0];
+const getTodayKey = () => new Date().toLocaleDateString('en-CA'); // Stable YYYY-MM-DD local format
 
 import { persist } from "zustand/middleware";
 
@@ -63,8 +63,18 @@ export const useStatsStore = create<StatsState>()(
           if (!token) return;
 
           const { getAuthedApi } = await import("@/lib/api");
+          
+          // Calculate timezone offset for the backend (e.g., +07:00)
+          const offsetMinutes = -new Date().getTimezoneOffset();
+          const hours = Math.floor(Math.abs(offsetMinutes) / 60);
+          const mins = Math.abs(offsetMinutes) % 60;
+          const sign = offsetMinutes >= 0 ? "+" : "-";
+          const tzOffset = `${sign}${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
           // Use the new /analytics/summary endpoint
-          const { data, error } = await getAuthedApi().api.analytics.summary.get();
+          const { data, error } = await getAuthedApi().api.analytics.summary.get({
+            $query: { tzOffset }
+          });
           if (error) throw new Error("Failed to fetch analytics");
           
           if (data) {
@@ -136,13 +146,21 @@ export const useStatsStore = create<StatsState>()(
         setSyncStatus("syncing");
         try {
           const { getAuthedApi } = await import("@/lib/api");
+          // Calculate timezone offset for the backend (e.g., +07:00)
+          const offsetMinutes = -new Date().getTimezoneOffset();
+          const hours = Math.floor(Math.abs(offsetMinutes) / 60);
+          const mins = Math.abs(offsetMinutes) % 60;
+          const sign = offsetMinutes >= 0 ? "+" : "-";
+          const tzOffset = `${sign}${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
           const { data } = await getAuthedApi().api.sessions.complete.post({ 
             duration: params.duration, 
             sessionType: params.sessionType, 
             taskId: params.taskId,
             rating: params.rating,
             wasPaused: params.wasPaused,
-            ambientSound: params.ambientSound
+            ambientSound: params.ambientSound,
+            tzOffset
           });
           
           if (data) {

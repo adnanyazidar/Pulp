@@ -403,15 +403,29 @@ export const app = new Elysia()
               const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
               const newTotalFocusTime = (stats.totalFocusTime || 0) + minutes;
 
-              // Streak logic (basic)
-              const today = new Date();
-              const lastActive = stats.lastActiveAt ? new Date(stats.lastActiveAt) : null;
+              // Streak logic (Timezone-Aware)
+              const tzOffset = (body as any).tzOffset || '+00:00';
+              
+              // Get today's date in user's timezone
+              const [todayResult] = await tx.execute(sql`SELECT DATE(CONVERT_TZ(NOW(), '+00:00', ${tzOffset})) as local_today`);
+              const localTodayStr = (todayResult as any)[0].local_today;
+              const localToday = new Date(localTodayStr);
+              
+              // Get last active date in user's timezone
+              let localLastActive = null;
+              if (stats.lastActiveAt) {
+                const [lastActiveResult] = await tx.execute(sql`SELECT DATE(CONVERT_TZ(${stats.lastActiveAt}, '+00:00', ${tzOffset})) as local_last_active`);
+                const lastActiveStr = (lastActiveResult as any)[0].local_last_active;
+                localLastActive = new Date(lastActiveStr);
+              }
+
               let newStreak = stats.currentStreak || 0;
 
-              if (!lastActive || lastActive.toDateString() !== today.toDateString()) {
-                const yesterday = new Date();
+              if (!localLastActive || localLastActive.getTime() !== localToday.getTime()) {
+                const yesterday = new Date(localToday);
                 yesterday.setDate(yesterday.getDate() - 1);
-                if (lastActive && lastActive.toDateString() === yesterday.toDateString()) {
+                
+                if (localLastActive && localLastActive.getTime() === yesterday.getTime()) {
                   newStreak += 1;
                 } else {
                   newStreak = 1;
@@ -424,7 +438,7 @@ export const app = new Elysia()
                   level: newLevel,
                   totalFocusTime: newTotalFocusTime,
                   currentStreak: newStreak,
-                  lastActiveAt: today
+                  lastActiveAt: new Date() // Still store server time, but logic above converts it
                 })
                 .where(eq(userStats.userId, userId));
 
@@ -459,52 +473,45 @@ export const app = new Elysia()
           rating: t.Optional(t.Number()),
           wasPaused: t.Optional(t.Boolean()),
           ambientSound: t.Optional(t.String()),
+          tzOffset: t.Optional(t.String())
         })
       })
-      .get('/analytics/summary', async ({ userId }) => {
+      .get('/analytics/summary', async ({ userId, query: { tzOffset } }) => {
         const ninetyDaysAgo = new Date();
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
         const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
-
-        // 1. Daily Aggregates (90 days) - Using Raw SQL for TiDB Serverless compatibility
-        const historySql = `
-          SELECT 
-            DATE_FORMAT(DATE(created_at), '%Y-%m-%d') as date, 
-            CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
-          FROM sessions 
-          WHERE user_id = ? 
-            AND created_at >= ? 
-            AND session_type = 'focus'
-          GROUP BY DATE(created_at)
-        `;
         
+        const offset = tzOffset || '+00:00';
+
         let history: Array<{ date: string, minutes: number }> = [];
         try {
-          const [rows] = await db.execute(
-            sql.raw(historySql.replace('?', userId.toString()).replace('?', "'" + dateStr + "'"))
-          );
+          const [rows] = await db.execute(sql`
+            SELECT 
+              DATE_FORMAT(DATE(CONVERT_TZ(created_at, '+00:00', ${offset})), '%Y-%m-%d') as date, 
+              CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
+            FROM sessions 
+            WHERE user_id = ${userId} 
+              AND created_at >= ${dateStr} 
+              AND session_type = 'focus'
+            GROUP BY DATE(CONVERT_TZ(created_at, '+00:00', ${offset}))
+          `);
           history = rows as unknown as Array<{ date: string, minutes: number }>;
         } catch (e: any) {
           console.error("❌ Analytics History Query Error:", e.message);
         }
 
-        // 1.5 Project Distribution - Using Raw SQL to join sessions with tasks
-        const projectSql = `
-          SELECT 
-            t.project_id as projectId, 
-            CAST(SUM(ROUND(s.duration / 60)) AS SIGNED) as minutes 
-          FROM sessions s
-          JOIN tasks t ON s.task_id = t.id
-          WHERE s.user_id = ? 
-            AND s.session_type = 'focus'
-          GROUP BY t.project_id
-        `;
-
         let projectDistribution: Array<{ projectId: number, minutes: number }> = [];
         try {
-          const [rows] = await db.execute(
-            sql.raw(projectSql.replace('?', userId.toString()))
-          );
+          const [rows] = await db.execute(sql`
+            SELECT 
+              t.project_id as projectId, 
+              CAST(SUM(ROUND(s.duration / 60)) AS SIGNED) as minutes 
+            FROM sessions s
+            JOIN tasks t ON s.task_id = t.id
+            WHERE s.user_id = ${userId} 
+              AND s.session_type = 'focus'
+            GROUP BY t.project_id
+          `);
           projectDistribution = rows as unknown as Array<{ projectId: number, minutes: number }>;
         } catch (e: any) {
           console.error("❌ Analytics Project Query Error:", e.message);
@@ -516,7 +523,10 @@ export const app = new Elysia()
 
         const badgesRecords = await db.select().from(userBadges).where(eq(userBadges.userId, userId));
 
-        const todayKey = new Date().toISOString().split('T')[0];
+        // Get local today key to match history bucket
+        const [todayResult] = await db.execute(sql`SELECT DATE_FORMAT(DATE(CONVERT_TZ(NOW(), '+00:00', ${offset})), '%Y-%m-%d') as local_today`);
+        const todayKey = (todayResult as any)[0].local_today;
+        
         const todayFocus = history.find(h => h.date === todayKey)?.minutes || 0;
 
         return {
@@ -528,6 +538,10 @@ export const app = new Elysia()
           projectDistribution,
           badges: badgesRecords || []
         };
+      }, {
+        query: t.Object({
+          tzOffset: t.Optional(t.String())
+        })
       })
       .post('/feedback', async ({ body, userId }) => {
         // In a real app, save to feedback table. 
