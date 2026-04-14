@@ -66,7 +66,7 @@ if (rawUri) {
 /**
  * Validate the database connection by executing a simple query.
  */
-export async function validateConnection(): Promise<{ ok: boolean; error?: string; code?: string; tables?: number; host?: string }> {
+export async function validateConnection(): Promise<{ ok: boolean; error?: string; code?: string; tables?: number; host?: string; passwordIsPlaceholder?: boolean }> {
   try {
     const conn = await poolInstance.getConnection();
     try {
