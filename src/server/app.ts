@@ -466,20 +466,27 @@ export const app = new Elysia()
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
         const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
 
-        // 1. Daily Aggregates (90 days)
-        const history = await db.select({
-          date: sql<string>`DATE(${sessions.createdAt})`,
-          minutes: sql<number>`CAST(SUM(ROUND(${sessions.duration} / 60)) AS SIGNED)`
-        })
-        .from(sessions)
-        .where(
-          and(
-            eq(sessions.userId, userId),
-            sql`${sessions.createdAt} >= ${dateStr}`,
-            eq(sessions.sessionType, 'focus')
-          )
-        )
-        .groupBy(sql`DATE(${sessions.createdAt})`);
+        // 1. Daily Aggregates (90 days) - Using Raw SQL for TiDB Serverless compatibility
+        const rawSql = `
+          SELECT 
+            DATE(created_at) as date, 
+            CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
+          FROM sessions 
+          WHERE user_id = ? 
+            AND created_at >= ? 
+            AND session_type = 'focus'
+          GROUP BY DATE(created_at)
+        `;
+        
+        let history: Array<{ date: string, minutes: number }> = [];
+        try {
+          const [rows] = await db.execute(
+            sql.raw(rawSql.replace('?', userId.toString()).replace('?', "'" + dateStr + "'"))
+          );
+          history = rows as unknown as Array<{ date: string, minutes: number }>;
+        } catch (e: any) {
+          console.error("❌ Analytics History Query Error:", e.message);
+        }
 
         // 2. Fetch current stats for the rest of the summary
         const statsRecords = await db.select().from(userStats).where(eq(userStats.userId, userId)).limit(1);
