@@ -550,7 +550,7 @@ export const app = new Elysia()
           const [rows] = await db.execute(sql`
             SELECT 
               DATE_FORMAT(DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), '%Y-%m-%d') as date, 
-              CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
+              CAST(COALESCE(SUM(GREATEST(ROUND(duration / 60), 1)), 0) AS SIGNED) as minutes 
             FROM sessions 
             WHERE user_id = ${userId} 
               AND DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) >= DATE_SUB(DATE(DATE_ADD(DATE_ADD(NOW(), INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), INTERVAL 90 DAY)
@@ -568,14 +568,14 @@ export const app = new Elysia()
           const [rows] = await db.execute(sql`
             SELECT 
               t.project_id as projectId, 
-              CAST(SUM(ROUND(s.duration / 60)) AS SIGNED) as minutes 
+              CAST(COALESCE(SUM(GREATEST(ROUND(s.duration / 60), 1)), 0) AS SIGNED) as minutes 
             FROM sessions s
             JOIN tasks t ON s.task_id = t.id
             WHERE s.user_id = ${userId} 
               AND s.session_type = 'focus'
             GROUP BY t.project_id
           `);
-          projectDistribution = rows as unknown as Array<{ projectId: number, minutes: number }>;
+          projectDistribution = (rows as unknown as any[]).map((r: any) => ({ projectId: Number(r.projectId), minutes: Number(r.minutes) }));
         } catch (e: any) {
           console.error("❌ Analytics Project Query Error:", e.message);
         }
@@ -586,7 +586,7 @@ export const app = new Elysia()
           const [rows] = await db.execute(sql`
             SELECT 
               HOUR(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) as hour,
-              CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes
+              CAST(COALESCE(SUM(GREATEST(ROUND(duration / 60), 1)), 0) AS SIGNED) as minutes
             FROM sessions
             WHERE user_id = ${userId} 
               AND session_type = 'focus'
@@ -594,7 +594,7 @@ export const app = new Elysia()
             GROUP BY hour
             ORDER BY minutes DESC
           `);
-          hourlyDistribution = rows as unknown as Array<{ hour: number, minutes: number }>;
+          hourlyDistribution = (rows as unknown as any[]).map((r: any) => ({ hour: Number(r.hour), minutes: Number(r.minutes) }));
         } catch (e: any) {
           console.error("❌ Analytics Hourly Query Error:", e.message);
         }

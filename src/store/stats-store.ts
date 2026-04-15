@@ -215,7 +215,7 @@ if (typeof window !== "undefined") {
         const projectId = activeTask?.projectId ?? null;
         
         // 1. Update Local Stats (Optimistic)
-        const focusDuration = 25; // 25 minutes
+        const focusDuration = useSettingsStore.getState().timerDurations.focus;
         useStatsStore.getState().recordSession(focusDuration, projectId);
 
         // 2. Sync to Backend (Atomic Transaction)
@@ -223,7 +223,7 @@ if (typeof window !== "undefined") {
         const ambientSound = useSettingsStore.getState().soundSettings.ambientSound;
 
         await useStatsStore.getState().syncSessionToBackend({
-          duration: 25 * 60, // 25 minutes in seconds
+          duration: focusDuration * 60, // Convert minutes to seconds
           sessionType: "focus",
           taskId: (activeTaskId as number) ?? undefined,
           wasPaused,
