@@ -10,6 +10,7 @@ interface StatsState {
   projectStats: Record<number, number>; // projectId -> total minutes
   totalTasksCompleted: number;
   currentStreak: number;
+  bestStreak: number;
   lastFocusDate: string | null;
   weeklySessionsCount: number;
   analyticsHistory: { date: string; minutes: number }[];
@@ -45,6 +46,7 @@ export const useStatsStore = create<StatsState>()(
       projectStats: {},
       totalTasksCompleted: 0,
       currentStreak: 0,
+      bestStreak: 0,
       lastFocusDate: null,
       weeklySessionsCount: 0,
       analyticsHistory: [],
@@ -80,6 +82,7 @@ export const useStatsStore = create<StatsState>()(
               xp: number;
               level: number;
               currentStreak: number;
+              bestStreak: number;
               history: { date: string; minutes: number }[];
               projectDistribution: { projectId: number; minutes: number }[];
               hourlyDistribution: { hour: number; minutes: number }[];
@@ -90,6 +93,7 @@ export const useStatsStore = create<StatsState>()(
               xp: d.xp ?? 0,
               level: d.level ?? 1,
               currentStreak: d.currentStreak ?? 0,
+              bestStreak: d.bestStreak ?? 0,
               analyticsHistory: d.history || [],
               hourlyDistribution: d.hourlyDistribution || [],
               unlockedBadges: (d.badges || []).map(b => b.badgeId),

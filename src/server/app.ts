@@ -617,6 +617,7 @@ export const app = new Elysia()
         return {
           todayFocusMinutes: todayFocus,
           currentStreak: stats?.currentStreak || 0,
+          bestStreak: stats?.bestStreak || 0,
           level: stats?.level || 1,
           xp: stats?.xp || 0,
           history,

@@ -8,7 +8,7 @@ import { getLocalDateKey } from "@/lib/date-utils";
 import { useEffect } from "react";
 
 export function StatsSummary() {
-  const { dailyHistory, totalTasksCompleted, currentStreak, weeklySessionsCount, hourlyDistribution, fetchStats, isUpdating } = useStatsStore();
+  const { dailyHistory, totalTasksCompleted, currentStreak, bestStreak, weeklySessionsCount, hourlyDistribution, fetchStats, isUpdating } = useStatsStore();
   const { tasks } = useTaskStore();
 
   useEffect(() => {
@@ -16,7 +16,18 @@ export function StatsSummary() {
   }, [fetchStats]);
   
   const today = getLocalDateKey();
+  const yesterday = getLocalDateKey(new Date(Date.now() - 86400000));
+  
   const minutesToday = dailyHistory[today] || 0;
+  const minutesYesterday = dailyHistory[yesterday] || 0;
+  
+  const focusTrend = (() => {
+    if (minutesYesterday === 0) return minutesToday > 0 ? "First session today" : "Start your day";
+    const diff = ((minutesToday - minutesYesterday) / minutesYesterday) * 100;
+    const sign = diff >= 0 ? "+" : "";
+    return `${sign}${Math.round(diff)}% from yesterday`;
+  })();
+
   const showHours = minutesToday >= 60;
   const displayTime = showHours ? (minutesToday / 60).toFixed(1) : minutesToday;
   const timeUnit = showHours ? "HOURS" : "MIN";
@@ -40,7 +51,7 @@ export function StatsSummary() {
       unit: timeUnit,
       icon: Zap,
       color: "text-pf-primary",
-      trend: "+12% from yesterday",
+      trend: focusTrend,
       trendColor: "text-pf-primary",
     },
     {
@@ -49,7 +60,7 @@ export function StatsSummary() {
       unit: "MIN",
       icon: Timer,
       color: "text-pf-secondary",
-      trend: "Steady flow",
+      trend: avgSessionMinutes > 30 ? "Deep focus flow" : "Steady flow",
       trendColor: "text-pf-secondary",
     },
     {
@@ -68,7 +79,7 @@ export function StatsSummary() {
       unit: "DAYS",
       icon: Flame,
       color: "text-pf-primary",
-      trend: "Personal record",
+      trend: currentStreak >= bestStreak && currentStreak > 0 ? "Personal record" : "Keep going",
       trendColor: "text-pf-primary",
     },
     {
@@ -77,7 +88,6 @@ export function StatsSummary() {
         if (hourlyDistribution.length === 0) return "--:--";
         const peak = hourlyDistribution[0];
         const hour = peak.hour;
-        const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour % 12 || 12;
         return `${displayHour.toString().padStart(2, '0')}:00`;
       })(),
@@ -88,7 +98,15 @@ export function StatsSummary() {
       })(),
       icon: zapIcon,
       color: "text-pf-secondary",
-      trend: hourlyDistribution.length > 0 ? (hourlyDistribution[0].hour < 12 ? "Morning Phase" : "Afternoon Phase") : "Not enough data",
+      trend: (() => {
+        if (hourlyDistribution.length === 0) return "Not enough data";
+        const hour = hourlyDistribution[0].hour;
+        if (hour < 5) return "Night Owl";
+        if (hour < 12) return "Morning Phase";
+        if (hour < 17) return "Afternoon Phase";
+        if (hour < 21) return "Evening Phase";
+        return "Night Owl";
+      })(),
       trendColor: "text-pf-secondary",
     },
   ];
