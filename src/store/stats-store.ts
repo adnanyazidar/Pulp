@@ -128,7 +128,7 @@ export const useStatsStore = create<StatsState>()(
         if (lastFocusDate !== today) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayKey = yesterday.toISOString().split("T")[0];
+          const yesterdayKey = getLocalDateKey(yesterday);
           newStreak = (lastFocusDate === yesterdayKey) ? newStreak + 1 : 1;
         }
 

@@ -485,10 +485,6 @@ export const app = new Elysia()
         })
       })
       .get('/analytics/summary', async ({ userId, query }) => {
-        const ninetyDaysAgo = new Date();
-        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-        const dateStr = ninetyDaysAgo.toISOString().split('T')[0];
-        
         const tzOffset = (query as any).tzOffset || '+00:00';
         const sign = tzOffset.startsWith('-') ? -1 : 1;
         const parts = tzOffset.replace(/[+-]/, '').split(':');
@@ -496,6 +492,7 @@ export const app = new Elysia()
         const offsetMinutes = (parseInt(parts[1]) || 0) * sign;
 
         // 1. Daily Aggregates (90 days) - Timezone-Aware using DATE_ADD
+        // The date boundary is also computed with DATE_ADD so it matches the user's local date
         let history: Array<{ date: string, minutes: number }> = [];
         try {
           const [rows] = await db.execute(sql`
@@ -504,11 +501,12 @@ export const app = new Elysia()
               CAST(SUM(ROUND(duration / 60)) AS SIGNED) as minutes 
             FROM sessions 
             WHERE user_id = ${userId} 
-              AND created_at >= ${dateStr} 
+              AND DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)) >= DATE_SUB(DATE(DATE_ADD(DATE_ADD(NOW(), INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), INTERVAL 90 DAY)
               AND session_type = 'focus'
             GROUP BY DATE(DATE_ADD(DATE_ADD(created_at, INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE))
           `);
-          history = rows as unknown as Array<{ date: string, minutes: number }>;
+          // Convert BigInt from SQL to Number for reliable JS comparison
+          history = (rows as unknown as any[]).map((r: any) => ({ date: String(r.date), minutes: Number(r.minutes) }));
         } catch (e: any) {
           console.error("❌ Analytics History Query Error:", e.message);
         }
@@ -559,9 +557,10 @@ export const app = new Elysia()
         const [todayResult] = await db.execute(sql`
           SELECT DATE_FORMAT(DATE(DATE_ADD(DATE_ADD(NOW(), INTERVAL ${offsetHours} HOUR), INTERVAL ${offsetMinutes} MINUTE)), '%Y-%m-%d') as local_today
         `);
-        const todayKey = (todayResult as any)[0].local_today;
+        const todayKey = String((todayResult as any)[0].local_today);
         
-        const todayFocus = history.find(h => h.date === todayKey)?.minutes || 0;
+        const todayFocus = history.find(h => String(h.date) === todayKey)?.minutes || 0;
+        console.log(`📊 Analytics Debug: todayKey=${todayKey}, historyDates=${history.map(h => h.date).join(',')}, todayFocus=${todayFocus}`);
 
         return {
           todayFocusMinutes: todayFocus,
