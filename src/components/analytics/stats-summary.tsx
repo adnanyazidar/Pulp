@@ -113,8 +113,8 @@ export function StatsSummary() {
 
   return (
     <div className={cn(
-      "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12 transition-all duration-700",
-      isUpdating ? "opacity-40 scale-[0.99] blur-[2px]" : "opacity-100 scale-100 blur-0"
+      "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12 transition-opacity duration-300",
+      isUpdating ? "opacity-70" : "opacity-100"
     )}>
       {stats.map((stat, i) => (
         <div

@@ -24,8 +24,8 @@ export function ActivityHeatmap() {
 
   return (
     <div className={cn(
-      "bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 mb-12 overflow-hidden transition-all duration-700",
-      isUpdating ? "opacity-30 blur-[4px]" : "opacity-100 blur-0"
+      "bg-pf-surface-container-low p-8 rounded-2xl border border-white/5 transition-opacity duration-300",
+      isUpdating ? "opacity-70" : "opacity-100"
     )}>
       <div className="flex items-center justify-between mb-8">
         <div>
