@@ -197,50 +197,57 @@ export const app = new Elysia()
           badges: badgesRecords || [],
         };
       })
-      .post('/me/reset', async ({ userId }) => {
-        // Delete child records first to satisfy foreign key constraints
-        await db.delete(sessions).where(eq(sessions.userId, userId));
-        await db.delete(tasks).where(eq(tasks.userId, userId));
-        await db.delete(projects).where(eq(projects.userId, userId));
-        await db.delete(userPlaylists).where(eq(userPlaylists.userId, userId));
-        await db.delete(userBadges).where(eq(userBadges.userId, userId));
+      .post('/me/reset', async ({ userId, set }) => {
+        try {
+          await db.transaction(async (tx) => {
+            // 1. Delete child records first to satisfy foreign key constraints
+            await tx.delete(sessions).where(eq(sessions.userId, userId));
+            await tx.delete(tasks).where(eq(tasks.userId, userId));
+            await tx.delete(projects).where(eq(projects.userId, userId));
+            await tx.delete(userPlaylists).where(eq(userPlaylists.userId, userId));
+            await tx.delete(userBadges).where(eq(userBadges.userId, userId));
 
-        // Reset stats
-        await db.update(userStats).set({
-          xp: 0,
-          level: 1,
-          totalFocusTime: 0,
-          currentStreak: 0,
-          bestStreak: 0,
-          lastActiveAt: new Date(),
-        }).where(eq(userStats.userId, userId));
+            // 2. Reset stats
+            await tx.update(userStats).set({
+              xp: 0,
+              level: 1,
+              totalFocusTime: 0,
+              currentStreak: 0,
+              bestStreak: 0,
+              lastActiveAt: new Date(),
+            }).where(eq(userStats.userId, userId));
 
-        // Reset settings
-        await db.update(settings).set({
-          focusDuration: 25,
-          shortBreakDuration: 5,
-          longBreakDuration: 15,
-          alarmSound: 'digital',
-          ambientSound: 'none',
-          accentColor: 'coral',
-          autoStartBreaks: false,
-        }).where(eq(settings.userId, userId));
+            // 3. Reset settings
+            await tx.update(settings).set({
+              focusDuration: 25,
+              shortBreakDuration: 5,
+              longBreakDuration: 15,
+              alarmSound: 'digital',
+              ambientSound: 'none',
+              accentColor: 'coral',
+              autoStartBreaks: false,
+            }).where(eq(settings.userId, userId));
 
-        // Recreate default projects
-        const defaultProjects = [
-          { name: 'Work', color: '#FF6B6B' },
-          { name: 'Study', color: '#66D9CC' },
-          { name: 'Personal', color: '#A2C9FF' },
-        ];
-        for (const p of defaultProjects) {
-          await db.insert(projects).values({
-            userId,
-            name: p.name,
-            color: p.color,
+            // 4. Recreate default projects
+            const defaultProjects = [
+              { name: 'Work', color: '#FF6B6B' },
+              { name: 'Study', color: '#66D9CC' },
+              { name: 'Personal', color: '#A2C9FF' },
+            ];
+            for (const p of defaultProjects) {
+              await tx.insert(projects).values({
+                userId,
+                name: p.name,
+                color: p.color,
+              });
+            }
           });
-        }
 
-        return { success: true };
+          return { success: true, message: "Application data has been reset." };
+        } catch (error: any) {
+          set.status = 500;
+          return { success: false, error: error.message };
+        }
       })
       .get('/badges', async ({ userId }) => {
         return await db.select().from(userBadges).where(eq(userBadges.userId, userId));
