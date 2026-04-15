@@ -177,7 +177,18 @@ export const useTaskStore = create<TaskState>()(
             projectId: taskData.projectId && taskData.projectId > 0 ? taskData.projectId : undefined
           });
           if (data) {
-            await get().fetchTasks();
+            const result = data as any;
+            const newTask: Task = {
+              id: result.id,
+              content: result.content,
+              projectId: result.projectId || null,
+              priority: result.priority || "low",
+              estPomos: result.estPomos || 1,
+              actPomos: 0,
+              isCompleted: false,
+              createdAt: new Date().toISOString(),
+            };
+            set((state: TaskState) => ({ tasks: [newTask, ...state.tasks] }));
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : "Failed to add task";
@@ -283,7 +294,20 @@ export const useTaskStore = create<TaskState>()(
             priority: task.priority,
             estPomos: task.estPomos,
           });
-          if (data) await get().fetchTasks();
+          if (data) {
+            const result = data as any;
+            const restoredTask: Task = {
+              id: result.id,
+              content: result.content,
+              projectId: result.projectId || null,
+              priority: result.priority || "low",
+              estPomos: result.estPomos || 1,
+              actPomos: 0,
+              isCompleted: false,
+              createdAt: new Date().toISOString(),
+            };
+            set((state: TaskState) => ({ tasks: [restoredTask, ...state.tasks] }));
+          }
         } catch (err) {
           console.error(err);
         }
