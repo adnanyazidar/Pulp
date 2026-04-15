@@ -264,21 +264,48 @@ export const useSettingsStore = create<SettingsState>()(
         document.body.removeChild(link);
       },
 
-      resetData: () => {
-        if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
-          // Surgically remove only app data keys, preserving 'pulp-auth' session
-          const keysToReset = [
-            'pomopulp-settings',
-            'pomopulp-stats',
-            'pulp-tasks',
-            'pomopulp-timer',
-            'pulp-daily-scratchpad',
-            'pulp-media',
-            'pomopulp-ui'
-          ];
+      resetData: async () => {
+        const raw = localStorage.getItem("pulp-auth");
+        const isAuthenticated = raw ? JSON.parse(raw)?.state?.isAuthenticated : false;
+
+        const keysToReset = [
+          'pomopulp-settings',
+          'pomopulp-stats',
+          'pulp-tasks',
+          'pomopulp-timer',
+          'pulp-daily-scratchpad',
+          'pulp-media',
+          'pomopulp-ui'
+        ];
+
+        if (isAuthenticated) {
+          const deleteCloud = confirm("You are currently logged in.\n\nDo you want to PERMANENTLY DELETE all your data across all devices?\n\nClick [OK] to delete all your cloud data too.\nClick [Cancel] to just force Logout and clear local data only.");
           
-          keysToReset.forEach(key => localStorage.removeItem(key));
-          window.location.reload();
+          if (deleteCloud) {
+            if (confirm("FINAL WARNING: All tasks, stats, and settings will be wiped from the cloud. Proceed?")) {
+              try {
+                const { getAuthedApi } = await import("@/lib/api");
+                await getAuthedApi().api.me.reset.post();
+                
+                // Clear local data and logout after wiping cloud
+                const { useAuthStore } = await import("./auth-store");
+                useAuthStore.getState().logout();
+              } catch (err) {
+                console.error("Failed to delete cloud data:", err);
+                alert("Failed to delete cloud data. Please check your connection.");
+              }
+            }
+          } else {
+            // Just force logout
+            const { useAuthStore } = await import("./auth-store");
+            useAuthStore.getState().logout();
+          }
+        } else {
+          // Offline behavior
+          if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+            keysToReset.forEach(key => localStorage.removeItem(key));
+            window.location.reload();
+          }
         }
       },
     }),
